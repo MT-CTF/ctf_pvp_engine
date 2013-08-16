@@ -15,13 +15,13 @@ cf.flag_func = {
 		if not puncher or not player then
 			return
 		end
-
-		local meta = minetest.env:get_meta(pos)
-		if not meta then
+		
+		local flag = cf.area.get_flag(pos)
+		if not flag then
 			return
 		end
 
-		local team = meta:get_string("team")
+		local team = flag.team
 		if not team then
 			return
 		end
@@ -52,8 +52,7 @@ cf.flag_func = {
 				cf.team(team).spawn = nil
 
 				if cf.settings.multiple_flags == true then
-					meta:set_string("team",cf.player(player).team)
-					meta:set_string("infotext", meta:get_string("team").."'s flag")
+					meta:set_string("infotext", team.."'s flag")
 					cf.area.delete_flag(team,pos)
 					cf.area.add_flag(cf.player(player).team,pos)
 				else
@@ -82,8 +81,7 @@ cf.flag_func = {
 
 		if cf.players and cf.players[placer:get_player_name()] and cf.players[placer:get_player_name()].team then
 			local team = cf.players[placer:get_player_name()].team
-			meta:set_string("team", team)
-			meta:set_string("infotext", meta:get_string("team").."'s flag")
+			meta:set_string("infotext", team.."'s flag")
 			
 			-- add flag
 			cf.area.add_flag(team,pos)
@@ -121,8 +119,7 @@ cf.flag_func = {
 			
 			local meta2 = minetest.env:get_meta(pos2)
 
-			meta2:set_string("team", team)
-			meta2:set_string("infotext", meta:get_string("team").."'s flag")
+			meta2:set_string("infotext", team.."'s flag")
 		else
 			minetest.chat_send_player(placer:get_player_name(),"You are not part of a team!")
 			minetest.env:set_node(pos,{name="air"})
@@ -219,13 +216,9 @@ minetest.register_abm({
 			minetest.env:set_node(top,{name="air"})
 			return
 		end
-		flagmeta:set_string("team", flag_team_data.team)
 		local topmeta = minetest.env:get_meta(top)
-		local flag_name = nil
-		if topmeta then
-			flag_name = flagmeta:get_string("flag_name")
-		end
-		if flag_name then
+		local flag_name = flag_team_data.name
+		if flag_name and flag_name ~= "" then
 			flagmeta:set_string("infotext", flag_name.." - "..flag_team_data.team)
 		else
 			flagmeta:set_string("infotext", flag_team_data.team.."'s flag")
@@ -238,9 +231,7 @@ minetest.register_abm({
 
 		minetest.env:set_node(top,{name="capturetheflag:flag_top_"..cf.team(flag_team_data.team).data.color})
 		topmeta = minetest.env:get_meta(top)
-		topmeta:set_string("team", flag_team_data.team)
-		topmeta:set_string("flag_name", flag_name)
-		if flag_name then
+		if flag_name and flag_name ~= "" then
 			topmeta:set_string("infotext", flag_name.." - "..flag_team_data.team)
 		else
 			topmeta:set_string("infotext", flag_team_data.team.."'s flag")

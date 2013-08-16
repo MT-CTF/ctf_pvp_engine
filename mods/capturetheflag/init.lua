@@ -148,6 +148,14 @@ end
 
 -- Sees if the player can change stuff in a team
 function cf.can_mod(player,team)
+	local privs = minetest.get_player_privs(player)
+	
+	if privs then
+		if privs.team == true then
+		 	return true
+		end
+	end
+
 	if player and cf.teams[team] and cf.teams[team].players and cf.teams[team].players[player] then
 		if cf.teams[team].players[player].auth == true then
 			return true
@@ -202,6 +210,39 @@ function cf.diplo.set(one,two,state)
 	end
 	
 	table.insert(cf.diplo.diplo,{one=one,two=two,state=state})
+	return
+end
+
+function cf.diplo.check_requests(one,two)
+	local team = cf.team(two)
+	
+	if not team.log then
+		return nil
+	end
+	
+	for i=1,#team.log do
+		if team.log[i].team == one and team.log[i].type=="request" and team.log[i].mode=="diplo" then
+			return team.log[i].msg
+		end
+	end
+	
+	return nil
+end
+
+function cf.diplo.cancel_requests(one,two)
+	local team = cf.team(two)
+	
+	if not team.log then
+		return
+	end
+	
+	for i=1,#team.log do
+		if team.log[i].team == one and team.log[i].type=="request" and team.log[i].mode=="diplo" then
+			table.remove(team.log,i)
+			return
+		end
+	end
+	
 	return
 end
 

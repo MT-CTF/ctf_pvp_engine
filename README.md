@@ -74,17 +74,24 @@ The fire arms mod is installed
 Commands
 ========
 
-Admin only
-----------
-Uses priv "team"
-* /ateam <name> - add a team called <name>.
-* /team_owner <name> - make a player the mod or not off the team (toggle)
-* (coming soon) /join <name> <team> - add player <name> to team <team>.
-* (coming soon) /lock <team> - stop any players joining team <team>
-* (coming soon) /unlock <team> - allow players to join team <team>
-
 Players
 -------
 * /team - view team panel
 * /list_teams - list all teams and their statistics
 * /join <team> - join the team <team>
+* /all <msg> - chat on the global channel
+
+Team owners
+-----------
+(coming soon) All these commands can be disabled from team owner's using settings
+* /post <msg> - posts a msg to the news board (team owners can use this as well if ctf_team_owners_post is true)
+* (coming soon) /lock <team> - stop any players joining team <team>
+* (coming soon) /unlock <team> - allow players to join team <team>
+
+Administrators only
+-------------------
+Uses priv "team"
+* /ateam <name> - add a team called <name>
+* /team_owner <name> - make a player the mod or not off the team (toggle)
+* /reload_ctf - reload the core and settings
+*/ctf - run debug functions and clean functions

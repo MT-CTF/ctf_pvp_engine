@@ -38,7 +38,7 @@ function cf.area.get_flag(pos)
 					print(dump(team.flags[i]))
 					print("----------------")
 				else
-					result = {pos=team.flags[i],team=team.data.name}
+					result = team.flags[i]
 				end
 			end
 		end
@@ -100,17 +100,15 @@ end
 -- gets the name of the owner of that location
 function cf.area.get_area(pos)
 	local closest = cf.area.nearest_flag(pos)
-
 	if not closest then
 		return false
 	end
-
-	local meta = minetest.env:get_meta(closest)
-	if not meta then
-		return false
+	local flag = cf.area.get_flag(closest)
+	
+	if flag then
+		return flag.team
 	end
-
-	return meta:get_string("team")
+	return false
 end
 
 -- updates the spawn position for a team
@@ -119,12 +117,13 @@ function cf.area.get_spawn(team)
 
 	if team and cf.teams and cf.team(team) then
 		if cf.team(team).spawn and minetest.env:get_node(cf.team(team).spawn).name == "capturetheflag:flag" then
-			-- Get meta data
-			local meta = minetest.env:get_meta(cf.team(team).spawn)
-			local _team = nil
-			if meta then
-				_team = meta:get_string("team")
+			local flag = cf.area.get_flag(cf.team(team).spawn)
+			
+			if not flag then
+				return false
 			end
+			
+			local _team = flag.team
 
 			-- Check to see if spawn is already defined
 			if team == _team then
@@ -149,25 +148,10 @@ function cf.area.asset_flags(team)
 	print("Checking the flags of "..team)
 
 	local tmp = cf.team(team).flags
-	local new = {}
 
 	for i=1,#tmp do
-		if tmp[i] and minetest.env:get_node(tmp[i]) and minetest.env:get_node(tmp[i]).name == "capturetheflag:flag" then
-			-- Get meta data
-			local meta = minetest.env:get_meta(tmp[i])
-			local _team = nil
-			if meta then
-				_team = meta:get_string("team")
-			end
-
-			-- Check to see if spawn is already defined
-			if team == _team then
-				table.insert(new,tmp[i])
-			else
-				print(_team.." is not "..team.." at "..dump(tmp[i]))
-			end
+		if tmp[i] and (not minetest.env:get_node(tmp[i]) or not minetest.env:get_node(tmp[i]).name == "capturetheflag:flag") then
+			print("Replacing flag...")
 		end
 	end
-	
-	cf.team(team).flags = new
 end

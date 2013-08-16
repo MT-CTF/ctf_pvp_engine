@@ -108,10 +108,15 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 		
 		for key,value in pairs(cf.teams) do
 			if key ~= team then
-				table.insert(data,{team=key,state=cf.diplo.get(team,key)})
+				table.insert(data,{
+						team = key,
+						state = cf.diplo.get(team,key),
+						to = cf.diplo.check_requests(team,key),
+						from = cf.diplo.check_requests(key,team)
+					})
 			end
 		end
-		
+
 		result = result .. "label[1,1;Diplomacy from the perspective of "..team.."]"
 
 		for i=1,#data do
@@ -126,14 +131,21 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 			result = result .. "button[1.25,".. height ..";2,1;team_".. data[i].team ..";".. data[i].team .."]"
 			result = result .. "label[3.75,".. height ..";".. data[i].state .."]"
 
-			if cf.can_mod(name,team)==true then
-				if data[i].state == "war" then
-					result = result .. "button[7.5,".. height ..";1.5,1;peace_".. data[i].team ..";Peace]"
-				elseif data[i].state == "peace" then
-					result = result .. "button[6,".. height ..";1.5,1;war_".. data[i].team ..";War]"
-					result = result .. "button[7.5,".. height ..";1.5,1;alli_".. data[i].team ..";Alliance]"
-				elseif data[i].state == "alliance" then
-					result = result .. "button[6,".. height ..";1.5,1;peace_".. data[i].team ..";Peace]"
+			if cf.can_mod(name,team)==true and cf.player(name).team == team then
+				if not data[i].from and not data[i].to then
+					if data[i].state == "war" then
+						result = result .. "button[7.5,".. height ..";1.5,1;peace_".. data[i].team ..";Peace]"
+					elseif data[i].state == "peace" then
+						result = result .. "button[6,".. height ..";1.5,1;war_".. data[i].team ..";War]"
+						result = result .. "button[7.5,".. height ..";1.5,1;alli_".. data[i].team ..";Alliance]"
+					elseif data[i].state == "alliance" then
+						result = result .. "button[6,".. height ..";1.5,1;peace_".. data[i].team ..";Peace]"
+					end
+				elseif data[i].from ~= nil then
+					result = result .. "label[6,".. height ..";request recieved]"
+				elseif data[i].to ~= nil then
+					result = result .. "label[5.5,".. height ..";request sent]"
+					result = result .. "button[7.5,".. height ..";1.5,1;cancel_".. data[i].team ..";Cancel]"
 				end
 			end
 		end
@@ -243,6 +255,9 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 					if cf.player(name) and cf.player(name).team and cf.team(cf.player(name).team) then
 						if ok == "y" then
 							cf.diplo.set(cf.player(name).team, cf.team(cf.player(name).team).log[tonumber(id)].team, cf.team(cf.player(name).team).log[tonumber(id)].msg)
+							cf.post(cf.player(name).team,{msg="You have accepted the "..cf.team(cf.player(name).team).log[tonumber(id)].msg.." request from "..cf.team(cf.player(name).team).log[tonumber(id)].team})
+							cf.post(cf.team(cf.player(name).team).log[tonumber(id)].team,{msg=cf.player(name).team.." has accepted your "..cf.team(cf.player(name).team).log[tonumber(id)].msg.." request"})
+							id = id + 1
 						end
 						
 						table.remove(cf.team(cf.player(name).team).log,id)
@@ -264,6 +279,62 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 					cf.gui.team_dip(name,newteam)
 					return true
 				end
+
+				newteam = string.match(key, "peace_(.+)")
+				if newteam and cf.player(name) then
+					local team = cf.player(name).team
+
+					if team then
+						if cf.diplo.get(team,newteam) == "war" then
+							cf.post(newteam,{type="request",msg="peace",team=team,mode="diplo"})
+						else
+							cf.diplo.set(team,newteam,"peace")
+							cf.post(team,{msg="You have cancelled the alliance treaty with "..newteam})
+							cf.post(newteam,{msg=team.." has cancelled the alliance treaty"})
+						end
+					end
+					
+					cf.gui.team_dip(name,team)
+					return true
+				end
+				
+				newteam = string.match(key, "war_(.+)")
+				if newteam and cf.player(name) then
+					local team = cf.player(name).team
+
+					if team then
+						cf.diplo.set(team,newteam,"war")
+						cf.post(team,{msg="You have declared war on "..newteam})
+						cf.post(newteam,{msg=team.." has declared war on you"})
+					end
+					
+					cf.gui.team_dip(name,team)
+					return true
+				end
+				
+				newteam = string.match(key, "alli_(.+)")
+				if newteam and cf.player(name) then
+					local team = cf.player(name).team
+
+					if team then
+						cf.post(newteam,{type="request",msg="alliance",team=team,mode="diplo"})
+					end
+
+					cf.gui.team_dip(name,team)
+					return true
+				end
+				
+				newteam = string.match(key, "cancel_(.+)")
+				if newteam and cf.player(name) then
+					local team = cf.player(name).team
+
+					if team then
+						cf.diplo.cancel_requests(team,newteam)
+					end
+					
+					cf.gui.team_dip(name,team)
+					return true
+				end
 			end
 		end
 	end)
@@ -271,24 +342,27 @@ end  -- end of check if team guis are enabled
 
 -- Flag interface
 function cf.gui.flag_board(name,pos)
-	local meta = minetest.env:get_meta(pos)
-	if not meta then
+	local flag = cf.area.get_flag(pos)
+	if not flag then
 		return
 	end
 
-	local team = meta:get_string("team")
+	local team = flag.team
 	if not team then
 		return
 	end
-	
+
 	if cf.can_mod(name,team) == false then
+		if cf.player(name) and cf.player(name).team and cf.player(name).team == team then
+			cf.gui.team_board(name,team)
+		end
 		return
 	end
-	
-	local flag_name = meta:get_string("flag_name")
+
+	local flag_name = flag.name
 	
 	if not cf.settings.flag_names then
-		meta:set_string("flag_name",nil)
+		flag.name = nil
 		return
 	end
 	
@@ -321,12 +395,12 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	end
 
 	if fields.save and fields.flag_name then
-		local meta = minetest.env:get_meta(cf.gui.flag_data[name].pos)
-		if not meta then
+		local flag = cf.area.get_flag(cf.gui.flag_data[name].pos)
+		if not flag then
 			return false
 		end
-	
-		local team = meta:get_string("team")
+
+		local team = flag.team
 		if not team then
 			return false
 		end
@@ -334,13 +408,13 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		if cf.can_mod(name,team) == false then
 			return false
 		end
-		
-		local flag_name = meta:get_string("flag_name")
+
+		local flag_name = flag.name
 		if not flag_name then
 			flag_name = ""
 		end
 
-		meta:set_string("flag_name",fields.flag_name)
+		flag.name = fields.flag_name
 
 		local msg = flag_name.." was renamed to "..fields.flag_name
 
@@ -355,15 +429,10 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		return true
 	elseif fields.delete then
 		local pos = cf.gui.flag_data[name].pos
-		
-		local meta = minetest.env:get_meta(cf.gui.flag_data[name].pos)
-		if not meta then
-			return false
-		end
-	
-		local team = meta:get_string("team")
+
+		local team = cf.area.get_flag(cf.gui.flag_data[name].pos).team
 		if not team then
-			return false
+			return
 		end
 		
 		if cf.can_mod(name,team) == false then

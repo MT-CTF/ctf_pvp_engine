@@ -95,6 +95,7 @@ minetest.register_chatcommand("all", {
 	description = "Send a message on the global channel",
 	func = function(name, param)
 		if not cf.settings.global_channel then
+			minetest.chat_send_player(name,"The global channel is disabled")
 			return
 		end
 
@@ -133,6 +134,10 @@ minetest.register_chatcommand("post", {
 -- Chat plus stuff
 if chatplus then
 	chatplus.register_handler(function(from,to,msg)
+		if not cf.settings.team_channel then
+			return nil
+		end
+
 		local fromp = cf.player(from)
 		local top = cf.player(to)
 
