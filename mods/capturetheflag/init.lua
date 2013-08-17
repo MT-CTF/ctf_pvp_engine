@@ -23,12 +23,12 @@ function cf.init()
 	cf._setb("global_channel",true) -- Can players chat with other teams on /all. If team_channel is false, this does nothing.
 
 	-- Settings: Teams
-	cf._set("allocate_mode",0) -- how are players allocated to teams?
+	cf._set("allocate_mode",0) -- (COMING SOON):how are players allocated to teams?
 	cf._set("default_diplo_state","war") -- what is the default diplomatic state? (war/peace/alliance)
-	cf._setb("delete_teams",false) -- should teams be deleted when they are defeated?
+	cf._setb("delete_teams",false) -- (COMING SOON):should teams be deleted when they are defeated?
 
 	-- Settings: Misc
-	cf._set("on_game_end",0) -- what happens when the game ends?
+	cf._set("on_game_end",0) -- (COMING SOON):what happens when the game ends?
 	cf._set("flag_protect_distance",25) -- how far do flags protect?
 
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "r")
