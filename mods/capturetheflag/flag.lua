@@ -26,7 +26,7 @@ cf.flag_func = {
 			return
 		end
 
-		if meta and cf.players and cf.team(team) and cf.player(player) and cf.player(player).team then
+		if cf.players and cf.team(team) and cf.player(player) and cf.player(player).team then
 			if cf.player(player).team ~= team then
 				local diplo = cf.diplo.get(team,cf.player(player).team)
 				
@@ -39,7 +39,7 @@ cf.flag_func = {
 					return
 				end
 
-				local flag_name = meta:get_string("flag_name")
+				local flag_name = flag.name
 				if flag_name and flag_name~="" then
 					minetest.chat_send_all(flag_name.." has been taken from "..team.." by "..cf.player(player).team.."!")
 					cf.post(team,{msg=flag_name.." has been captured by "..cf.player(player).team,icon="flag_red"})
@@ -52,7 +52,6 @@ cf.flag_func = {
 				cf.team(team).spawn = nil
 
 				if cf.settings.multiple_flags == true then
-					meta:set_string("infotext", team.."'s flag")
 					cf.area.delete_flag(team,pos)
 					cf.area.add_flag(cf.player(player).team,pos)
 				else

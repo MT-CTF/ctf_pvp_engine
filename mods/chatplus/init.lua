@@ -169,7 +169,11 @@ chatplus.register_handler(function(from,to,msg)
 		return nil
 	end
 
-	if chatplus.distance ~= 0 and chatplus.distance ~= nil and (chatplus.get_distance(from_o:getpos(),to_o:getpos()) > tonumber(chatplus.distance)) then
+	if not chatplus.distance or tonumber(chatplus.distance)==0 then
+		return nil
+	end
+
+	if chatplus.get_distance(from_o:getpos(),to_o:getpos()) > tonumber(chatplus.distance) then
 		return false
 	end
 	return nil

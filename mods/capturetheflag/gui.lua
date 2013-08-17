@@ -46,7 +46,7 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 				amount = amount + 1
 				local height = (amount*0.5)+0.5
 
-				if height > 7 then
+				if height > 5 then
 					print("break!")
 					break
 				end
@@ -85,7 +85,7 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 			amount = i
 			local height = (i*0.5)+0.5
 			
-			if height > 7 then
+			if height > 5 then
 				break
 			end
 	
@@ -123,7 +123,7 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 			amount = i
 			local height = (i*1)+0.5
 
-			if height > 6 then
+			if height > 5 then
 				break
 			end
 
