@@ -160,7 +160,7 @@ chatplus.register_handler(function(from,to,msg)
 	return nil
 end)
 
-if not chatplus.distance then
+if chatplus.distance then
 chatplus.register_handler(function(from,to,msg)
 	local from_o = minetest.get_player_by_name(from)
 	local to_o = minetest.get_player_by_name(to)
