@@ -183,11 +183,38 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 			result
 		)
 	end
-	
+
 	minetest.register_chatcommand("team", {
 		description = "Open the team console",
 		func = function(name, param)
-			if cf and cf.players and cf.players[name] and cf.players[name].team then
+			local test =  string.match(param,"player (.-)")
+			if test then
+				print("is a player request "..test)
+				
+				if cf.player(test) then
+					if cf.player(test).team then
+						if cf.player(test).auth then
+							minetest.chat_send_player(name,test.." is in team "..cf.player(test).team.." (team owner)",false)
+						else
+							minetest.chat_send_player(name,test.." is in team "..cf.player(test).team,false)
+						end
+					else
+						minetest.chat_send_player(name,test.." is not in a team",false)
+					end
+				end
+			elseif cf.team(param) then
+				minetest.chat_send_player(name,"Team "..param..":",false)
+				local count = 0
+
+				for _,value in pairs(cf.team(param).players) do
+					count = count + 1
+					if value.aut == true then
+						minetest.chat_send_player(name,count..">> "..value.name.." (team owner)",false)
+					else
+						minetest.chat_send_player(name,count..">> "..value.name,false)
+					end
+				end
+			elseif cf and cf.players and cf.players[name] and cf.players[name].team then
 				cf.gui.team_board(name,cf.players[name].team)
 			end
 		end,
