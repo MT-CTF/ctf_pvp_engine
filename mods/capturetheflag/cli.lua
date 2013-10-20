@@ -3,6 +3,57 @@ minetest.register_privilege("team",{
 	description = "Team manager",
 })
 
+minetest.register_chatcommand("team", {
+	description = "Open the team console",
+	func = function(name, param)
+		local test =  string.match(param,"player (.-)")
+		if test then
+			print("is a player request "..test)
+				
+			if cf.player(test) then
+				if cf.player(test).team then
+					if cf.player(test).auth then
+						minetest.chat_send_player(name,test.." is in team "..cf.player(test).team.." (team owner)",false)
+					else
+						minetest.chat_send_player(name,test.." is in team "..cf.player(test).team,false)
+					end
+				else
+					minetest.chat_send_player(name,test.." is not in a team",false)
+				end
+			end
+		elseif cf.team(param) then
+			minetest.chat_send_player(name,"Team "..param..":",false)
+			local count = 0
+			for _,value in pairs(cf.team(param).players) do
+				count = count + 1
+				if value.aut == true then
+					minetest.chat_send_player(name,count..">> "..value.name.." (team owner)",false)
+				else
+					minetest.chat_send_player(name,count..">> "..value.name,false)
+				end
+			end
+		elseif 
+			cf and
+			cf.players and
+			cf.players[name] and
+			cf.players[name].team and
+			cf.setting("gui")
+		then
+			if cf.setting("team_gui_initial") == "news" and cf.setting("news_gui") then
+				cf.gui.team_board(name,cf.players[name].team)
+			elseif cf.setting("team_gui_initial") == "flags" and cf.setting("flag_teleport_gui") then
+				cf.gui.team_flags(name,cf.players[name].team)
+			elseif cf.setting("team_gui_initial") == "diplo" and cf.setting("diplomacy") then
+				cf.gui.team_dip(name,cf.players[name].team)
+			elseif cf.setting("team_gui_initial") == "admin" then
+				cf.gui.team_settings(name,cf.players[name].team)
+			elseif cf.setting("news_gui") then
+				cf.gui.team_board(name,cf.players[name].team)			
+			end
+		end
+	end,
+})
+
 minetest.register_chatcommand("join", {
 	params = "team name",
 	description = "Add to team",
@@ -94,7 +145,7 @@ minetest.register_chatcommand("all", {
 	params = "msg",
 	description = "Send a message on the global channel",
 	func = function(name, param)
-		if not cf.settings.global_channel then
+		if not cf.setting("global_channel") then
 			minetest.chat_send_player(name,"The global channel is disabled")
 			return
 		end
@@ -134,7 +185,7 @@ minetest.register_chatcommand("post", {
 -- Chat plus stuff
 if chatplus then
 	chatplus.register_handler(function(from,to,msg)
-		if not cf.settings.team_channel then
+		if not cf.setting("team_channel") then
 			return nil
 		end
 
@@ -142,7 +193,7 @@ if chatplus then
 		local top = cf.player(to)
 
 		if not fromp then
-			if not cf.settings.global_channel then
+			if not cf.setting("global_channel") then
 				minetest.chat_send_player(from,"You are not yet part of a team, so you have no mates to send to",false)
 			else
 				minetest.chat_send_player(to,"GLOBAL <"..from.."> "..msg,false)

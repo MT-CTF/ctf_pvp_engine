@@ -8,28 +8,33 @@ function cf.init()
 	print("[CaptureTheFlag] Initialising...")
 
 	-- Set up structures
-	cf.settings = {}
+	cf._defsettings = {}
 	cf.teams = {}
 	cf.players = {}
 	cf.diplo.diplo = {}
 
 	-- Settings: Feature enabling
-	cf._setb("node_ownership",true)
-	cf._setb("multiple_flags",true)
-	cf._setb("gui",true)
-	cf._setb("team_gui",true)
-	cf._setb("flag_names",true) -- can flags be named
-	cf._setb("team_channel",true) -- do teams have their own chat channel
-	cf._setb("global_channel",true) -- Can players chat with other teams on /all. If team_channel is false, this does nothing.
+	cf._set("node_ownership",true)
+	cf._set("multiple_flags",true)
+	cf._set("gui",true) -- whether GUIs are used
+	cf._set("team_gui",true) -- GUI on /team is used
+	cf._set("flag_teleport_gui",true) -- flag tab in /team
+	cf._set("spawn_in_flag_teleport_gui",false) -- show spawn in the flag teleport team gui
+	cf._set("news_gui",true) -- news tab in /team
+	cf._set("diplomacy",true)
+	cf._set("flag_names",true) -- can flags be named
+	cf._set("team_channel",true) -- do teams have their own chat channel
+	cf._set("global_channel",true) -- Can players chat with other teams on /all. If team_channel is false, this does nothing.
 
 	-- Settings: Teams
-	cf._set("allocate_mode",0) -- (COMING SOON):how are players allocated to teams?
+	--cf._set("allocate_mode",0) -- (COMING SOON):how are players allocated to teams?
 	cf._set("default_diplo_state","war") -- what is the default diplomatic state? (war/peace/alliance)
-	cf._setb("delete_teams",false) -- (COMING SOON):should teams be deleted when they are defeated?
+	--cf._setb("delete_teams",false) -- (COMING SOON):should teams be deleted when they are defeated?
 
 	-- Settings: Misc
-	cf._set("on_game_end",0) -- (COMING SOON):what happens when the game ends?
+	--cf._set("on_game_end",0) -- (COMING SOON):what happens when the game ends?
 	cf._set("flag_protect_distance",25) -- how far do flags protect?
+	cf._set("team_gui_initial","news") -- [news/flags/diplo/admin] - the starting tab
 
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "r")
 	if file then
@@ -45,20 +50,17 @@ end
 
 -- Set settings
 function cf._set(setting,default)
-	if minetest.setting_get("ctf_"..setting)~=nil and minetest.setting_get("ctf_"..setting)~="" then
-		print("Setting: "..setting.." has been set from config")
-		cf.settings[setting] = minetest.setting_get("ctf_"..setting)
-	else
-		print("Setting: "..setting.." has been set from default")
-		cf.settings[setting] = default
-	end
+	cf._defsettings[setting] = default
 end
 
-function cf._setb(setting,default)
-	if minetest.setting_get("ctf_"..setting)~=nil and minetest.setting_get("ctf_"..setting)~=""  then
-		cf.settings[setting] = minetest.setting_getbool("ctf_"..setting)
+function cf.setting(name)
+	if minetest.setting_get("ctf_"..name) then
+		return minetest.setting_get("ctf_"..name)
+	elseif cf._defsettings[name]~= nil then
+		return cf._defsettings[name]
 	else
-		cf.settings[setting] = default
+		print("[CaptureTheFlag] Setting "..name.." not found!")
+		return nil
 	end
 end
 
@@ -185,7 +187,7 @@ cf.diplo = {}
 
 function cf.diplo.get(one,two)
 	if not cf.diplo.diplo then
-        	return cf.settings.default_diplo_state
+        	return cf.setting("default_diplo_state")
 	end
 
 	for i=1,#cf.diplo.diplo do
@@ -195,7 +197,7 @@ function cf.diplo.get(one,two)
 		end
 	end
 
-	return cf.settings.default_diplo_state
+	return cf.setting("default_diplo_state")
 end
 
 function cf.diplo.set(one,two,state)

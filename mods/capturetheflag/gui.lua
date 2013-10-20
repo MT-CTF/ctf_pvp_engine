@@ -1,14 +1,25 @@
 cf.gui = {}
 
-if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabled
+if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are enabled
 	-- Get tab buttons
 	function cf.gui.tabs(name,team)
-		return (
-			"button[1,0;2,1;home;About]"..
-			"button[3,0;2,1;board;News]"..
-			"button[5,0;2,1;diplo;Diplomacy]"..
-			"button[7,0;2,1;admin;Settings]"
-		)
+		local result = ""
+		local id = 1
+		local function addtab(name,text)
+			result = result .. "button["..(id*2-1)..",0;2,1;"..name..";"..text.."]"
+			id = id + 1
+		end
+		if cf.setting("news_gui") then
+			addtab("board","News")
+		end		
+		if cf.setting("flag_teleport_gui") then
+			addtab("flags","Flags")
+		end
+		if cf.setting("diplomacy") then
+			addtab("diplo","Diplomacy")
+		end
+		addtab("admin","Settings")
+		return result
 	end
 	
 	-- Team interface
@@ -73,26 +84,55 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 	end
 
 	-- Team interface
-	function cf.gui.team_about(name,team)
+	function cf.gui.team_flags(name,team)
 		local result = ""
-		local data = {
-			"Welcome to "..team.."!",
-		}
-	
-		local amount = 0
-	
-		for i=1,#data do
-			amount = i
-			local height = (i*0.5)+0.5
+		local t = cf.team(team)
+		
+		if not t then
+			return		
+		end
+		
+		local x = 1
+		local y = 2
+		result = result .. "label[1,1;Click a flag button to go there]"
+
+		if cf.setting("spawn_in_flag_teleport_gui") and minetest.get_setting("static_spawnpoint") then
+			local x,y,z = string.match(minetest.get_setting("static_spawnpoint"),"(%d+),(%d+),(%d+)")
+
+			result = result ..
+				"button[" .. x .. "," .. y .. ";2,1;goto_"
+				..f.x.."_"..f.y.."_"..f.z..";"
+
+			result = result ..  "Spawn]"
+			x = x + 2
+		end
+		
+		for i=1,#t.flags do
+			local f = t.flags[i]			
 			
-			if height > 5 then
+			if x > 8 then
+				x = 1
+				y = y + 1			
+			end
+			
+			if y > 6 then
 				break
 			end
-	
-			result = result .. "label[0.5,".. height ..";".. data[i] .."]"
+			
+			result = result ..
+				"button[" .. x .. "," .. y .. ";2,1;goto_"
+				..f.x.."_"..f.y.."_"..f.z..";"
+			
+			if f.name then
+				result = result .. f.name .. "]"	
+			else
+				result = result .. "("..f.x..","..f.y..","..f.z..")]"			
+			end	
+
+			x = x + 2
 		end
 	
-		minetest.show_formspec(name, "capturetheflag:home",
+		minetest.show_formspec(name, "capturetheflag:flags",
 			"size[10,7]"..
 			cf.gui.tabs(name,team)..
 			result
@@ -164,12 +204,12 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 		end
 	
 		local color = ""
-	
+
 		if cf.team(team).data and cf.team(team).data.color then
 			color = cf.team(team).data.color
 		end
 	
-		local result = "field[1,2;4,1;color;Team Color;"..color.."]"..
+		local result = "field[3,2;4,1;color;Team Color;"..color.."]"..
 			"button[4,6;2,1;save;Save]"
 	
 	
@@ -183,49 +223,12 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 			result
 		)
 	end
-
-	minetest.register_chatcommand("team", {
-		description = "Open the team console",
-		func = function(name, param)
-			local test =  string.match(param,"player (.-)")
-			if test then
-				print("is a player request "..test)
-				
-				if cf.player(test) then
-					if cf.player(test).team then
-						if cf.player(test).auth then
-							minetest.chat_send_player(name,test.." is in team "..cf.player(test).team.." (team owner)",false)
-						else
-							minetest.chat_send_player(name,test.." is in team "..cf.player(test).team,false)
-						end
-					else
-						minetest.chat_send_player(name,test.." is not in a team",false)
-					end
-				end
-			elseif cf.team(param) then
-				minetest.chat_send_player(name,"Team "..param..":",false)
-				local count = 0
-
-				for _,value in pairs(cf.team(param).players) do
-					count = count + 1
-					if value.aut == true then
-						minetest.chat_send_player(name,count..">> "..value.name.." (team owner)",false)
-					else
-						minetest.chat_send_player(name,count..">> "..value.name,false)
-					end
-				end
-			elseif cf and cf.players and cf.players[name] and cf.players[name].team then
-				cf.gui.team_board(name,cf.players[name].team)
-			end
-		end,
-	})
-
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local name = player:get_player_name()
-		if formname=="capturetheflag:board" or formname=="capturetheflag:home" or formname=="capturetheflag:dip" or formname=="capturetheflag:team_settings" then
-			if fields.home then
+		if formname=="capturetheflag:board" or formname=="capturetheflag:flags" or formname=="capturetheflag:dip" or formname=="capturetheflag:team_settings" then
+			if fields.flags then
 				if cf and cf.players and cf.players[name] and cf.players[name].team then
-					cf.gui.team_about(name,cf.players[name].team)
+					cf.gui.team_flags(name,cf.players[name].team)
 				end
 				return true
 			end
@@ -293,6 +296,19 @@ if cf.settings.team_gui and cf.settings.gui then -- check if team guis are enabl
 						return true
 					end
 				end
+			end
+		end
+	end)
+	
+	minetest.register_on_player_receive_fields(function(player, formname, fields)
+		local name = player:get_player_name()
+		if formname=="capturetheflag:flags" then
+			for key, field in pairs(fields) do
+				local x,y,z = string.match(key, "goto_(%d+)_(%d+)_(%d+)")
+				if x and y and x then
+					player:setpos({x=x,y=y,z=z})
+					return true
+				end			
 			end
 		end
 	end)
@@ -387,13 +403,13 @@ function cf.gui.flag_board(name,pos)
 	end
 
 	local flag_name = flag.name
-	
-	if not cf.settings.flag_names then
+
+	if not cf.setting("flag_names") then
 		flag.name = nil
 		return
 	end
 	
-	if not cf.settings.gui then
+	if not cf.setting("gui") then
 		return
 	end
 

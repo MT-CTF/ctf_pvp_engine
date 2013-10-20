@@ -72,11 +72,11 @@ function cf.area.nearest_flag(pos)
 		return nil
 	end
 
-	print("cf.settings.flag_protect_distance is "..dump(cf.settings.flag_protect_distance))
+	print("cf.setting('flag_protect_distance') is "..dump(cf.setting("flag_protect_distance")))
 
 	local nodes = minetest.env:find_nodes_in_area(
-		{x=pos.x-cf.settings.flag_protect_distance,y=pos.y-cf.settings.flag_protect_distance,z=pos.z-cf.settings.flag_protect_distance},
-		{x=pos.x+cf.settings.flag_protect_distance,y=pos.y+cf.settings.flag_protect_distance,z=pos.z+cf.settings.flag_protect_distance},
+		{x=pos.x-cf.setting("flag_protect_distance"),y=pos.y-cf.setting("flag_protect_distance"),z=pos.z-cf.setting("flag_protect_distance")},
+		{x=pos.x+cf.setting("flag_protect_distance"),y=pos.y+cf.setting("flag_protect_distance"),z=pos.z+cf.setting("flag_protect_distance")},
 		{"group:is_flag"}
 	)
 

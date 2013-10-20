@@ -31,7 +31,7 @@ cf.flag_func = {
 				local diplo = cf.diplo.get(team,cf.player(player).team)
 				
 				if not diplo then
-					diplo = cf.settings.default_diplo_state
+					diplo = cf.setting("default_diplo_state")
 				end
 
 				if diplo ~= "war" then
@@ -51,7 +51,7 @@ cf.flag_func = {
 				end
 				cf.team(team).spawn = nil
 
-				if cf.settings.multiple_flags == true then
+				if cf.setting("multiple_flags") == true then
 					cf.area.delete_flag(team,pos)
 					cf.area.add_flag(cf.player(player).team,pos)
 				else
@@ -86,7 +86,7 @@ cf.flag_func = {
 			cf.area.add_flag(team,pos)
 
 			if cf.teams[team].spawn and minetest.env:get_node(cf.teams[team].spawn).name == "capturetheflag:flag" then
-				if not cf.settings.multiple_flags then
+				if not cf.setting("multiple_flags") then
 					-- send message
 					minetest.chat_send_all(team.."'s flag has been moved")
 					minetest.env:set_node(cf.team(team).spawn,{name="air"})
