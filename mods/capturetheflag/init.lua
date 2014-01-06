@@ -25,7 +25,8 @@ function cf.init()
 	cf._set("flag_names",true) -- can flags be named
 	cf._set("team_channel",true) -- do teams have their own chat channel
 	cf._set("global_channel",true) -- Can players chat with other teams on /all. If team_channel is false, this does nothing.
-
+	cf._set("players_can_change_team",true)
+	
 	-- Settings: Teams
 	--cf._set("allocate_mode",0) -- (COMING SOON):how are players allocated to teams?
 	cf._set("default_diplo_state","war") -- what is the default diplomatic state? (war/peace/alliance)
