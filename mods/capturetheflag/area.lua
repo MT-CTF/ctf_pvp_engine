@@ -30,9 +30,10 @@ function cf.area.get_flag(pos)
 				team.flags[i].z == pos.z
 			) then
 				if result then
-					minetest.chat_send_all("[CTF WARNING] Multiple teams have same flag. please report this to the server operator / admin")
+					minetest.chat_send_all("[CTF WARNING] Multiple teams have same flag. Please report this to the server operator / admin")
 					print("CTF WARNING DATA")
-					print("Multiple teams have same flag. See debug log for details")
+					print("Multiple teams have same flag.")
+					print("This is a sign of ctf.txt corruption.")
 					print("----------------")
 					print(dump(result))
 					print(dump(team.flags[i]))

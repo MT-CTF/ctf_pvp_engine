@@ -11,11 +11,13 @@ function cf.init()
 	cf._defsettings = {}
 	cf.teams = {}
 	cf.players = {}
+	cf.claimed = {}
 	cf.diplo.diplo = {}
 
 	-- Settings: Feature enabling
 	cf._set("node_ownership",true)
 	cf._set("multiple_flags",true)
+	cf._set("flag_capture_take",false) -- whether flags need to be taken to home flag when captured
 	cf._set("gui",true) -- whether GUIs are used
 	cf._set("team_gui",true) -- GUI on /team is used
 	cf._set("flag_teleport_gui",true) -- flag tab in /team
@@ -144,8 +146,20 @@ end
 
 -- Cleans up the flag lists
 function cf.clean_flags()
-	for _, str in pairs(cf.teams) do
-		cf.area.asset_flags(str.data.name)
+	for _, team in pairs(cf.teams) do
+		cf.assert_flags(team.data.name)
+	end
+end
+
+-- Get info for cf.claimed
+function cf.collect_claimed()
+	cf.claimed = {}
+	for _, team in pairs(cf.teams) do
+		for i = 1, #team.flags do
+			if team.flags[i].claimed then
+				table.insert(cf.claimed,team.flags[i])
+			end
+		end
 	end
 end
 
@@ -312,3 +326,7 @@ dofile(minetest.get_modpath("capturetheflag").."/area.lua")
 dofile(minetest.get_modpath("capturetheflag").."/gui.lua")
 dofile(minetest.get_modpath("capturetheflag").."/cli.lua")
 dofile(minetest.get_modpath("capturetheflag").."/flag.lua")
+
+-- Load other
+cf.collect_claimed()
+

@@ -472,8 +472,14 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		return true
 	elseif fields.delete then
 		local pos = cf.gui.flag_data[name].pos
+		
+		local flag = cf.area.get_flag(cf.gui.flag_data[name].pos)
+		
+		if not flag then
+			print("No flag?!")
+		end
 
-		local team = cf.area.get_flag(cf.gui.flag_data[name].pos).team
+		local team = flag.team
 		if not team then
 			return
 		end

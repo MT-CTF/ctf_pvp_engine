@@ -179,11 +179,12 @@ minetest.register_chatcommand("ateam", {
 })
 
 minetest.register_chatcommand("ctf", {
-	description = "Do admin debug stuff",
+	description = "Do admin cleaning stuff",
 	privs = {team=true},
 	func = function(name, param)
 		cf.clean_flags()
 		cf.clean_player_lists()
+		cf.collect_claimed()
 	end,
 })
 
