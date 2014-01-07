@@ -1,246 +1,202 @@
--- Chat plus
+-- Chat Plus
+-- =========
+-- Advanced chat functionality
+-- =========
+
 chatplus = {
-	log = true,			-- change this to true to log all chat messages
-	log_file = minetest.get_worldpath().."/chatplus-log.txt",	-- default log file
-	distance = minetest.setting_get("chatplus_distance"),
-	log_handle = nil,	-- do not change
-
-	
-	-- Initialise Chat Plus
-	init = function()
-		chatplus.load()
-		
-		if not chatplus.players then
-			chatplus.players = {}
-		end
-		
-		chatplus._players = {}
-	end,
-
-	-- Checks that a user's namespace is ok
-	poke = function(name,player)
-		if not chatplus.players then
-			chatplus.init()
-		end
-
-		if not chatplus.players[name] then
-			chatplus.players[name] = {}
-		end
-
-		if not chatplus.players[name].ignore then
-			chatplus.players[name].ignore = {}			
-		end
-
-		if not chatplus.players[name].messages then
-			chatplus.players[name].messages = {}		
-		end
-
-		chatplus.players[name].enabled = true
-
-		if player then
-			if player=="end" then
-				chatplus.players[name].enabled = false
-				chatplus._players[name] = nil
-			elseif not chatplus._players[name] then
-				chatplus._players[name] = {player = player}
-			end
-		end
-
-		chatplus.save()
-		
-		return chatplus.players[name]
-	end,
-
-	-- Outputs and sends message stream
-	activate = function(name)
-		if not chatplus.players[name] then
-			return false
-		end
-
-		local player = chatplus.players[name]
-
-		if not player.messages or #player.messages==0 then
-			minetest.chat_send_player(name,"You have no messages")
-			return false
-		end
-
-		minetest.chat_send_player(name,"("..#player.messages..") You have mail:")
-		for i=1,#player.messages do
-			minetest.chat_send_player(name,player.messages[i],false)
-		end
-		minetest.chat_send_player(name,"("..#player.messages..")",false)
-
-		return true
-	end,
-
-	count = 0,
-	
-	save = function()
-		print("[Chatplus] Saving data")
-	
-		local file = io.open(minetest.get_worldpath().."/chatplus.txt", "w")
-		if file then
-			file:write(minetest.serialize(chatplus.players))
-			file:close()
-		end
-	end,
-	
-	load = function()
-		-- Initialize the log
-		if ( chatplus.log == true ) then
-			chatplus.log_handle = io.open(chatplus.log_file,"a+")
-			if ( chatplus.log_handle == nil ) then
-				minetest.log("action","Unable to open chat plus log file: "..chatplus.log_file)
-			else
-				minetest.log("action","Logging chat plus to: "..chatplus.log_file)
-			end	
-			-- no further checking, when writing to log we will make sure chatplus.log_handle ~= nil
-		end
-	
-		-- load saved messages
-		local file = io.open(minetest.get_worldpath().."/chatplus.txt", "r")
-		if file then
-			local table = minetest.deserialize(file:read("*all"))
-			file:close()
-
-			if type(table) == "table" then
-				chatplus.players = table
-				return
-			end
-		end
-	end,
-	_handlers = {},
-	register_handler = function(func,place)
-		if not place then
-			table.insert(chatplus._handlers,func)
-		else
-			table.insert(chatplus._handlers,place,func)
-		end
-	end
+	log_file = minetest.get_worldpath().."/chatplus-log.txt",
+	_defsettings = {
+		log = true,
+		distance = 0
+	}
 }
 
-function chatplus.get_distance(v, w)
-    return math.sqrt(
-        math.pow(v.x - w.x, 2) +
-        math.pow(v.y - w.y, 2) +
-        math.pow(v.z - w.z, 2)
-    )
+function chatplus.init()
+	chatplus.load()
+	chatplus.clean_players()
+	
+	if not chatplus.players then
+		chatplus.players = {}
+	end
+	chatplus.count = 0
+	chatplus.loggedin = {}
+	chatplus._handlers = {}
 end
 
--- Register handler caller
-minetest.register_on_chat_message(function(name,msg)
-	if ( chatplus.log_handle ~= nil ) then
-		chatplus.log_handle:write(os.date("%m/%d/%Y %I:%M%p").." <"..name.."> "..msg.."\r\n")
+function chatplus.setting(name)
+	local get = minetest.setting_get("chatplus_"..name)
+	if get then
+		return get
+	elseif chatplus._defsettings[name]~= nil then
+		return chatplus._defsettings[name]
+	else
+		minetest.log("[Chatplus] Setting chatplus_"..name.." not found!")
+		return nil
+	end	
+end
+
+function chatplus.load()
+	-- Initialize the log
+	if chatplus.setting("log") then
+		chatplus.log_handle = io.open(chatplus.log_file,"a+")
+		if not chatplus.log_handle then
+			minetest.log("error","Unable to open chat plus log file: "..chatplus.log_file)
+		else
+			minetest.log("action","Logging chat plus to: "..chatplus.log_file)
+		end	
+	end
+	
+	-- Load player data
+	minetest.log("[Chatplus] Loading data")
+	local file = io.open(minetest.get_worldpath().."/chatplus.txt", "r")
+	if file then
+		local table = minetest.deserialize(file:read("*all"))
+		file:close()
+		if type(table) == "table" then
+			chatplus.players = table
+			return
+		end
+	end	
+end
+
+function chatplus.save()
+	minetest.log("[Chatplus] Saving data")
+	
+	local file = io.open(minetest.get_worldpath().."/chatplus.txt", "w")
+	if file then
+		file:write(minetest.serialize(chatplus.players))
+		file:close()
+	end
+end
+
+function chatplus.clean_players()
+	if not chatplus.players then
+		chatplus.players = {}
+		return
+	end
+
+	minetest.log("[Chatplus] Cleaning player lists")
+	for key,value in pairs(chatplus.players) do
+		if value.messages then
+			value.inbox = value.messages
+			value.messages = nil			
+		end
+	
+		if (
+			(not value.inbox or #value.inbox==0) and
+			(not value.ignore or #value.ignore==0)
+		) then
+			minetest.log("Deleting blank player "..key)
+			value[key] = nil
+		end
+	end
+	chatplus.save()
+	minetest.log("[Chatplus] Clean complete")
+end
+
+function chatplus.poke(name,player)
+	local function check(name,value)
+		if not chatplus.players[name][value] then
+			chatplus.players[name][value] = {}
+		end
+	end
+	if not chatplus.players[name] then
+		chatplus.players[name] = {}
+	end
+	check(name,"ignore")
+	check(name,"messages")
+	
+	chatplus.players[name].enabled = true
+	
+	if player then
+		if player=="end" then
+			chatplus.players[name].enabled = false
+			chatplus.loggedin[name] = nil
+		else
+			if not chatplus.loggedin[name] then
+				chatplus.loggedin[name] = {}				
+			end
+			chatplus.loggedin[name].player = player
+		end
+	end
+	
+	chatplus.save()
+	
+	return chatplus.players[name]
+end
+
+function chatplus.register_handler(func,place)
+	if not place then
+		table.insert(chatplus._handlers,func)
+	else
+		table.insert(chatplus._handlers,place,func)
+	end
+end
+
+function chatplus.send(from,msg)
+	-- Log chat message
+	if chatplus.log_handle ~= nil then
+		chatplus.log_handle:write(
+			os.date("%d/%m/%Y %I:%M%p")..
+			" <"..from.."> "..
+			msg..
+			"\r\n"
+		)
 		chatplus.log_handle:flush()
 	end
-	for key,value in pairs(chatplus.players) do
+	
+	-- Loop through senders
+	for key,value in pairs(chatplus.loggedin) do
 		local res = nil
 		for i=1,#chatplus._handlers do
 			if chatplus._handlers[i] then
-				res = chatplus._handlers[i](name,key,msg)
+				res = chatplus._handlers[i](from,key,msg)
 				
 				if res ~= nil then
 					break
 				end
 			end
 		end
-		if (res == nil or res == true) and key~=name  then
-			minetest.chat_send_player(key,"<"..name.."> "..msg,false)
+		if (res == nil or res == true) and key~=from then
+			minetest.chat_send_player(key,"<"..from.."> "..msg,false)
 		end
 	end
 
 	return true
+end
+
+-- Minetest callbacks
+minetest.register_on_chat_message(chatplus.send)
+minetest.register_on_joinplayer(function(player)
+	local _player = chatplus.poke(player:get_player_name(),player)
+
+	if chatplus.log_handle ~= nil then
+		chatplus.log_handle:write(os.date("%d/%m/%Y %I:%M%p").." "..player:get_player_name().." joined\r\n")
+		chatplus.log_handle:flush()
+	end
+
+	-- inbox stuff!
+	if _player.inbox and #_player.inbox>0 then
+		minetest.after(10,minetest.chat_send_player,player:get_player_name(),"("..#_player.inbox..") You have mail! Type /inbox to recieve")	
+	end
+end)
+minetest.register_on_leaveplayer(function(player)
+	chatplus.poke(player:get_player_name(),"end")
+	if chatplus.log_handle ~= nil then
+		chatplus.log_handle:write(os.date("%d/%m/%Y %I:%M%p").." "..player:get_player_name().." disconnected\r\n")
+		chatplus.log_handle:flush()
+	end
 end)
 
--- Register ignore
+-- Init
+chatplus.init()
+
+-- Ignoring
 chatplus.register_handler(function(from,to,msg)
 	if chatplus.players[to] and chatplus.players[to].ignore and chatplus.players[to].ignore[from]==true then
 		return false
 	end
 	return nil
-end)
-
-if chatplus.distance then
-chatplus.register_handler(function(from,to,msg)
-	local from_o = minetest.get_player_by_name(from)
-	local to_o = minetest.get_player_by_name(to)
-
-	if not from_o or not to_o then
-		return nil
-	end
-
-	if not chatplus.distance or tonumber(chatplus.distance)==0 then
-		return nil
-	end
-
-	if chatplus.get_distance(from_o:getpos(),to_o:getpos()) > tonumber(chatplus.distance) then
-		return false
-	end
-	return nil
-end)
-end
-
-minetest.register_on_joinplayer(function(player)
-	local _player = chatplus.poke(player:get_player_name(),player)
-
-	if ( chatplus.log_handle ~= nil ) then
-		chatplus.log_handle:write(os.date("%m/%d/%Y %I:%M%p").." "..player:get_player_name().." joined\r\n")
-		chatplus.log_handle:flush()
-	end
-
-	if _player.messages and #_player.messages>0 then
-		-- Sending chat messages immediately on join are sometimes missed or not received at all so we delay it	
-		minetest.after(10,minetest.chat_send_player,player:get_player_name(),"("..#_player.messages..") You have mail! Type /inbox to recieve")	
-		--minetest.chat_send_player(player:get_player_name(),"("..#_player.messages..") You have mail! Type /inbox to recieve")
-	end
-end)
-
-minetest.register_on_leaveplayer(function(player)
-	chatplus.poke(player:get_player_name(),"end")
-	chatplus.players[player:get_player_name()].enabled = false
-	if ( chatplus.log_handle ~= nil ) then
-		chatplus.log_handle:write(os.date("%m/%d/%Y %I:%M%p").." "..player:get_player_name().." disconnected\r\n")
-		chatplus.log_handle:flush()
-	end
-end)
-
-minetest.register_globalstep(function(dtime)
-	chatplus.count = chatplus.count + dtime
-	if chatplus.count > 5 then
-		chatplus.count = 0
-		-- loop through player list
-		for key,value in pairs(chatplus.players) do
-			if chatplus._players and chatplus._players[key] and chatplus._players[key].player and value and value.messages and chatplus._players[key].player.hud_add and chatplus._players[key].lastcount ~= #value.messages then				
-				if chatplus._players[key].msgicon then
-					chatplus._players[key].player:hud_remove(chatplus._players[key].msgicon)
-				end
-
-				if chatplus._players[key].msgicon2 then
-					chatplus._players[key].player:hud_remove(chatplus._players[key].msgicon2)
-				end
-
-				if #value.messages>0 then
-					chatplus._players[key].msgicon = chatplus._players[key].player:hud_add({
-						hud_elem_type = "image",
-						name = "MailIcon",
-						position = {x=0.52, y=0.52},
-						text="chatplus_mail.png",
-						scale = {x=1,y=1},
-						alignment = {x=0.5, y=0.5},
-					})
-					chatplus._players[key].msgicon2 = chatplus._players[key].player:hud_add({
-						hud_elem_type = "text",
-						name = "MailText",
-						position = {x=0.55, y=0.52},
-						text=#value.messages,
-						scale = {x=1,y=1},
-						alignment = {x=0.5, y=0.5},
-					})					
-				end
-				chatplus._players[key].lastcount = #value.messages
-			end
-		end
-	end
 end)
 
 minetest.register_chatcommand("ignore", {
@@ -255,7 +211,7 @@ minetest.register_chatcommand("ignore", {
 		else
 			minetest.chat_send_player(name,"Player "..param.." is already ignored.")
 		end
-	end,
+	end
 })
 
 minetest.register_chatcommand("unignore", {
@@ -270,8 +226,30 @@ minetest.register_chatcommand("unignore", {
 		else
 			minetest.chat_send_player(name,"Player "..param.." is already unignored.")
 		end
-	end,
+	end
 })
+
+-- inbox
+function chatplus.showInbox(name)
+	if not chatplus.players[name] then
+		return false
+	end
+
+	local player = chatplus.players[name]
+
+	if not player.inbox or #player.inbox==0 then
+		minetest.chat_send_player(name,"Your inbox is empty!")
+		return false
+	end
+
+	minetest.chat_send_player(name,"("..#player.inbox..") You have mail:")
+	for i=1,#player.inbox do
+		minetest.chat_send_player(name,player.inbox[i],false)
+	end
+	minetest.chat_send_player(name,"("..#player.inbox..")",false)
+
+	return true
+end
 
 minetest.register_chatcommand("inbox", {
 	params = "clear?",
@@ -279,11 +257,11 @@ minetest.register_chatcommand("inbox", {
 	func = function(name, param)
 		if param == "clear" then
 			local player = chatplus.poke(name)
-			player.messages = {}
+			player.inbox = {}
 			chatplus.save()
 			minetest.chat_send_player(name,"Inbox cleared")
 		else
-			chatplus.activate(name)
+			chatplus.showInbox(name)
 		end
 	end,
 })
@@ -296,16 +274,18 @@ minetest.register_chatcommand("mail", {
 		local to, msg = string.match(param, "([%a%d_]+) (.+)")
 		
 		if not to or not msg then
-			minetest.chat_send_player(name,"mail: <playername> <msg>")
+			minetest.chat_send_player(name,"mail: <playername> <msg>",false)
 			return
 		end
 
-		print("To: "..to)
-		print("From: "..name)
-		print("MSG: "..msg)
+		minetest.log("To: "..to..", From: "..name..", MSG: "..msg)
+		if chatplus.log_handle ~= nil then
+		chatplus.log_handle:write(os.date("%d/%m/%Y %I:%M%p").." To: "..to..", From: "..name..", MSG: "..msg)
+		chatplus.log_handle:flush()
+	end
 		
 		if chatplus.players[to] then
-			table.insert(chatplus.players[to].messages,"mail from <"..name..">: "..msg)
+			table.insert(chatplus.players[to].inbox,os.date("%d/%m/%Y %I:%M%p").." <"..name..">: "..msg)
 			minetest.chat_send_player(name,"Message sent")
 			chatplus.save()
 		else
@@ -314,4 +294,71 @@ minetest.register_chatcommand("mail", {
 	end,
 })
 
-chatplus.init()
+minetest.register_globalstep(function(dtime)
+	chatplus.count = chatplus.count + dtime
+	if chatplus.count > 5 then
+		chatplus.count = 0
+		-- loop through player list
+		for key,value in pairs(chatplus.players) do
+			if (
+				chatplus.loggedin and
+				chatplus.loggedin[key] and
+				chatplus.loggedin[key].player and
+				value and
+				value.inbox and
+				chatplus.loggedin[key].player.hud_add and
+				chatplus.loggedin[key].lastcount ~= #value.inbox
+			) then				
+				if chatplus.loggedin[key].msgicon then
+					chatplus.loggedin[key].player:hud_remove(chatplus.loggedin[key].msgicon)
+				end
+
+				if chatplus.loggedin[key].msgicon2 then
+					chatplus.loggedin[key].player:hud_remove(chatplus.loggedin[key].msgicon2)
+				end
+
+				if #value.inbox>0 then
+					chatplus.loggedin[key].msgicon = chatplus.loggedin[key].player:hud_add({
+						hud_elem_type = "image",
+						name = "MailIcon",
+						position = {x=0.52, y=0.52},
+						text="chatplus_mail.png",
+						scale = {x=1,y=1},
+						alignment = {x=0.5, y=0.5},
+					})
+					chatplus.loggedin[key].msgicon2 = chatplus.loggedin[key].player:hud_add({
+						hud_elem_type = "text",
+						name = "MailText",
+						position = {x=0.55, y=0.52},
+						text=#value.inbox,
+						scale = {x=1,y=1},
+						alignment = {x=0.5, y=0.5},
+					})					
+				end
+				chatplus.loggedin[key].lastcount = #value.inbox
+			end
+		end
+	end
+end)
+
+chatplus.register_handler(function(from,to,msg)
+	if chatplus.setting("distance") <= 0 then
+		return nil
+	end
+
+	local from_o = minetest.get_player_by_name(from)
+	local to_o = minetest.get_player_by_name(to)
+
+	if not from_o or not to_o then
+		return nil
+	end
+
+	if (
+		chatplus.setting("distance") ~= 0 and
+		chatplus.setting("distance") ~= nil and
+		(vector.distance(from_o:getpos(),to_o:getpos()) > tonumber(chatplus.setting("distance")))
+	)then
+		return false
+	end
+	return nil
+end)
