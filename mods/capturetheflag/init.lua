@@ -216,7 +216,9 @@ function cf.diplo.get(one,two)
 end
 
 function cf.diplo.set(one,two,state)
-	if cf.diplo.diplo then
+	if not cf.diplo.diplo then
+		cf.diplo.diplo = {}
+	else
 		for i=1,#cf.diplo.diplo do
 			local dip = cf.diplo.diplo[i]
 			if (dip.one == one and dip.two == two) or (dip.one == two and dip.two == one) then
