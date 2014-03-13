@@ -212,7 +212,7 @@ minetest.register_chatcommand("team_owner", {
 			end
 			cf.save()
 		else
-			minetest.chat_send_player(name, "Player "..param.." does not exist",false)
+			minetest.chat_send_player(name, "Unable to do that :/ "..param.." does not exist, or is not part of a valid team.",false)
 		end
 	end,
 })
