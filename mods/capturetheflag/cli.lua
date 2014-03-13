@@ -81,14 +81,14 @@ minetest.register_chatcommand("team", {
 			minetest.chat_send_player(name,"joining '"..tplayer.."' to team '"..tteam.."'",false)
 			local privs = minetest.get_player_privs(name)
 			if privs and privs.team == true then
-				local player = cf.player(name)
+				local player = cf.player(tplayer)
 				
 				if not player then
-					player = {name=name}
+					player = {name=tplayer}
 				end
 			
-				if cf.add_user(param,player) == true then
-					minetest.chat_send_all(name.." has joined team "..param)
+				if cf.add_user(tteam,tplayer) == true then
+					minetest.chat_send_all(tplayer.." has joined team "..tteam)
 				end
 			else
 				minetest.chat_send_player(name, "You can not do this!")
