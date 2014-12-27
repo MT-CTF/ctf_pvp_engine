@@ -1,4 +1,4 @@
-minetest.register_on_generated(function(minp, maxp, seed)
+function flowers.mgv6ongen(minp, maxp, seed)
 	if maxp.y >= 2 and minp.y <= 0 then
 		-- Generate flowers
 		local perlin1 = minetest.get_perlin(436, 3, 0.6, 100)
@@ -26,7 +26,7 @@ minetest.register_on_generated(function(minp, maxp, seed)
 						break
 					end
 				end
-				
+
 				if ground_y then
 					local p = {x=x,y=ground_y+1,z=z}
 					local nn = minetest.get_node(p).name
@@ -54,9 +54,17 @@ minetest.register_on_generated(function(minp, maxp, seed)
 						end
 					end
 				end
-				
+
 			end
 		end
 		end
+	end
+end
+
+-- Enable in mapgen v6 only
+
+minetest.register_on_mapgen_init(function(mg_params)
+	if mg_params.mgname == "v6" then
+		minetest.register_on_generated(flowers.mgv6ongen)
 	end
 end)

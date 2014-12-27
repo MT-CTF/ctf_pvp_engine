@@ -14,11 +14,13 @@ minetest.register_craftitem("default:paper", {
 minetest.register_craftitem("default:book", {
 	description = "Book",
 	inventory_image = "default_book.png",
+	groups = {book=1},
 })
 
 minetest.register_craftitem("default:coal_lump", {
 	description = "Coal Lump",
 	inventory_image = "default_coal_lump.png",
+	groups = {coal = 1}
 })
 
 minetest.register_craftitem("default:iron_lump", {
@@ -79,11 +81,6 @@ minetest.register_craftitem("default:mese_crystal_fragment", {
 minetest.register_craftitem("default:clay_brick", {
 	description = "Clay Brick",
 	inventory_image = "default_clay_brick.png",
-})
-
-minetest.register_craftitem("default:scorched_stuff", {
-	description = "Scorched Stuff",
-	inventory_image = "default_scorched_stuff.png",
 })
 
 minetest.register_craftitem("default:obsidian_shard", {

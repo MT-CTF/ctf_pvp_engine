@@ -1,5 +1,0 @@
-
-TODO
-----
-
-- Add an appropriate sound for grenade/bazooka explosion.
