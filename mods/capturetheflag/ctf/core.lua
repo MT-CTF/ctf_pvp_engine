@@ -224,7 +224,9 @@ minetest.register_on_newplayer(function(player)
 	local max_players = ctf.setting("maximum_in_team")
 	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
 	
-	if alloc_mode == 1 then
+	if alloc_mode == 0 then
+		return
+	elseif alloc_mode == 1 then
 		local index = {}
 		
 		for key, team in pairs(ctf.teams) do
