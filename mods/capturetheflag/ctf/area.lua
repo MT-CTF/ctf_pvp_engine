@@ -117,7 +117,7 @@ function cf.area.get_spawn(team)
 	cf.area.asset_flags(team)
 
 	if team and cf.teams and cf.team(team) then
-		if cf.team(team).spawn and minetest.env:get_node(cf.team(team).spawn).name == "capturetheflag:flag" then
+		if cf.team(team).spawn and minetest.env:get_node(cf.team(team).spawn).name == "ctf:flag" then
 			local flag = cf.area.get_flag(cf.team(team).spawn)
 			
 			if not flag then
@@ -151,7 +151,7 @@ function cf.area.asset_flags(team)
 	local tmp = cf.team(team).flags
 
 	for i=1,#tmp do
-		if tmp[i] and (not minetest.env:get_node(tmp[i]) or not minetest.env:get_node(tmp[i]).name == "capturetheflag:flag") then
+		if tmp[i] and (not minetest.env:get_node(tmp[i]) or not minetest.env:get_node(tmp[i]).name == "ctf:flag") then
 			print("Replacing flag...")
 		end
 	end

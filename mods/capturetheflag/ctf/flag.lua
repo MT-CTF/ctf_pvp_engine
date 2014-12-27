@@ -185,7 +185,7 @@ cf.flag_func = {
 			-- add flag
 			cf.area.add_flag(team,pos)
 
-			if cf.teams[team].spawn and minetest.env:get_node(cf.teams[team].spawn).name == "capturetheflag:flag" then
+			if cf.teams[team].spawn and minetest.env:get_node(cf.teams[team].spawn).name == "ctf:flag" then
 				if not cf.setting("multiple_flags") then
 					-- send message
 					minetest.chat_send_all(team.."'s flag has been moved")
@@ -214,7 +214,7 @@ cf.flag_func = {
 				cf.save()
 			end
 
-			minetest.env:set_node(pos2,{name="capturetheflag:flag_top_"..cf.team(team).data.color})
+			minetest.env:set_node(pos2,{name="ctf:flag_top_"..cf.team(team).data.color})
 			
 			local meta2 = minetest.env:get_meta(pos2)
 
@@ -227,7 +227,7 @@ cf.flag_func = {
 }
 
 -- The flag
-minetest.register_node("capturetheflag:flag",{
+minetest.register_node("ctf:flag",{
 	description = "Flag",
 	drawtype="nodebox",
 	paramtype = "light",
@@ -256,7 +256,7 @@ local colors = {"red","green","blue"}
 
 for i=1,#colors do
 	local color = colors[i]
-	minetest.register_node("capturetheflag:flag_top_"..color,{
+	minetest.register_node("ctf:flag_top_"..color,{
 		description = "You are not meant to have this! - flag top",
 		drawtype="nodebox",
 		paramtype = "light",
@@ -282,7 +282,7 @@ for i=1,#colors do
 	})
 end
 
-minetest.register_node("capturetheflag:flag_captured_top",{
+minetest.register_node("ctf:flag_captured_top",{
 	description = "You are not meant to have this! - flag captured",
 	drawtype="nodebox",
 	paramtype = "light",
@@ -353,9 +353,9 @@ minetest.register_abm({
 		end
 
 		if flag_team_data.claimed then		
-			minetest.env:set_node(top,{name="capturetheflag:flag_captured_top"})
+			minetest.env:set_node(top,{name="ctf:flag_captured_top"})
 		else
-			minetest.env:set_node(top,{name="capturetheflag:flag_top_"..cf.team(flag_team_data.team).data.color})
+			minetest.env:set_node(top,{name="ctf:flag_top_"..cf.team(flag_team_data.team).data.color})
 		end
 		
 		topmeta = minetest.env:get_meta(top)

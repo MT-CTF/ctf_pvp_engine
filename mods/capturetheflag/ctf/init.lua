@@ -324,10 +324,10 @@ cf.init()
 cf.clean_player_lists()
 
 -- Load Modules
-dofile(minetest.get_modpath("capturetheflag").."/area.lua")
-dofile(minetest.get_modpath("capturetheflag").."/gui.lua")
-dofile(minetest.get_modpath("capturetheflag").."/cli.lua")
-dofile(minetest.get_modpath("capturetheflag").."/flag.lua")
+dofile(minetest.get_modpath("ctf").."/area.lua")
+dofile(minetest.get_modpath("ctf").."/gui.lua")
+dofile(minetest.get_modpath("ctf").."/cli.lua")
+dofile(minetest.get_modpath("ctf").."/flag.lua")
 
 -- Load other
 cf.collect_claimed()
