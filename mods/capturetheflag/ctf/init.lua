@@ -111,8 +111,32 @@ function cf.player(name)
 	return cf.players[name]
 end
 
--- add a user to a team
-function cf.add_user(team,user)
+-- Player joins team
+function cf.join(name, team, force)
+	if not name or name == "" or not team or team == "" then
+		return false
+	end
+
+	local player = cf.player(name)
+		
+	if not player then
+		player = {name = name}
+	end
+	
+	if not force and not cf.setting("players_can_change_team") and (not player.team or player.team == "") then
+		minetest.chat_send_player(name, "You are not allowed to switch teams, traitor!")
+		return false
+	end
+
+	if cf.add_user(team, player) == true then
+		minetest.chat_send_all(name.." has joined team "..team)
+		return true
+	end
+	return false
+end
+
+-- Add a player to a team in data structures
+function cf.add_user(team, user)
 	local _team = cf.team(team)
 	local _user = cf.player(user.name)
 	if _team and user and user.name then

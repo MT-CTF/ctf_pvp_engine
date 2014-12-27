@@ -127,19 +127,7 @@ minetest.register_chatcommand("join", {
 	params = "team name",
 	description = "Add to team",
 	func = function(name, param)
-		local player = cf.player(name)
-		
-		if not player then
-			player = {name=name}
-		end
-		
-		if not cf.setting("players_can_change_team") and (not player.team or player.team=="") then
-			minetest.chat_send_player(name,"You are not allowed to switch teams, traitor!",false)
-		end
-
-		if cf.add_user(param,player) == true then
-			minetest.chat_send_all(name.." has joined team "..param)
-		end
+		cf.join(name, param, false)
 	end,
 })
 minetest.register_chatcommand("list_teams", {

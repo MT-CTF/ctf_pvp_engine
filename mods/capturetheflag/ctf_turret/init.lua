@@ -1,6 +1,6 @@
 ARROW_DAMAGE = 2
 ARROW_VELOCITY = 2
-minetest.register_node("turret:turret", {
+minetest.register_node("ctf_turret:turret", {
 	description = "Team Turret",
 	tiles = {
 		"default_stone.png",
@@ -40,7 +40,7 @@ minetest.register_node("turret:turret", {
 })
 
 minetest.register_abm({
-	nodenames = {"turret:turret"},
+	nodenames = {"ctf_turret:turret"},
 	interval = 0.25,
 	chance = 4,
 	action = function(pos, node)
@@ -82,7 +82,7 @@ minetest.register_abm({
 				}
 
 				-- Create bullet entity
-				local bullet=minetest.env:add_entity({x=pos.x,y=pos.y+0.5,z=pos.z}, "turret:arrow_entity")
+				local bullet=minetest.env:add_entity({x=pos.x,y=pos.y+0.5,z=pos.z}, "ctf_turret:arrow_entity")
 				
 				-- Set velocity
 				bullet:setvelocity({x=calc.x * ARROW_VELOCITY,y=calc.y * ARROW_VELOCITY,z=calc.z * ARROW_VELOCITY})
@@ -102,36 +102,35 @@ THROWING_ARROW_ENTITY={
 	textures = {"bullet.png"},
 	lastpos={},
 	collisionbox = {-0.17,-0.17,-0.17,0.17,0.17,0.17},
-}
--- Arrow_entity.on_step()--> called when arrow is moving
-THROWING_ARROW_ENTITY.on_step = function(self, dtime)
-	self.timer=self.timer+dtime
-	local pos = self.object:getpos()
-	local node = minetest.env:get_node(pos)
-	if self.timer > 2 then
-		self.object:remove()
-	end
-	-- When arrow is away from player (after 0.2 seconds): Cause damage to mobs and players
-	if self.timer>0.2 then
-		local objs = minetest.env:get_objects_inside_radius({x=pos.x,y=pos.y,z=pos.z}, 1.5)
-		for k, obj in pairs(objs) do
-			if obj:is_player() then
-				obj:set_hp(obj:get_hp()-ARROW_DAMAGE)
-				self.object:remove()
+	on_step = function(self, dtime)
+		self.timer=self.timer+dtime
+		local pos = self.object:getpos()
+		if self.timer > 2 then
+			self.object:remove()
+		end
+		
+		if self.timer > 0.2 then
+			local objs = minetest.env:get_objects_inside_radius({x=pos.x,y=pos.y,z=pos.z}, 1.5)
+			for k, obj in pairs(objs) do
+				if obj:is_player() then
+					obj:set_hp(obj:get_hp() - ARROW_DAMAGE)
+					self.object:remove()
+				end
 			end
 		end
+		
+		local node = minetest.env:get_node(pos)		
+		if node.name ~= "air" and node.name ~= "ctf_turret:turret" then
+			--minetest.env:add_item(self.lastpos, "throwing:arrow")
+			self.object:remove()
+		end
 	end
-	
-	if node.name ~= "air" and node.name ~= "turret:turret" then
-		minetest.env:add_item(self.lastpos, 'throwing:arrow')
-		self.object:remove()
-	end
-end
+}
 
-minetest.register_entity("turret:arrow_entity", THROWING_ARROW_ENTITY)
+minetest.register_entity("ctf_turret:arrow_entity", THROWING_ARROW_ENTITY)
 
 minetest.register_craft({
-	output = "turret:turret",
+	output = "ctf_turret:turret",
 	recipe = {
 		{"default:mese_crystal", "default:gold_ingot", "default:mese_crystal"},
 		{"default:gold_ingot", "default:mese_crystal", "default:gold_ingot"},
