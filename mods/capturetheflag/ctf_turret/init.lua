@@ -29,8 +29,8 @@ minetest.register_node("ctf_turret:turret", {
 	after_place_node = function(pos, placer)
 		local meta = minetest.env:get_meta(pos)
 
-		if meta and cf.players and cf.player(placer:get_player_name()) and cf.player(placer:get_player_name()).team then
-			local team = cf.player(placer:get_player_name()).team
+		if meta and ctf.players and ctf.player(placer:get_player_name()) and ctf.player(placer:get_player_name()).team then
+			local team = ctf.player(placer:get_player_name()).team
 			meta:set_string("team", team)
 			meta:set_string("infotext", "Owned by "..team)
 		else
@@ -54,7 +54,7 @@ minetest.register_abm({
 			return
 		end
 
-		local app = cf.area.get_area(pos)
+		local app = ctf.area.get_area(pos)
 		if app and app~=team then
 			team = app
 			meta:set_string("team",team)
@@ -69,9 +69,9 @@ minetest.register_abm({
 		for _,obj in ipairs(objects) do
 			if (
 				obj:is_player() and
-				cf.players and
-				cf.player(obj:get_player_name()) and
-				cf.player(obj:get_player_name()).team ~= team
+				ctf.players and
+				ctf.player(obj:get_player_name()) and
+				ctf.player(obj:get_player_name()).team ~= team
 			)then
 				-- Calculate stuff
 				local obj_p = obj:getpos()

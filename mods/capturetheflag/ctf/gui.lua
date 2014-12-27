@@ -1,21 +1,21 @@
-cf.gui = {}
+ctf.gui = {}
 
-if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are enabled
+if ctf.setting("team_gui") and ctf.setting("gui") then -- check if team guis are enabled
 	-- Get tab buttons
-	function cf.gui.tabs(name,team)
+	function ctf.gui.tabs(name,team)
 		local result = ""
 		local id = 1
 		local function addtab(name,text)
 			result = result .. "button["..(id*2-1)..",0;2,1;"..name..";"..text.."]"
 			id = id + 1
 		end
-		if cf.setting("news_gui") then
+		if ctf.setting("news_gui") then
 			addtab("board","News")
 		end		
-		if cf.setting("flag_teleport_gui") then
+		if ctf.setting("flag_teleport_gui") then
 			addtab("flags","Flags")
 		end
-		if cf.setting("diplomacy") then
+		if ctf.setting("diplomacy") then
 			addtab("diplo","Diplomacy")
 		end
 		addtab("admin","Settings")
@@ -23,9 +23,9 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 	end
 	
 	-- Team interface
-	function cf.gui.team_board(name,team)
+	function ctf.gui.team_board(name,team)
 		local result = ""
-		local data = cf.teams[team].log
+		local data = ctf.teams[team].log
 	
 		if not data then
 			data = {}
@@ -35,7 +35,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 
 		for i=1,#data do
 			if data[i].type == "request" then
-				if cf.can_mod(name,team)==true then
+				if ctf.can_mod(name,team)==true then
 					amount = amount + 2
 					local height = (amount*0.5) + 0.5
 					amount = amount + 1
@@ -67,7 +67,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 			end
 		end
 
-		if cf.can_mod(name,team)==true then
+		if ctf.can_mod(name,team)==true then
 			result = result .. "button[4,6;2,1;clear;Clear all]"
 		end
 
@@ -78,15 +78,15 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 
 		minetest.show_formspec(name, "ctf:board",
 			"size[10,7]"..
-			cf.gui.tabs(name,team)..
+			ctf.gui.tabs(name,team)..
 			result
 		)
 	end
 
 	-- Team interface
-	function cf.gui.team_flags(name,team)
+	function ctf.gui.team_flags(name,team)
 		local result = ""
-		local t = cf.team(team)
+		local t = ctf.team(team)
 		
 		if not t then
 			return		
@@ -96,7 +96,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 		local y = 2
 		result = result .. "label[1,1;Click a flag button to go there]"
 
-		if cf.setting("spawn_in_flag_teleport_gui") and minetest.get_setting("static_spawnpoint") then
+		if ctf.setting("spawn_in_flag_teleport_gui") and minetest.get_setting("static_spawnpoint") then
 			local x,y,z = string.match(minetest.get_setting("static_spawnpoint"),"(%d+),(%d+),(%d+)")
 
 			result = result ..
@@ -134,25 +134,25 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 	
 		minetest.show_formspec(name, "ctf:flags",
 			"size[10,7]"..
-			cf.gui.tabs(name,team)..
+			ctf.gui.tabs(name,team)..
 			result
 		)
 	end
 	
 	-- Team interface
-	function cf.gui.team_dip(name,team)
+	function ctf.gui.team_dip(name,team)
 		local result = ""
 		local data = {}
 
 		local amount = 0
 		
-		for key,value in pairs(cf.teams) do
+		for key,value in pairs(ctf.teams) do
 			if key ~= team then
 				table.insert(data,{
 						team = key,
-						state = cf.diplo.get(team,key),
-						to = cf.diplo.check_requests(team,key),
-						from = cf.diplo.check_requests(key,team)
+						state = ctf.diplo.get(team,key),
+						to = ctf.diplo.check_requests(team,key),
+						from = ctf.diplo.check_requests(key,team)
 					})
 			end
 		end
@@ -171,7 +171,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 			result = result .. "button[1.25,".. height ..";2,1;team_".. data[i].team ..";".. data[i].team .."]"
 			result = result .. "label[3.75,".. height ..";".. data[i].state .."]"
 
-			if cf.can_mod(name,team)==true and cf.player(name).team == team then
+			if ctf.can_mod(name,team)==true and ctf.player(name).team == team then
 				if not data[i].from and not data[i].to then
 					if data[i].state == "war" then
 						result = result .. "button[7.5,".. height ..";1.5,1;peace_".. data[i].team ..";Peace]"
@@ -192,34 +192,34 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 	
 		minetest.show_formspec(name, "ctf:dip",
 			"size[10,7]"..
-			cf.gui.tabs(name,team)..
+			ctf.gui.tabs(name,team)..
 			result
 		)
 	end
 	
 	-- Team interface
-	function cf.gui.team_settings(name,team)
-		if not team or not cf.team(team) then
+	function ctf.gui.team_settings(name,team)
+		if not team or not ctf.team(team) then
 			return
 		end
 	
 		local color = ""
 
-		if cf.team(team).data and cf.team(team).data.color then
-			color = cf.team(team).data.color
+		if ctf.team(team).data and ctf.team(team).data.color then
+			color = ctf.team(team).data.color
 		end
 	
 		local result = "field[3,2;4,1;color;Team Color;"..color.."]"..
 			"button[4,6;2,1;save;Save]"
 	
 	
-		if cf.can_mod(name,team) == false then
+		if ctf.can_mod(name,team) == false then
 			result = "label[0.5,1;You do not own this team!"
 		end
 	
 		minetest.show_formspec(name, "ctf:team_settings",
 			"size[10,7]"..
-			cf.gui.tabs(name,team)..
+			ctf.gui.tabs(name,team)..
 			result
 		)
 	end
@@ -227,46 +227,46 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 		local name = player:get_player_name()
 		if formname=="ctf:board" or formname=="ctf:flags" or formname=="ctf:dip" or formname=="ctf:team_settings" then
 			if fields.flags then
-				if cf and cf.players and cf.players[name] and cf.players[name].team then
-					cf.gui.team_flags(name,cf.players[name].team)
+				if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
+					ctf.gui.team_flags(name,ctf.players[name].team)
 				end
 				return true
 			end
 			if fields.board then
-				if cf and cf.players and cf.players[name] and cf.players[name].team then
-					cf.gui.team_board(name,cf.players[name].team)
+				if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
+					ctf.gui.team_board(name,ctf.players[name].team)
 				end
 				return true
 			end
 			if fields.diplo then
-				if cf and cf.players and cf.players[name] and cf.players[name].team then
-					cf.gui.team_dip(name,cf.players[name].team)
+				if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
+					ctf.gui.team_dip(name,ctf.players[name].team)
 				end
 				return true
 			end
 			if fields.admin then
-				if cf and cf.players and cf.players[name] and cf.players[name].team then
-					cf.gui.team_settings(name,cf.players[name].team)
+				if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
+					ctf.gui.team_settings(name,ctf.players[name].team)
 				end
 				return true
 			end
 			if fields.clear then
-				if cf and cf.players and cf.players[name] and cf.players[name].team then
-					cf.team(cf.players[name].team).log = {}
-					cf.save()
-					cf.gui.team_board(name,cf.players[name].team)
+				if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
+					ctf.team(ctf.players[name].team).log = {}
+					ctf.save()
+					ctf.gui.team_board(name,ctf.players[name].team)
 				end
 				return true
 			end
 			if fields.save and formname=="ctf:team_settings" then
-				if cf and cf.players and cf.players[name] and cf.players[name].team then
-					cf.gui.team_settings(name,cf.players[name].team)
+				if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
+					ctf.gui.team_settings(name,ctf.players[name].team)
 				end
-				if cf and cf.team(cf.players[name].team) and cf.team(cf.players[name].team).data then
+				if ctf and ctf.team(ctf.players[name].team) and ctf.team(ctf.players[name].team).data then
 					if minetest.registered_items["ctf:flag_top_"..fields.color] then
 						print("Setting color...")
-						cf.team(cf.players[name].team).data.color = fields.color
-						cf.save()
+						ctf.team(ctf.players[name].team).data.color = fields.color
+						ctf.save()
 					else
 						minetest.chat_send_player(name,"Color "..fields.color.." does not exist!")
 					end
@@ -282,17 +282,17 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 			for key, field in pairs(fields) do
 				local ok, id = string.match(key, "btn_([yn])([0123456789]+)")
 				if ok and id then
-					if cf.player(name) and cf.player(name).team and cf.team(cf.player(name).team) then
+					if ctf.player(name) and ctf.player(name).team and ctf.team(ctf.player(name).team) then
 						if ok == "y" then
-							cf.diplo.set(cf.player(name).team, cf.team(cf.player(name).team).log[tonumber(id)].team, cf.team(cf.player(name).team).log[tonumber(id)].msg)
-							cf.post(cf.player(name).team,{msg="You have accepted the "..cf.team(cf.player(name).team).log[tonumber(id)].msg.." request from "..cf.team(cf.player(name).team).log[tonumber(id)].team})
-							cf.post(cf.team(cf.player(name).team).log[tonumber(id)].team,{msg=cf.player(name).team.." has accepted your "..cf.team(cf.player(name).team).log[tonumber(id)].msg.." request"})
+							ctf.diplo.set(ctf.player(name).team, ctf.team(ctf.player(name).team).log[tonumber(id)].team, ctf.team(ctf.player(name).team).log[tonumber(id)].msg)
+							ctf.post(ctf.player(name).team,{msg="You have accepted the "..ctf.team(ctf.player(name).team).log[tonumber(id)].msg.." request from "..ctf.team(ctf.player(name).team).log[tonumber(id)].team})
+							ctf.post(ctf.team(ctf.player(name).team).log[tonumber(id)].team,{msg=ctf.player(name).team.." has accepted your "..ctf.team(ctf.player(name).team).log[tonumber(id)].msg.." request"})
 							id = id + 1
 						end
 						
-						table.remove(cf.team(cf.player(name).team).log,id)
-						cf.save()
-						cf.gui.team_board(name,cf.player(name).team)
+						table.remove(ctf.team(ctf.player(name).team).log,id)
+						ctf.save()
+						ctf.gui.team_board(name,ctf.player(name).team)
 						return true
 					end
 				end
@@ -319,63 +319,63 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 			for key, field in pairs(fields) do
 				local newteam = string.match(key, "team_(.+)")
 				if newteam then
-					cf.gui.team_dip(name,newteam)
+					ctf.gui.team_dip(name,newteam)
 					return true
 				end
 
 				newteam = string.match(key, "peace_(.+)")
-				if newteam and cf.player(name) then
-					local team = cf.player(name).team
+				if newteam and ctf.player(name) then
+					local team = ctf.player(name).team
 
 					if team then
-						if cf.diplo.get(team,newteam) == "war" then
-							cf.post(newteam,{type="request",msg="peace",team=team,mode="diplo"})
+						if ctf.diplo.get(team,newteam) == "war" then
+							ctf.post(newteam,{type="request",msg="peace",team=team,mode="diplo"})
 						else
-							cf.diplo.set(team,newteam,"peace")
-							cf.post(team,{msg="You have cancelled the alliance treaty with "..newteam})
-							cf.post(newteam,{msg=team.." has cancelled the alliance treaty"})
+							ctf.diplo.set(team,newteam,"peace")
+							ctf.post(team,{msg="You have cancelled the alliance treaty with "..newteam})
+							ctf.post(newteam,{msg=team.." has cancelled the alliance treaty"})
 						end
 					end
 					
-					cf.gui.team_dip(name,team)
+					ctf.gui.team_dip(name,team)
 					return true
 				end
 				
 				newteam = string.match(key, "war_(.+)")
-				if newteam and cf.player(name) then
-					local team = cf.player(name).team
+				if newteam and ctf.player(name) then
+					local team = ctf.player(name).team
 
 					if team then
-						cf.diplo.set(team,newteam,"war")
-						cf.post(team,{msg="You have declared war on "..newteam})
-						cf.post(newteam,{msg=team.." has declared war on you"})
+						ctf.diplo.set(team,newteam,"war")
+						ctf.post(team,{msg="You have declared war on "..newteam})
+						ctf.post(newteam,{msg=team.." has declared war on you"})
 					end
 					
-					cf.gui.team_dip(name,team)
+					ctf.gui.team_dip(name,team)
 					return true
 				end
 				
 				newteam = string.match(key, "alli_(.+)")
-				if newteam and cf.player(name) then
-					local team = cf.player(name).team
+				if newteam and ctf.player(name) then
+					local team = ctf.player(name).team
 
 					if team then
-						cf.post(newteam,{type="request",msg="alliance",team=team,mode="diplo"})
+						ctf.post(newteam,{type="request",msg="alliance",team=team,mode="diplo"})
 					end
 
-					cf.gui.team_dip(name,team)
+					ctf.gui.team_dip(name,team)
 					return true
 				end
 				
 				newteam = string.match(key, "cancel_(.+)")
-				if newteam and cf.player(name) then
-					local team = cf.player(name).team
+				if newteam and ctf.player(name) then
+					local team = ctf.player(name).team
 
 					if team then
-						cf.diplo.cancel_requests(team,newteam)
+						ctf.diplo.cancel_requests(team,newteam)
 					end
 					
-					cf.gui.team_dip(name,team)
+					ctf.gui.team_dip(name,team)
 					return true
 				end
 			end
@@ -384,8 +384,8 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 end  -- end of check if team guis are enabled
 
 -- Flag interface
-function cf.gui.flag_board(name,pos)
-	local flag = cf.area.get_flag(pos)
+function ctf.gui.flag_board(name,pos)
+	local flag = ctf.area.get_flag(pos)
 	if not flag then
 		return
 	end
@@ -395,21 +395,21 @@ function cf.gui.flag_board(name,pos)
 		return
 	end
 
-	if cf.can_mod(name,team) == false then
-		if cf.player(name) and cf.player(name).team and cf.player(name).team == team then
-			cf.gui.team_board(name,team)
+	if ctf.can_mod(name,team) == false then
+		if ctf.player(name) and ctf.player(name).team and ctf.player(name).team == team then
+			ctf.gui.team_board(name,team)
 		end
 		return
 	end
 
 	local flag_name = flag.name
 
-	if not cf.setting("flag_names") then
+	if not ctf.setting("flag_names") then
 		flag.name = nil
 		return
 	end
 	
-	if not cf.setting("gui") then
+	if not ctf.setting("gui") then
 		return
 	end
 
@@ -417,11 +417,11 @@ function cf.gui.flag_board(name,pos)
 		flag_name = ""
 	end
 	
-	if not cf.gui.flag_data then
-		cf.gui.flag_data = {}
+	if not ctf.gui.flag_data then
+		ctf.gui.flag_data = {}
 	end
 
-	cf.gui.flag_data[name] = {pos=pos}
+	ctf.gui.flag_data[name] = {pos=pos}
 
 	minetest.show_formspec(name, "ctf:flag_board",
 		"size[6,3]"..
@@ -438,7 +438,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	end
 
 	if fields.save and fields.flag_name then
-		local flag = cf.area.get_flag(cf.gui.flag_data[name].pos)
+		local flag = ctf.area.get_flag(ctf.gui.flag_data[name].pos)
 		if not flag then
 			return false
 		end
@@ -448,7 +448,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			return false
 		end
 		
-		if cf.can_mod(name,team) == false then
+		if ctf.can_mod(name,team) == false then
 			return false
 		end
 
@@ -462,18 +462,18 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local msg = flag_name.." was renamed to "..fields.flag_name
 
 		if flag_name=="" then
-			msg = "A flag was named "..fields.flag_name.." at ("..cf.gui.flag_data[name].pos.x..","..cf.gui.flag_data[name].pos.z..")"
+			msg = "A flag was named "..fields.flag_name.." at ("..ctf.gui.flag_data[name].pos.x..","..ctf.gui.flag_data[name].pos.z..")"
 		end
 
 		print(msg)
 		
-		cf.post(team,{msg=msg,icon="flag_info"})
+		ctf.post(team,{msg=msg,icon="flag_info"})
 
 		return true
 	elseif fields.delete then
-		local pos = cf.gui.flag_data[name].pos
+		local pos = ctf.gui.flag_data[name].pos
 		
-		local flag = cf.area.get_flag(cf.gui.flag_data[name].pos)
+		local flag = ctf.area.get_flag(ctf.gui.flag_data[name].pos)
 		
 		if not flag then
 			print("No flag?!")
@@ -484,11 +484,11 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			return
 		end
 		
-		if cf.can_mod(name,team) == false then
+		if ctf.can_mod(name,team) == false then
 			return false
 		end
 		
-		cf.area.delete_flag(team,pos)
+		ctf.area.delete_flag(team,pos)
 		
 		minetest.env:set_node(pos,{name="air"})
 		pos.y=pos.y+1

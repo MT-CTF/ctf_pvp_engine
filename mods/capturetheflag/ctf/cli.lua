@@ -22,12 +22,12 @@ minetest.register_chatcommand("team", {
 		if test then
 			print("is a player request "..test)
 				
-			if cf.player(test) then
-				if cf.player(test).team then
-					if cf.player(test).auth then
-						minetest.chat_send_player(name,test.." is in team "..cf.player(test).team.." (team owner)",false)
+			if ctf.player(test) then
+				if ctf.player(test).team then
+					if ctf.player(test).auth then
+						minetest.chat_send_player(name,test.." is in team "..ctf.player(test).team.." (team owner)",false)
 					else
-						minetest.chat_send_player(name,test.." is in team "..cf.player(test).team,false)
+						minetest.chat_send_player(name,test.." is in team "..ctf.player(test).team,false)
 					end
 				else
 					minetest.chat_send_player(name,test.." is not in a team",false)
@@ -40,7 +40,7 @@ minetest.register_chatcommand("team", {
 			if privs and privs.team == true then
 				if (
 					string.match(create,"([%a%b_]-)")
-					and cf.team({name=create,add_team=true})
+					and ctf.team({name=create,add_team=true})
 					and create ~= ""
 					and create ~= nil
 				) then
@@ -53,7 +53,7 @@ minetest.register_chatcommand("team", {
 			end
 		elseif param == "all" then
 			minetest.chat_send_player(name, "Teams:",false)
-			for k,v in pairs(cf.teams) do
+			for k,v in pairs(ctf.teams) do
 				if v and v.players then
 					local numItems = 0
 					for k,v in pairs(v.players) do
@@ -66,10 +66,10 @@ minetest.register_chatcommand("team", {
 					minetest.chat_send_player(name, ">> "..k.." ("..numItems2.." flags, "..numItems.." players)",false)
 				end
 			end 
-		elseif cf.team(param) then
+		elseif ctf.team(param) then
 			minetest.chat_send_player(name,"Team "..param..":",false)
 			local count = 0
-			for _,value in pairs(cf.team(param).players) do
+			for _,value in pairs(ctf.team(param).players) do
 				count = count + 1
 				if value.aut == true then
 					minetest.chat_send_player(name,count..">> "..value.name.." (team owner)",false)
@@ -81,13 +81,13 @@ minetest.register_chatcommand("team", {
 			minetest.chat_send_player(name,"joining '"..tplayer.."' to team '"..tteam.."'",false)
 			local privs = minetest.get_player_privs(name)
 			if privs and privs.team == true then
-				local player = cf.player(tplayer)
+				local player = ctf.player(tplayer)
 				
 				if not player then
 					player = {name=tplayer}
 				end
 			
-				if cf.add_user(tteam,tplayer) == true then
+				if ctf.add_user(tteam,tplayer) == true then
 					minetest.chat_send_all(tplayer.." has joined team "..tteam)
 				end
 			else
@@ -101,22 +101,22 @@ minetest.register_chatcommand("team", {
 				team_console_help(name)
 			end
 			if ( 
-				cf and
-				cf.players and
-				cf.players[name] and
-				cf.players[name].team and
-				cf.setting("gui")
+				ctf and
+				ctf.players and
+				ctf.players[name] and
+				ctf.players[name].team and
+				ctf.setting("gui")
 			) then
-				if cf.setting("team_gui_initial") == "news" and cf.setting("news_gui") then
-					cf.gui.team_board(name,cf.players[name].team)
-				elseif cf.setting("team_gui_initial") == "flags" and cf.setting("flag_teleport_gui") then
-					cf.gui.team_flags(name,cf.players[name].team)
-				elseif cf.setting("team_gui_initial") == "diplo" and cf.setting("diplomacy") then
-					cf.gui.team_dip(name,cf.players[name].team)
-				elseif cf.setting("team_gui_initial") == "admin" then
-					cf.gui.team_settings(name,cf.players[name].team)
-				elseif cf.setting("news_gui") then
-					cf.gui.team_board(name,cf.players[name].team)			
+				if ctf.setting("team_gui_initial") == "news" and ctf.setting("news_gui") then
+					ctf.gui.team_board(name,ctf.players[name].team)
+				elseif ctf.setting("team_gui_initial") == "flags" and ctf.setting("flag_teleport_gui") then
+					ctf.gui.team_flags(name,ctf.players[name].team)
+				elseif ctf.setting("team_gui_initial") == "diplo" and ctf.setting("diplomacy") then
+					ctf.gui.team_dip(name,ctf.players[name].team)
+				elseif ctf.setting("team_gui_initial") == "admin" then
+					ctf.gui.team_settings(name,ctf.players[name].team)
+				elseif ctf.setting("news_gui") then
+					ctf.gui.team_board(name,ctf.players[name].team)			
 				end
 			end
 		end
@@ -127,7 +127,7 @@ minetest.register_chatcommand("join", {
 	params = "team name",
 	description = "Add to team",
 	func = function(name, param)
-		cf.join(name, param, false)
+		ctf.join(name, param, false)
 	end,
 })
 minetest.register_chatcommand("list_teams", {
@@ -136,7 +136,7 @@ minetest.register_chatcommand("list_teams", {
 	func = function(name, param)
 		minetest.chat_send_player(name, "This command will be made obsolete! Use '/team all' instead!",false)
 		minetest.chat_send_player(name, "Teams:")
-		for k,v in pairs(cf.teams) do
+		for k,v in pairs(ctf.teams) do
 			if v and v.players then
 				local numItems = 0
 				for k,v in pairs(v.players) do
@@ -158,7 +158,7 @@ minetest.register_chatcommand("ateam", {
 	privs = {team=true},
 	func = function(name, param)
 		minetest.chat_send_player(name, "This command will be made obsolete! Use '/team add name' instead!",false)
-		if string.match(param,"([%a%b_]-)") and cf.team({name=param,add_team=true}) and param ~= "" and param~= nil then
+		if string.match(param,"([%a%b_]-)") and ctf.team({name=param,add_team=true}) and param ~= "" and param~= nil then
 			minetest.chat_send_player(name, "Added team "..param,false)
 		else
 			minetest.chat_send_player(name, "Error adding team "..param,false)
@@ -170,8 +170,8 @@ minetest.register_chatcommand("ctf", {
 	description = "Do admin cleaning stuff",
 	privs = {team=true},
 	func = function(name, param)
-		cf.clean_player_lists()
-		cf.collect_claimed()
+		ctf.clean_player_lists()
+		ctf.collect_claimed()
 		minetest.chat_send_player(name, "CTF cleaned!")
 	end,
 })
@@ -180,8 +180,8 @@ minetest.register_chatcommand("reload_ctf", {
 	description = "reload the ctf main frame and get settings",
 	privs = {team=true},
 	func = function(name, param)
-		cf.save()
-		cf.init()
+		ctf.save()
+		ctf.init()
 		minetest.chat_send_player(name, "CTF core reloaded!")
 	end
 })
@@ -191,15 +191,15 @@ minetest.register_chatcommand("team_owner", {
 	description = "Make player team owner",
 	privs = {team=true},
 	func = function(name, param)
-		if cf and cf.players and cf.player(param) and cf.player(param).team and cf.team(cf.player(param).team) then
-			if cf.player(param).auth == true then
-				cf.player(param).auth = false
+		if ctf and ctf.players and ctf.player(param) and ctf.player(param).team and ctf.team(ctf.player(param).team) then
+			if ctf.player(param).auth == true then
+				ctf.player(param).auth = false
 				minetest.chat_send_player(name, param.." was downgraded from team admin status",false)
 			else
-				cf.player(param).auth = true
-				minetest.chat_send_player(name, param.." was upgraded to an admin of "..cf.player(name).team,false)
+				ctf.player(param).auth = true
+				minetest.chat_send_player(name, param.." was upgraded to an admin of "..ctf.player(name).team,false)
 			end
-			cf.save()
+			ctf.save()
 		else
 			minetest.chat_send_player(name, "Unable to do that :/ "..param.." does not exist, or is not part of a valid team.",false)
 		end
@@ -210,13 +210,13 @@ minetest.register_chatcommand("all", {
 	params = "msg",
 	description = "Send a message on the global channel",
 	func = function(name, param)
-		if not cf.setting("global_channel") then
+		if not ctf.setting("global_channel") then
 			minetest.chat_send_player(name,"The global channel is disabled",false)
 			return
 		end
 
-		if cf.player(name) and cf.player(name).team then
-			minetest.chat_send_all(cf.player(name).team.." <"..name.."> "..param)
+		if ctf.player(name) and ctf.player(name).team then
+			minetest.chat_send_all(ctf.player(name).team.." <"..name.."> "..param)
 		else
 			minetest.chat_send_all("GLOBAL <"..name.."> "..param)
 		end
@@ -229,16 +229,16 @@ minetest.register_chatcommand("post", {
 	description = "Post a message on your team's message board",
 	func = function(name, param)
 
-		if cf and cf.players and cf.players[name] and cf.players[name].team and cf.teams[cf.players[name].team] then
-			if not cf.player(name).auth then
+		if ctf and ctf.players and ctf.players[name] and ctf.players[name].team and ctf.teams[ctf.players[name].team] then
+			if not ctf.player(name).auth then
 				minetest.chat_send_player(name, "You do not own that team")
 			end
 
-			if not cf.teams[cf.players[name].team].log then
-				cf.teams[cf.players[name].team].log = {}
+			if not ctf.teams[ctf.players[name].team].log then
+				ctf.teams[ctf.players[name].team].log = {}
 			end
 
-			table.insert(cf.teams[cf.players[name].team].log,{msg=param})
+			table.insert(ctf.teams[ctf.players[name].team].log,{msg=param})
 
 			minetest.chat_send_player(name, "Posted: "..param)
 		else
@@ -250,15 +250,15 @@ minetest.register_chatcommand("post", {
 -- Chat plus stuff
 if chatplus then
 	chatplus.register_handler(function(from,to,msg)
-		if not cf.setting("team_channel") then
+		if not ctf.setting("team_channel") then
 			return nil
 		end
 
-		local fromp = cf.player(from)
-		local top = cf.player(to)
+		local fromp = ctf.player(from)
+		local top = ctf.player(to)
 
 		if not fromp then
-			if not cf.setting("global_channel") then
+			if not ctf.setting("global_channel") then
 				minetest.chat_send_player(from,"You are not yet part of a team, so you have no mates to send to",false)
 			else
 				minetest.chat_send_player(to,"GLOBAL <"..from.."> "..msg,false)

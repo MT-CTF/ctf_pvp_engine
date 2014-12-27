@@ -1,28 +1,28 @@
-cf.area = {}
+ctf.area = {}
 
 -- add a flag to a team
-function cf.area.add_flag(team,pos)
+function ctf.area.add_flag(team,pos)
 	if not team or team == "" then
 		return
 	end
 
-	if not cf.team(team).flags then
-		cf.team(team).flags = {}
+	if not ctf.team(team).flags then
+		ctf.team(team).flags = {}
 	end
 
 	pos.team = team
-	table.insert(cf.team(team).flags,pos)
-	cf.save()
+	table.insert(ctf.team(team).flags,pos)
+	ctf.save()
 end
 
 -- get a flag from a team
-function cf.area.get_flag(pos)
+function ctf.area.get_flag(pos)
 	if not pos then
 		return
 	end
 
 	local result = nil
-	for _, team in pairs(cf.teams) do
+	for _, team in pairs(ctf.teams) do
 		for i = 1, #team.flags do
 			if (
 				team.flags[i].x == pos.x and
@@ -48,36 +48,36 @@ function cf.area.get_flag(pos)
 end
 
 -- delete a flag from a team
-function cf.area.delete_flag(team,pos)
+function ctf.area.delete_flag(team,pos)
 	if not team or team == "" then
 		return
 	end
 
-	print(dump(cf.team(team).flags))
-	for i = 1, #cf.team(team).flags do
+	print(dump(ctf.team(team).flags))
+	for i = 1, #ctf.team(team).flags do
 		if (
-			cf.team(team).flags[i].x == pos.x and
-			cf.team(team).flags[i].y == pos.y and
-			cf.team(team).flags[i].z == pos.z
+			ctf.team(team).flags[i].x == pos.x and
+			ctf.team(team).flags[i].y == pos.y and
+			ctf.team(team).flags[i].z == pos.z
 		) then
-			table.remove(cf.team(team).flags,i)
+			table.remove(ctf.team(team).flags,i)
 			return
 		end
 	end
 end
 
 -- Gets the nearest flag in a 25 metre radius block
-function cf.area.nearest_flag(pos)
+function ctf.area.nearest_flag(pos)
 	if not pos then
 		print ("No position provided to nearest_flag()")
 		return nil
 	end
 
-	print("cf.setting('flag_protect_distance') is "..dump(cf.setting("flag_protect_distance")))
+	print("ctf.setting('flag_protect_distance') is "..dump(ctf.setting("flag_protect_distance")))
 
 	local nodes = minetest.env:find_nodes_in_area(
-		{x=pos.x-cf.setting("flag_protect_distance"),y=pos.y-cf.setting("flag_protect_distance"),z=pos.z-cf.setting("flag_protect_distance")},
-		{x=pos.x+cf.setting("flag_protect_distance"),y=pos.y+cf.setting("flag_protect_distance"),z=pos.z+cf.setting("flag_protect_distance")},
+		{x=pos.x-ctf.setting("flag_protect_distance"),y=pos.y-ctf.setting("flag_protect_distance"),z=pos.z-ctf.setting("flag_protect_distance")},
+		{x=pos.x+ctf.setting("flag_protect_distance"),y=pos.y+ctf.setting("flag_protect_distance"),z=pos.z+ctf.setting("flag_protect_distance")},
 		{"group:is_flag"}
 	)
 
@@ -99,12 +99,12 @@ function cf.area.nearest_flag(pos)
 end
 
 -- gets the name of the owner of that location
-function cf.area.get_area(pos)
-	local closest = cf.area.nearest_flag(pos)
+function ctf.area.get_area(pos)
+	local closest = ctf.area.nearest_flag(pos)
 	if not closest then
 		return false
 	end
-	local flag = cf.area.get_flag(closest)
+	local flag = ctf.area.get_flag(closest)
 	
 	if flag then
 		return flag.team
@@ -113,12 +113,12 @@ function cf.area.get_area(pos)
 end
 
 -- updates the spawn position for a team
-function cf.area.get_spawn(team)
-	cf.area.asset_flags(team)
+function ctf.area.get_spawn(team)
+	ctf.area.asset_flags(team)
 
-	if team and cf.teams and cf.team(team) then
-		if cf.team(team).spawn and minetest.env:get_node(cf.team(team).spawn).name == "ctf:flag" then
-			local flag = cf.area.get_flag(cf.team(team).spawn)
+	if team and ctf.teams and ctf.team(team) then
+		if ctf.team(team).spawn and minetest.env:get_node(ctf.team(team).spawn).name == "ctf:flag" then
+			local flag = ctf.area.get_flag(ctf.team(team).spawn)
 			
 			if not flag then
 				return false
@@ -133,22 +133,22 @@ function cf.area.get_spawn(team)
 		end
 
 		-- Get new spawn
-		if #cf.team(team).flags > 0 then
-			cf.team(team).spawn = cf.team(team).flags[1]
+		if #ctf.team(team).flags > 0 then
+			ctf.team(team).spawn = ctf.team(team).flags[1]
 			return true
 		end
 	end
 	return false
 end
 
-function cf.area.asset_flags(team)
-	if not team or not cf.team(team) then
+function ctf.area.asset_flags(team)
+	if not team or not ctf.team(team) then
 		return false
 	end
 	
 	print("Checking the flags of "..team)
 
-	local tmp = cf.team(team).flags
+	local tmp = ctf.team(team).flags
 
 	for i=1,#tmp do
 		if tmp[i] and (not minetest.env:get_node(tmp[i]) or not minetest.env:get_node(tmp[i]).name == "ctf:flag") then

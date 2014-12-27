@@ -1,27 +1,27 @@
 -- diplo states: war, peace, alliance
-cf.diplo = {}
+ctf.diplo = {}
 
-function cf.diplo.get(one,two)
-	if not cf.diplo.diplo then
-        	return cf.setting("default_diplo_state")
+function ctf.diplo.get(one,two)
+	if not ctf.diplo.diplo then
+        	return ctf.setting("default_diplo_state")
 	end
 
-	for i=1,#cf.diplo.diplo do
-		local dip = cf.diplo.diplo[i]
+	for i=1,#ctf.diplo.diplo do
+		local dip = ctf.diplo.diplo[i]
 		if (dip.one == one and dip.two == two) or (dip.one == two and dip.two == one) then
 			return dip.state
 		end
 	end
 
-	return cf.setting("default_diplo_state")
+	return ctf.setting("default_diplo_state")
 end
 
-function cf.diplo.set(one,two,state)
-	if not cf.diplo.diplo then
-		cf.diplo.diplo = {}
+function ctf.diplo.set(one,two,state)
+	if not ctf.diplo.diplo then
+		ctf.diplo.diplo = {}
 	else
-		for i=1,#cf.diplo.diplo do
-			local dip = cf.diplo.diplo[i]
+		for i=1,#ctf.diplo.diplo do
+			local dip = ctf.diplo.diplo[i]
 			if (dip.one == one and dip.two == two) or (dip.one == two and dip.two == one) then
 				dip.state = state
 				return
@@ -29,12 +29,12 @@ function cf.diplo.set(one,two,state)
 		end
 	end
 	
-	table.insert(cf.diplo.diplo,{one=one,two=two,state=state})
+	table.insert(ctf.diplo.diplo,{one=one,two=two,state=state})
 	return
 end
 
-function cf.diplo.check_requests(one,two)
-	local team = cf.team(two)
+function ctf.diplo.check_requests(one,two)
+	local team = ctf.team(two)
 	
 	if not team.log then
 		return nil
@@ -49,8 +49,8 @@ function cf.diplo.check_requests(one,two)
 	return nil
 end
 
-function cf.diplo.cancel_requests(one,two)
-	local team = cf.team(two)
+function ctf.diplo.cancel_requests(one,two)
+	local team = ctf.team(two)
 	
 	if not team.log then
 		return

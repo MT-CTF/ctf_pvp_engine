@@ -1,14 +1,14 @@
 -- This mod is used to protect nodes in the capture the flag game
 
 function stop_dig(name,pos)
-	local team = cf.area.get_area(pos)
+	local team = ctf.area.get_area(pos)
 	
 	if not team then
 		return false
 	end
 
-	if cf.players and cf.player(name) and cf.player(name).team then
-		if cf.player(name).team == team then
+	if ctf.players and ctf.player(name) and ctf.player(name).team then
+		if ctf.player(name).team == team then
 			return false
 		end
 	end

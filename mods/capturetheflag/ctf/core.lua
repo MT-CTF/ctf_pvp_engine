@@ -1,60 +1,60 @@
-function cf.init()
+function ctf.init()
 	print("[CaptureTheFlag] Initialising...")
 
 	-- Set up structures
-	cf._defsettings = {}
-	cf.teams = {}
-	cf.players = {}
-	cf.claimed = {}
-	cf.diplo = {diplo = {}}
+	ctf._defsettings = {}
+	ctf.teams = {}
+	ctf.players = {}
+	ctf.claimed = {}
+	ctf.diplo = {diplo = {}}
 
 	-- Settings: Feature enabling
-	cf._set("node_ownership",true)
-	cf._set("multiple_flags",true)
-	cf._set("flag_capture_take",false) -- whether flags need to be taken to home flag when captured
-	cf._set("gui",true) -- whether GUIs are used
-	cf._set("team_gui",true) -- GUI on /team is used
-	cf._set("flag_teleport_gui",true) -- flag tab in /team
-	cf._set("spawn_in_flag_teleport_gui",false) -- show spawn in the flag teleport team gui
-	cf._set("news_gui",true) -- news tab in /team
-	cf._set("diplomacy",true)
-	cf._set("flag_names",true) -- can flags be named
-	cf._set("team_channel",true) -- do teams have their own chat channel
-	cf._set("global_channel",true) -- Can players chat with other teams on /all. If team_channel is false, this does nothing.
-	cf._set("players_can_change_team",true)
+	ctf._set("node_ownership",true)
+	ctf._set("multiple_flags",true)
+	ctf._set("flag_capture_take",false) -- whether flags need to be taken to home flag when captured
+	ctf._set("gui",true) -- whether GUIs are used
+	ctf._set("team_gui",true) -- GUI on /team is used
+	ctf._set("flag_teleport_gui",true) -- flag tab in /team
+	ctf._set("spawn_in_flag_teleport_gui",false) -- show spawn in the flag teleport team gui
+	ctf._set("news_gui",true) -- news tab in /team
+	ctf._set("diplomacy",true)
+	ctf._set("flag_names",true) -- can flags be named
+	ctf._set("team_channel",true) -- do teams have their own chat channel
+	ctf._set("global_channel",true) -- Can players chat with other teams on /all. If team_channel is false, this does nothing.
+	ctf._set("players_can_change_team",true)
 	
 	-- Settings: Teams
-	--cf._set("allocate_mode",0) -- (COMING SOON):how are players allocated to teams?
-	cf._set("default_diplo_state","war") -- what is the default diplomatic state? (war/peace/alliance)
-	--cf._setb("delete_teams",false) -- (COMING SOON):should teams be deleted when they are defeated?
+	--ctf._set("allocate_mode",0) -- (COMING SOON):how are players allocated to teams?
+	ctf._set("default_diplo_state","war") -- what is the default diplomatic state? (war/peace/alliance)
+	--ctf._setb("delete_teams",false) -- (COMING SOON):should teams be deleted when they are defeated?
 
 	-- Settings: Misc
-	--cf._set("on_game_end",0) -- (COMING SOON):what happens when the game ends?
-	cf._set("flag_protect_distance",25) -- how far do flags protect?
-	cf._set("team_gui_initial","news") -- [news/flags/diplo/admin] - the starting tab
+	--ctf._set("on_game_end",0) -- (COMING SOON):what happens when the game ends?
+	ctf._set("flag_protect_distance",25) -- how far do flags protect?
+	ctf._set("team_gui_initial","news") -- [news/flags/diplo/admin] - the starting tab
 
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "r")
 	if file then
 		local table = minetest.deserialize(file:read("*all"))
 		if type(table) == "table" then
-			cf.teams = table.teams
-			cf.players = table.players
-			cf.diplo.diplo = table.diplo
+			ctf.teams = table.teams
+			ctf.players = table.players
+			ctf.diplo.diplo = table.diplo
 			return
 		end
 	end
 end
 
 -- Set settings
-function cf._set(setting,default)
-	cf._defsettings[setting] = default
+function ctf._set(setting,default)
+	ctf._defsettings[setting] = default
 end
 
-function cf.setting(name)
+function ctf.setting(name)
 	if minetest.setting_get("ctf_"..name) then
 		return minetest.setting_get("ctf_"..name)
-	elseif cf._defsettings[name] ~= nil then
-		return cf._defsettings[name]
+	elseif ctf._defsettings[name] ~= nil then
+		return ctf._defsettings[name]
 	else
 		print("[CaptureTheFlag] Setting "..name.." not found!")
 		return nil
@@ -62,67 +62,67 @@ function cf.setting(name)
 end
 
 -- Save game
-function cf.save()
+function ctf.save()
 	print("[CaptureTheFlag] Saving data...")
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "w")
 	if file then
 		file:write(minetest.serialize({
-			teams = cf.teams,
-			players = cf.players,
-			diplo = cf.diplo.diplo
+			teams = ctf.teams,
+			players = ctf.players,
+			diplo = ctf.diplo.diplo
 		}))
 		file:close()
 	end
 end
 
 -- Get or add a team
-function cf.team(name) -- get or add a team
+function ctf.team(name) -- get or add a team
 	if type(name) == "table" then
 		if not name.add_team then
-			error("Invalid table given to cf.team")
+			error("Invalid table given to ctf.team")
 			return
 		end
 
 		print("Defining team "..name.name)
 
-		cf.teams[name.name]={
+		ctf.teams[name.name]={
 			data = name,
 			spawn=nil,
 			players={},
 			flags = {}
 		}
 		
-		cf.save()
+		ctf.save()
 		
-		return cf.teams[name.name]
+		return ctf.teams[name.name]
 	else
-		return cf.teams[name]
+		return ctf.teams[name]
 	end
 end
 
 -- get a player
-function cf.player(name) 
-	return cf.players[name]
+function ctf.player(name) 
+	return ctf.players[name]
 end
 
 -- Player joins team
-function cf.join(name, team, force)
+function ctf.join(name, team, force)
 	if not name or name == "" or not team or team == "" then
 		return false
 	end
 
-	local player = cf.player(name)
+	local player = ctf.player(name)
 		
 	if not player then
 		player = {name = name}
 	end
 	
-	if not force and not cf.setting("players_can_change_team") and (not player.team or player.team == "") then
+	if not force and not ctf.setting("players_can_change_team") and (not player.team or player.team == "") then
 		minetest.chat_send_player(name, "You are not allowed to switch teams, traitor!")
 		return false
 	end
 
-	if cf.add_user(team, player) == true then
+	if ctf.add_user(team, player) == true then
 		minetest.chat_send_all(name.." has joined team "..team)
 		return true
 	end
@@ -130,19 +130,19 @@ function cf.join(name, team, force)
 end
 
 -- Add a player to a team in data structures
-function cf.add_user(team, user)
-	local _team = cf.team(team)
-	local _user = cf.player(user.name)
+function ctf.add_user(team, user)
+	local _team = ctf.team(team)
+	local _user = ctf.player(user.name)
 	if _team and user and user.name then
-		if _user and _user.team and cf.team(_user.team) then
-			cf.teams[_user.team].players[user.name] = nil
+		if _user and _user.team and ctf.team(_user.team) then
+			ctf.teams[_user.team].players[user.name] = nil
 		end
 
 		user.team = team
 		user.auth = false
 		_team.players[user.name]=user
-		cf.players[user.name] = user
-		cf.save()
+		ctf.players[user.name] = user
+		ctf.save()
 
 		return true
 	else
@@ -151,31 +151,31 @@ function cf.add_user(team, user)
 end
 
 -- Cleans up the player lists
-function cf.clean_player_lists()
-	for _, str in pairs(cf.players) do
-		if str and str.team and cf.teams[str.team] then
+function ctf.clean_player_lists()
+	for _, str in pairs(ctf.players) do
+		if str and str.team and ctf.teams[str.team] then
 			print("Adding player "..str.name.." to team "..str.team)
-			cf.teams[str.team].players[str.name] = str
+			ctf.teams[str.team].players[str.name] = str
 		else
 			print("Skipping player "..str.name)
 		end
 	end
 end
 
--- Get info for cf.claimed
-function cf.collect_claimed()
-	cf.claimed = {}
-	for _, team in pairs(cf.teams) do
+-- Get info for ctf.claimed
+function ctf.collect_claimed()
+	ctf.claimed = {}
+	for _, team in pairs(ctf.teams) do
 		for i = 1, #team.flags do
 			if team.flags[i].claimed then
-				table.insert(cf.claimed, team.flags[i])
+				table.insert(ctf.claimed, team.flags[i])
 			end
 		end
 	end
 end
 
 -- Sees if the player can change stuff in a team
-function cf.can_mod(player,team)
+function ctf.can_mod(player,team)
 	local privs = minetest.get_player_privs(player)
 	
 	if privs then
@@ -184,8 +184,8 @@ function cf.can_mod(player,team)
 		end
 	end
 
-	if player and cf.teams[team] and cf.teams[team].players and cf.teams[team].players[player] then
-		if cf.teams[team].players[player].auth == true then
+	if player and ctf.teams[team] and ctf.teams[team].players and ctf.teams[team].players[player] then
+		if ctf.teams[team].players[player].auth == true then
 			return true
 		end
 	end
@@ -193,17 +193,17 @@ function cf.can_mod(player,team)
 end
 
 -- post a message to a team board
-function cf.post(team,msg)
-	if not cf.team(team) then
+function ctf.post(team,msg)
+	if not ctf.team(team) then
 		return false
 	end
 
-	if not cf.team(team).log then
-		cf.team(team).log = {}
+	if not ctf.team(team).log then
+		ctf.team(team).log = {}
 	end
 
-	table.insert(cf.team(team).log,1,msg)
-	cf.save()
+	table.insert(ctf.team(team).log,1,msg)
+	ctf.save()
 
 	return true
 end

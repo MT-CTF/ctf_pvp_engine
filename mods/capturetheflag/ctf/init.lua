@@ -2,7 +2,7 @@
 --	by Andrew "rubenwardy" Ward
 -----------------------------------------
 
-cf = {}
+ctf = {}
 
 -- Helpers
 v3={}
@@ -60,7 +60,7 @@ end
 
 -- Load the core
 dofile(minetest.get_modpath("ctf").."/core.lua")
-cf.init()
+ctf.init()
 
 -- Modules
 dofile(minetest.get_modpath("ctf").."/diplomacy.lua")
@@ -70,5 +70,5 @@ dofile(minetest.get_modpath("ctf").."/cli.lua")
 dofile(minetest.get_modpath("ctf").."/flag.lua")
 
 -- Init
-cf.clean_player_lists()
-cf.collect_claimed()
+ctf.clean_player_lists()
+ctf.collect_claimed()
