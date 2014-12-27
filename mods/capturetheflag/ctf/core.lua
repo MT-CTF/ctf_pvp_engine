@@ -24,14 +24,15 @@ function ctf.init()
 	ctf._set("players_can_change_team",true)
 	
 	-- Settings: Teams
-	--ctf._set("allocate_mode",0) -- (COMING SOON):how are players allocated to teams?
-	ctf._set("default_diplo_state","war") -- what is the default diplomatic state? (war/peace/alliance)
+	ctf._set("allocate_mode", 2) -- how are players allocated to teams? 0: none, 1: random, 2: one of first two largest groups, 3 smallest group
+	ctf._set("maximum_in_team", -1) -- Maximum number in team, obeyed by allocation and /join. Admins don't obey this
+	ctf._set("default_diplo_state", "war") -- what is the default diplomatic state? (war/peace/alliance)
 	--ctf._setb("delete_teams",false) -- (COMING SOON):should teams be deleted when they are defeated?
 
 	-- Settings: Misc
 	--ctf._set("on_game_end",0) -- (COMING SOON):what happens when the game ends?
-	ctf._set("flag_protect_distance",25) -- how far do flags protect?
-	ctf._set("team_gui_initial","news") -- [news/flags/diplo/admin] - the starting tab
+	ctf._set("flag_protect_distance", 25) -- how far do flags protect?
+	ctf._set("team_gui_initial", "news") -- [news/flags/diplo/admin] - the starting tab
 
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "r")
 	if file then
@@ -51,8 +52,9 @@ function ctf._set(setting,default)
 end
 
 function ctf.setting(name)
-	if minetest.setting_get("ctf_"..name) then
-		return minetest.setting_get("ctf_"..name)
+	local set = minetest.setting_get("ctf_"..name)
+	if set ~= nil then
+		return set
 	elseif ctf._defsettings[name] ~= nil then
 		return ctf._defsettings[name]
 	else
@@ -98,6 +100,15 @@ function ctf.team(name) -- get or add a team
 	else
 		return ctf.teams[name]
 	end
+end
+
+-- Count number of players in a team
+function ctf.count_players_in_team(team)
+	local count = 0
+	for name, player in pairs(ctf.team(team).players) do
+		count = count + 1
+	end
+	return count
 end
 
 -- get a player
@@ -207,3 +218,72 @@ function ctf.post(team,msg)
 
 	return true
 end
+
+minetest.register_on_newplayer(function(player)
+	local name = player:get_player_name()
+	local max_players = ctf.setting("maximum_in_team")
+	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
+	
+	if alloc_mode == 1 then
+		local index = {}
+		
+		for key, team in pairs(ctf.teams) do
+			if max_players == -1 or ctf.count_players_in_team(key) < max_players then
+				table.insert(index, key)
+			end
+		end
+		
+		if #index == 0 then
+			minetest.log("error", "[CaptureTheFlag] No teams to join!")
+		else
+			local team = index[math.random(1, #index)]
+			
+			print(name.." was allocated to "..team)
+			
+			ctf.join(name, team)
+		end
+	elseif alloc_mode == 2 then
+		local one = nil
+		local one_count = -1
+		local two = nil
+		local two_count = -1
+		for key, team in pairs(ctf.teams) do
+			local count = ctf.count_players_in_team(key)
+			if (max_players == -1 or count < max_players) then
+				if count > one_count then
+					two = one
+					two_count = one_count
+					one = key
+					one_count = count
+				end
+				
+				if count > two_count then
+					two = key
+					two_count = count
+				end				
+			end
+		end
+		
+		if not one and not two then
+			minetest.log("error", "[CaptureTheFlag] No teams to join!")
+		elseif one and two then
+			if math.random() > 0.5 then
+				print(name.." was allocated to "..one)			
+				ctf.join(name, one)
+			else
+				print(name.." was allocated to "..two)
+				ctf.join(name, two)
+			end
+		else
+			if one then
+				print(name.." was allocated to "..one)			
+				ctf.join(name, one)
+			else			
+				print(name.." was allocated to "..two)
+				ctf.join(name, two)
+			end
+		end
+	else
+		print("Unknown allocation mode: "..ctf.setting("allocate_mode"))
+	end
+end)

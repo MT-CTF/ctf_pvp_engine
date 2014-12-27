@@ -13,7 +13,7 @@ minetest.register_node("traps:cage",{
 	inventory_image = minetest.inventorycube("traps_grass.png",
 			"default_grass_side.png", "default_grass_side.png"),
 	dug_item = '', -- Get nothing
-	groups={immortal},
+	groups={immortal = 1},
 	description = "Cage Trap",
 })
 
@@ -22,7 +22,7 @@ minetest.register_node("traps:uncage",{
 	inventory_image = minetest.inventorycube("traps_uncage.png",
 			"traps_uncage.png", "traps_uncage.png"),
 	dug_item = '', -- Get nothing
-	groups={immortal},
+	groups={immortal = 1},
 	description = "Cage Trap Release",
 })
 
@@ -33,7 +33,7 @@ minetest.register_node("traps:cage_glass", {
 	inventory_image = minetest.inventorycube("default_glass.png"),
 	paramtype = "light",
 	sunlight_propagates = true,
-	groups = {immortl},
+	groups = {immortal = 1},
 	sounds = default.node_sound_glass_defaults(),
 })
 
@@ -48,14 +48,12 @@ minetest.register_abm(
 		for k, obj in pairs(objs) do
 			print("HIT!")
 			--local objpos=obj:getpos()
-
-			local tmp
-
+			
 			minetest.env:add_node(pos,{name=block_to_place})
 
 			--Left
 			print("Left")
-			tmp={x=(pos.x+1),y=(pos.y+1),z=(pos.z)}
+			local tmp = {x=(pos.x+1),y=(pos.y+1),z=(pos.z)}
 			minetest.env:add_node(tmp,{name=block_to_place})
 
 			--Right

@@ -55,15 +55,12 @@ minetest.register_chatcommand("team", {
 			minetest.chat_send_player(name, "Teams:",false)
 			for k,v in pairs(ctf.teams) do
 				if v and v.players then
-					local numItems = 0
-					for k,v in pairs(v.players) do
-						numItems = numItems + 1
+					local numPlayers = ctf.count_players_in_team(k)
+					local numFlags = 0
+					for k, v in pairs(v.flags) do
+						numFlags = numFlags + 1
 					end
-					local numItems2 = 0
-					for k,v in pairs(v.flags) do
-						numItems2 = numItems2 + 1
-					end
-					minetest.chat_send_player(name, ">> "..k.." ("..numItems2.." flags, "..numItems.." players)",false)
+					minetest.chat_send_player(name, ">> "..k.." ("..numFlags.." flags, "..numPlayers.." players)")
 				end
 			end 
 		elseif ctf.team(param) then
