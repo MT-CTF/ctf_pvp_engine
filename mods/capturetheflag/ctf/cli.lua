@@ -170,9 +170,9 @@ minetest.register_chatcommand("ctf", {
 	description = "Do admin cleaning stuff",
 	privs = {team=true},
 	func = function(name, param)
-		cf.clean_flags()
 		cf.clean_player_lists()
 		cf.collect_claimed()
+		minetest.chat_send_player(name, "CTF cleaned!")
 	end,
 })
 
@@ -182,7 +182,8 @@ minetest.register_chatcommand("reload_ctf", {
 	func = function(name, param)
 		cf.save()
 		cf.init()
-	end,
+		minetest.chat_send_player(name, "CTF core reloaded!")
+	end
 })
 
 minetest.register_chatcommand("team_owner", {

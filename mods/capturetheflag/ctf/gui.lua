@@ -76,7 +76,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 				"label[0.5,1.5;News such as attacks will appear here]"
 		end
 
-		minetest.show_formspec(name, "capturetheflag:board",
+		minetest.show_formspec(name, "ctf:board",
 			"size[10,7]"..
 			cf.gui.tabs(name,team)..
 			result
@@ -132,7 +132,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 			x = x + 2
 		end
 	
-		minetest.show_formspec(name, "capturetheflag:flags",
+		minetest.show_formspec(name, "ctf:flags",
 			"size[10,7]"..
 			cf.gui.tabs(name,team)..
 			result
@@ -190,7 +190,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 			end
 		end
 	
-		minetest.show_formspec(name, "capturetheflag:dip",
+		minetest.show_formspec(name, "ctf:dip",
 			"size[10,7]"..
 			cf.gui.tabs(name,team)..
 			result
@@ -217,7 +217,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 			result = "label[0.5,1;You do not own this team!"
 		end
 	
-		minetest.show_formspec(name, "capturetheflag:team_settings",
+		minetest.show_formspec(name, "ctf:team_settings",
 			"size[10,7]"..
 			cf.gui.tabs(name,team)..
 			result
@@ -225,7 +225,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 	end
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local name = player:get_player_name()
-		if formname=="capturetheflag:board" or formname=="capturetheflag:flags" or formname=="capturetheflag:dip" or formname=="capturetheflag:team_settings" then
+		if formname=="ctf:board" or formname=="ctf:flags" or formname=="ctf:dip" or formname=="ctf:team_settings" then
 			if fields.flags then
 				if cf and cf.players and cf.players[name] and cf.players[name].team then
 					cf.gui.team_flags(name,cf.players[name].team)
@@ -258,12 +258,12 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 				end
 				return true
 			end
-			if fields.save and formname=="capturetheflag:team_settings" then
+			if fields.save and formname=="ctf:team_settings" then
 				if cf and cf.players and cf.players[name] and cf.players[name].team then
 					cf.gui.team_settings(name,cf.players[name].team)
 				end
 				if cf and cf.team(cf.players[name].team) and cf.team(cf.players[name].team).data then
-					if minetest.registered_items["capturetheflag:flag_top_"..fields.color] then
+					if minetest.registered_items["ctf:flag_top_"..fields.color] then
 						print("Setting color...")
 						cf.team(cf.players[name].team).data.color = fields.color
 						cf.save()
@@ -278,7 +278,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local name = player:get_player_name()
-		if formname=="capturetheflag:board" then
+		if formname=="ctf:board" then
 			for key, field in pairs(fields) do
 				local ok, id = string.match(key, "btn_([yn])([0123456789]+)")
 				if ok and id then
@@ -302,7 +302,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 	
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local name = player:get_player_name()
-		if formname=="capturetheflag:flags" then
+		if formname=="ctf:flags" then
 			for key, field in pairs(fields) do
 				local x,y,z = string.match(key, "goto_(%d+)_(%d+)_(%d+)")
 				if x and y and x then
@@ -315,7 +315,7 @@ if cf.setting("team_gui") and cf.setting("gui") then -- check if team guis are e
 
 	minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local name = player:get_player_name()
-		if formname=="capturetheflag:dip" then
+		if formname=="ctf:dip" then
 			for key, field in pairs(fields) do
 				local newteam = string.match(key, "team_(.+)")
 				if newteam then
@@ -423,7 +423,7 @@ function cf.gui.flag_board(name,pos)
 
 	cf.gui.flag_data[name] = {pos=pos}
 
-	minetest.show_formspec(name, "capturetheflag:flag_board",
+	minetest.show_formspec(name, "ctf:flag_board",
 		"size[6,3]"..
 		"field[1,1;4,1;flag_name;Flag Name;"..flag_name.."]"..
 		"button_exit[1,2;2,1;save;Save]"..
@@ -433,7 +433,7 @@ end
 minetest.register_on_player_receive_fields(function(player, formname, fields)
 	local name = player:get_player_name()
 	
-	if not formname=="capturetheflag:flag_board" then
+	if not formname=="ctf:flag_board" then
 		return false
 	end
 
