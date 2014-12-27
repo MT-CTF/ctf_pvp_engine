@@ -24,7 +24,7 @@ function ctf.init()
 	ctf._set("players_can_change_team",true)
 	
 	-- Settings: Teams
-	ctf._set("allocate_mode", 2) -- how are players allocated to teams? 0: none, 1: random, 2: one of first two largest groups, 3 smallest group
+	ctf._set("allocate_mode", 0) -- how are players allocated to teams? 0: none, 1: random, 2: one of first two largest groups, 3 smallest group
 	ctf._set("maximum_in_team", -1) -- Maximum number in team, obeyed by allocation and /join. Admins don't obey this
 	ctf._set("default_diplo_state", "war") -- what is the default diplomatic state? (war/peace/alliance)
 	--ctf._setb("delete_teams",false) -- (COMING SOON):should teams be deleted when they are defeated?
@@ -282,6 +282,23 @@ minetest.register_on_newplayer(function(player)
 				print(name.." was allocated to "..two)
 				ctf.join(name, two)
 			end
+		end
+	elseif alloc_mode == 3 then
+		local smallest = nil
+		local smallest_count = 1000
+		for key, team in pairs(ctf.teams) do
+			local count = ctf.count_players_in_team(key)
+			if not smallest or count < smallest_count then
+				smallest = key
+				smallest_count = count
+			end
+		end
+		
+		if not smallest then
+			minetest.log("error", "[CaptureTheFlag] No teams to join!")
+		else
+			print(name.." was allocated to "..smallest)
+			ctf.join(name, smallest)
 		end
 	else
 		print("Unknown allocation mode: "..ctf.setting("allocate_mode"))
