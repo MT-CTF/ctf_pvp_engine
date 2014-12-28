@@ -30,8 +30,8 @@ function ctf.area.get_flag(pos)
 				team.flags[i].z == pos.z
 			) then
 				if result then
-					minetest.chat_send_all("[CTF WARNING] Multiple teams have same flag. Please report this to the server operator / admin")
-					print("CTF WARNING DATA")
+					minetest.chat_send_all("[CTF ERROR] Multiple teams have same flag. Please report this to the server operator / admin")
+					print("CTF ERROR DATA")
 					print("Multiple teams have same flag.")
 					print("This is a sign of ctf.txt corruption.")
 					print("----------------")
@@ -48,7 +48,7 @@ function ctf.area.get_flag(pos)
 end
 
 -- delete a flag from a team
-function ctf.area.delete_flag(team,pos)
+function ctf.area.delete_flag(team, pos)
 	if not team or team == "" then
 		return
 	end
@@ -73,11 +73,17 @@ function ctf.area.nearest_flag(pos)
 		return nil
 	end
 
-	print("ctf.setting('flag_protect_distance') is "..dump(ctf.setting("flag_protect_distance")))
-
 	local nodes = minetest.env:find_nodes_in_area(
-		{x=pos.x-ctf.setting("flag_protect_distance"),y=pos.y-ctf.setting("flag_protect_distance"),z=pos.z-ctf.setting("flag_protect_distance")},
-		{x=pos.x+ctf.setting("flag_protect_distance"),y=pos.y+ctf.setting("flag_protect_distance"),z=pos.z+ctf.setting("flag_protect_distance")},
+		{
+			x = pos.x - ctf.setting("flag_protect_distance"),
+			y = pos.y - ctf.setting("flag_protect_distance"),
+			z = pos.z - ctf.setting("flag_protect_distance")
+		},
+		{
+			x = pos.x + ctf.setting("flag_protect_distance"),
+			y = pos.y + ctf.setting("flag_protect_distance"),
+			z = pos.z + ctf.setting("flag_protect_distance")
+		},
 		{"group:is_flag"}
 	)
 
@@ -85,10 +91,11 @@ function ctf.area.nearest_flag(pos)
 		local closest = nil
 		local _dis = 1000
 
-		for a=1, #nodes do
-			if v3.distance(pos, nodes[a]) < _dis then
+		for a = 1, #nodes do
+			local this_dis = vector.distance(pos, nodes[a])
+			if this_dis < _dis then
 				closest = nodes[a]
-				_dis = v3.distance(pos, nodes[a])
+				_dis = this_dis
 			end
 		end
 
@@ -105,7 +112,7 @@ function ctf.area.get_area(pos)
 		return false
 	end
 	local flag = ctf.area.get_flag(closest)
-	
+
 	if flag then
 		return flag.team
 	end
@@ -119,11 +126,11 @@ function ctf.area.get_spawn(team)
 	if team and ctf.teams and ctf.team(team) then
 		if ctf.team(team).spawn and minetest.env:get_node(ctf.team(team).spawn).name == "ctf:flag" then
 			local flag = ctf.area.get_flag(ctf.team(team).spawn)
-			
+
 			if not flag then
 				return false
 			end
-			
+
 			local _team = flag.team
 
 			-- Check to see if spawn is already defined
@@ -145,7 +152,7 @@ function ctf.area.asset_flags(team)
 	if not team or not ctf.team(team) then
 		return false
 	end
-	
+
 	print("Checking the flags of "..team)
 
 	local tmp = ctf.team(team).flags
