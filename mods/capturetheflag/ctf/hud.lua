@@ -1,4 +1,4 @@
-function hudkit()
+local function hudkit()
 	return {
 		players = {},
 
