@@ -58,11 +58,8 @@ function v3.get_direction(pos1,pos2)
 	return {x=x_raw,y=y_raw,z=z_raw}
 end
 
--- Load the core
-dofile(minetest.get_modpath("ctf").."/core.lua")
-ctf.init()
-
 -- Modules
+dofile(minetest.get_modpath("ctf").."/core.lua")
 dofile(minetest.get_modpath("ctf").."/diplomacy.lua")
 dofile(minetest.get_modpath("ctf").."/area.lua")
 dofile(minetest.get_modpath("ctf").."/gui.lua")
@@ -70,5 +67,6 @@ dofile(minetest.get_modpath("ctf").."/cli.lua")
 dofile(minetest.get_modpath("ctf").."/flag.lua")
 
 -- Init
+ctf.init()
 ctf.clean_player_lists()
 ctf.collect_claimed()

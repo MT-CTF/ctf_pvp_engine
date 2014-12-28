@@ -1,3 +1,12 @@
+ctf.registered_on_load = {}
+function ctf.register_on_load(func)
+	table.insert(ctf.registered_on_load, func)
+end
+ctf.registered_on_save = {}
+function ctf.register_on_save(func)
+	table.insert(ctf.registered_on_save, func)
+end
+
 function ctf.init()
 	print("[CaptureTheFlag] Initialising...")
 
@@ -6,7 +15,6 @@ function ctf.init()
 	ctf.teams = {}
 	ctf.players = {}
 	ctf.claimed = {}
-	ctf.diplo = {diplo = {}}
 
 	-- Settings: Feature enabling
 	ctf._set("node_ownership",true)
@@ -22,7 +30,7 @@ function ctf.init()
 	ctf._set("team_channel",true) -- do teams have their own chat channel
 	ctf._set("global_channel",true) -- Can players chat with other teams on /all. If team_channel is false, this does nothing.
 	ctf._set("players_can_change_team",true)
-	
+
 	-- Settings: Teams
 	ctf._set("allocate_mode", 0) -- how are players allocated to teams? 0: none, 1: random, 2: one of first two largest groups, 3 smallest group
 	ctf._set("maximum_in_team", -1) -- Maximum number in team, obeyed by allocation and /join. Admins don't obey this
@@ -34,19 +42,10 @@ function ctf.init()
 	ctf._set("flag_protect_distance", 25) -- how far do flags protect?
 	ctf._set("team_gui_initial", "news") -- [news/flags/diplo/admin] - the starting tab
 
-	local file = io.open(minetest.get_worldpath().."/ctf.txt", "r")
-	if file then
-		local table = minetest.deserialize(file:read("*all"))
-		if type(table) == "table" then
-			ctf.teams = table.teams
-			ctf.players = table.players
-			ctf.diplo.diplo = table.diplo
-			return
-		end
-	end
+	ctf.load()
 end
 
--- Set settings
+-- Set default setting value
 function ctf._set(setting,default)
 	ctf._defsettings[setting] = default
 end
@@ -63,16 +62,42 @@ function ctf.setting(name)
 	end
 end
 
--- Save game
+function ctf.load()
+	local file = io.open(minetest.get_worldpath().."/ctf.txt", "r")
+	if file then
+		local table = minetest.deserialize(file:read("*all"))
+		if type(table) == "table" then
+			ctf.teams = table.teams
+			ctf.players = table.players
+
+			for i = 1, #ctf.registered_on_load do
+				ctf.registered_on_load[i](table)
+			end
+			return
+		end
+	end
+end
+
 function ctf.save()
 	print("[CaptureTheFlag] Saving data...")
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "w")
 	if file then
-		file:write(minetest.serialize({
+		local out = {
 			teams = ctf.teams,
-			players = ctf.players,
-			diplo = ctf.diplo.diplo
-		}))
+			players = ctf.players
+		}
+
+		for i = 1, #ctf.registered_on_save do
+			local res = ctf.registered_on_save[i]()
+
+			if res then
+				for key, value in pairs(res) do
+					out[key] = value
+				end
+			end
+		end
+
+		file:write(minetest.serialize(out))
 		file:close()
 	end
 end
@@ -93,9 +118,9 @@ function ctf.team(name) -- get or add a team
 			players={},
 			flags = {}
 		}
-		
+
 		ctf.save()
-		
+
 		return ctf.teams[name.name]
 	else
 		return ctf.teams[name]
@@ -112,7 +137,7 @@ function ctf.count_players_in_team(team)
 end
 
 -- get a player
-function ctf.player(name) 
+function ctf.player(name)
 	return ctf.players[name]
 end
 
@@ -123,11 +148,11 @@ function ctf.join(name, team, force)
 	end
 
 	local player = ctf.player(name)
-		
+
 	if not player then
 		player = {name = name}
 	end
-	
+
 	if not force and not ctf.setting("players_can_change_team") and (not player.team or player.team == "") then
 		minetest.chat_send_player(name, "You are not allowed to switch teams, traitor!")
 		return false
@@ -188,7 +213,7 @@ end
 -- Sees if the player can change stuff in a team
 function ctf.can_mod(player,team)
 	local privs = minetest.get_player_privs(player)
-	
+
 	if privs then
 		if privs.team == true then
 		 	return true
@@ -223,25 +248,25 @@ minetest.register_on_newplayer(function(player)
 	local name = player:get_player_name()
 	local max_players = ctf.setting("maximum_in_team")
 	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
-	
+
 	if alloc_mode == 0 then
 		return
 	elseif alloc_mode == 1 then
 		local index = {}
-		
+
 		for key, team in pairs(ctf.teams) do
 			if max_players == -1 or ctf.count_players_in_team(key) < max_players then
 				table.insert(index, key)
 			end
 		end
-		
+
 		if #index == 0 then
 			minetest.log("error", "[CaptureTheFlag] No teams to join!")
 		else
 			local team = index[math.random(1, #index)]
-			
+
 			print(name.." was allocated to "..team)
-			
+
 			ctf.join(name, team)
 		end
 	elseif alloc_mode == 2 then
@@ -258,19 +283,19 @@ minetest.register_on_newplayer(function(player)
 					one = key
 					one_count = count
 				end
-				
+
 				if count > two_count then
 					two = key
 					two_count = count
-				end				
+				end
 			end
 		end
-		
+
 		if not one and not two then
 			minetest.log("error", "[CaptureTheFlag] No teams to join!")
 		elseif one and two then
 			if math.random() > 0.5 then
-				print(name.." was allocated to "..one)			
+				print(name.." was allocated to "..one)
 				ctf.join(name, one)
 			else
 				print(name.." was allocated to "..two)
@@ -278,9 +303,9 @@ minetest.register_on_newplayer(function(player)
 			end
 		else
 			if one then
-				print(name.." was allocated to "..one)			
+				print(name.." was allocated to "..one)
 				ctf.join(name, one)
-			else			
+			else
 				print(name.." was allocated to "..two)
 				ctf.join(name, two)
 			end
@@ -295,7 +320,7 @@ minetest.register_on_newplayer(function(player)
 				smallest_count = count
 			end
 		end
-		
+
 		if not smallest then
 			minetest.log("error", "[CaptureTheFlag] No teams to join!")
 		else

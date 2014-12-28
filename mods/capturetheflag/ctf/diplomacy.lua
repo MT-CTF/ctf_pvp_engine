@@ -1,5 +1,15 @@
 -- diplo states: war, peace, alliance
-ctf.diplo = {}
+ctf.diplo = {
+	diplo = {}
+}
+
+ctf.register_on_load(function(table)
+	ctf.diplo.diplo = table.diplo
+end)
+
+ctf.register_on_save(function()
+	return { diplo = ctf.diplo.diplo }
+end)
 
 function ctf.diplo.get(one,two)
 	if not ctf.diplo.diplo then
@@ -28,40 +38,40 @@ function ctf.diplo.set(one,two,state)
 			end
 		end
 	end
-	
+
 	table.insert(ctf.diplo.diplo,{one=one,two=two,state=state})
 	return
 end
 
 function ctf.diplo.check_requests(one,two)
 	local team = ctf.team(two)
-	
+
 	if not team.log then
 		return nil
 	end
-	
+
 	for i=1,#team.log do
 		if team.log[i].team == one and team.log[i].type=="request" and team.log[i].mode=="diplo" then
 			return team.log[i].msg
 		end
 	end
-	
+
 	return nil
 end
 
 function ctf.diplo.cancel_requests(one,two)
 	local team = ctf.team(two)
-	
+
 	if not team.log then
 		return
 	end
-	
+
 	for i=1,#team.log do
 		if team.log[i].team == one and team.log[i].type=="request" and team.log[i].mode=="diplo" then
 			table.remove(team.log,i)
 			return
 		end
 	end
-	
+
 	return
 end
