@@ -16,31 +16,32 @@ function ctf.init()
 	ctf.players = {}
 	ctf.claimed = {}
 
+	-- See minetest.conf.example in the root of this subgame
+
 	-- Settings: Feature enabling
-	ctf._set("node_ownership",true)
-	ctf._set("multiple_flags",true)
-	ctf._set("flag_capture_take",false) -- whether flags need to be taken to home flag when captured
-	ctf._set("gui",true) -- whether GUIs are used
-	ctf._set("team_gui",true) -- GUI on /team is used
-	ctf._set("flag_teleport_gui",true) -- flag tab in /team
-	ctf._set("spawn_in_flag_teleport_gui",false) -- show spawn in the flag teleport team gui
-	ctf._set("news_gui",true) -- news tab in /team
-	ctf._set("diplomacy",true)
-	ctf._set("flag_names",true) -- can flags be named
-	ctf._set("team_channel",true) -- do teams have their own chat channel
-	ctf._set("global_channel",true) -- Can players chat with other teams on /all. If team_channel is false, this does nothing.
-	ctf._set("players_can_change_team",true)
+	ctf._set("node_ownership",             true)
+	ctf._set("multiple_flags",             true)
+	ctf._set("flag_capture_take",          false)
+	ctf._set("gui",                        true)
+	ctf._set("hud",                        true)
+	ctf._set("team_gui",                   true)
+	ctf._set("flag_teleport_gui",          true)
+	ctf._set("spawn_in_flag_teleport_gui", false)
+	ctf._set("news_gui",                   true)
+	ctf._set("diplomacy",                  true)
+	ctf._set("flag_names",                 true)
+	ctf._set("team_channel",               true)
+	ctf._set("global_channel",             true)
+	ctf._set("players_can_change_team",    true)
 
 	-- Settings: Teams
-	ctf._set("allocate_mode", 0) -- how are players allocated to teams? 0: none, 1: random, 2: one of first two largest groups, 3 smallest group
-	ctf._set("maximum_in_team", -1) -- Maximum number in team, obeyed by allocation and /join. Admins don't obey this
-	ctf._set("default_diplo_state", "war") -- what is the default diplomatic state? (war/peace/alliance)
-	--ctf._setb("delete_teams",false) -- (COMING SOON):should teams be deleted when they are defeated?
+	ctf._set("allocate_mode",              0)
+	ctf._set("maximum_in_team",            -1)
+	ctf._set("default_diplo_state",        "war")
 
 	-- Settings: Misc
-	--ctf._set("on_game_end",0) -- (COMING SOON):what happens when the game ends?
-	ctf._set("flag_protect_distance", 25) -- how far do flags protect?
-	ctf._set("team_gui_initial", "news") -- [news/flags/diplo/admin] - the starting tab
+	ctf._set("flag_protect_distance",      25)
+	ctf._set("team_gui_initial",           "news")
 
 	ctf.load()
 end
@@ -60,6 +61,11 @@ function ctf.setting(name)
 		print("[CaptureTheFlag] Setting "..name.." not found!")
 		return nil
 	end
+end
+
+function ctf.setting_bool(name)
+	local set = ctf.setting(name)
+	return minetest.is_yes(set)
 end
 
 function ctf.load()
@@ -160,6 +166,11 @@ function ctf.join(name, team, force)
 
 	if ctf.add_user(team, player) == true then
 		minetest.chat_send_all(name.." has joined team "..team)
+
+		if ctf.setting_bool("hud") then
+			ctf.hud.update(minetest.get_player_by_name(name))
+		end
+
 		return true
 	end
 	return false

@@ -4,13 +4,17 @@ minetest.register_privilege("team",{
 })
 
 local function team_console_help(name)
-	minetest.chat_send_player(name,"Try:",false)
-	minetest.chat_send_player(name,"/team - show team panel",false)
-	minetest.chat_send_player(name,"/team all - list all teams",false)
-	minetest.chat_send_player(name,"/team name - show details about team 'name'",false)
-	minetest.chat_send_player(name,"/team player name - get which team 'player' is in",false)
-	minetest.chat_send_player(name,"/team add name - add a team called name (admin only)",false)
-	minetest.chat_send_player(name,"/team join player team - add 'player' to team 'team' (admin only)",false)
+	minetest.chat_send_player(name,"Try:", false)
+	minetest.chat_send_player(name,"/team - show team panel", false)
+	minetest.chat_send_player(name,"/team all - list all teams", false)
+	minetest.chat_send_player(name,"/team name - show details about team 'name'", false)
+	minetest.chat_send_player(name,"/team player name - get which team 'player' is in", false)
+
+	local privs = minetest.get_player_privs(name)
+	if privs and privs.team == true then
+		minetest.chat_send_player(name,"/team add name - add a team called name (admin only)", false)
+		minetest.chat_send_player(name,"/team join player team - add 'player' to team 'team' (admin only)", false)
+	end
 end
 
 minetest.register_chatcommand("team", {
@@ -21,7 +25,7 @@ minetest.register_chatcommand("team", {
 		local tplayer,tteam = string.match(param,"^join ([%a%d_]+) ([%a%d_]+)")
 		if test then
 			print("is a player request "..test)
-				
+
 			if ctf.player(test) then
 				if ctf.player(test).team then
 					if ctf.player(test).auth then
@@ -62,7 +66,7 @@ minetest.register_chatcommand("team", {
 					end
 					minetest.chat_send_player(name, ">> "..k.." ("..numFlags.." flags, "..numPlayers.." players)")
 				end
-			end 
+			end
 		elseif ctf.team(param) then
 			minetest.chat_send_player(name,"Team "..param..":",false)
 			local count = 0
@@ -79,11 +83,11 @@ minetest.register_chatcommand("team", {
 			local privs = minetest.get_player_privs(name)
 			if privs and privs.team == true then
 				local player = ctf.player(tplayer)
-				
+
 				if not player then
 					player = {name=tplayer}
 				end
-			
+
 				if ctf.add_user(tteam,tplayer) == true then
 					minetest.chat_send_all(tplayer.." has joined team "..tteam)
 				end
@@ -97,13 +101,14 @@ minetest.register_chatcommand("team", {
 				minetest.chat_send_player(name,"'"..param.."' is an invalid parameter to /team",false)
 				team_console_help(name)
 			end
-			if ( 
+			if (
 				ctf and
 				ctf.players and
 				ctf.players[name] and
 				ctf.players[name].team and
 				ctf.setting("gui")
 			) then
+				minetest.chat_send_player(name, "Showing the Team GUI")
 				if ctf.setting("team_gui_initial") == "news" and ctf.setting("news_gui") then
 					ctf.gui.team_board(name,ctf.players[name].team)
 				elseif ctf.setting("team_gui_initial") == "flags" and ctf.setting("flag_teleport_gui") then
@@ -113,7 +118,7 @@ minetest.register_chatcommand("team", {
 				elseif ctf.setting("team_gui_initial") == "admin" then
 					ctf.gui.team_settings(name,ctf.players[name].team)
 				elseif ctf.setting("news_gui") then
-					ctf.gui.team_board(name,ctf.players[name].team)			
+					ctf.gui.team_board(name,ctf.players[name].team)
 				end
 			end
 		end
@@ -145,7 +150,7 @@ minetest.register_chatcommand("list_teams", {
 				end
 				minetest.chat_send_player(name, ">> "..k.." ("..numItems2.." flags, "..numItems.." players)",false)
 			end
-		end                                                                         
+		end
 	end,
 })
 
@@ -262,7 +267,7 @@ if chatplus then
 			end
 			return false
 		end
-		
+
 		if not top then
 			return false
 		end

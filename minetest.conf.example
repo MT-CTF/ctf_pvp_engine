@@ -11,6 +11,9 @@
 #  Are GUIs enabled
 #ctf_gui = true
 
+#  Is the HUD enabled
+#ctf_hud = true
+
 #  Team GUI on /team
 #ctf_team_gui = true
 
