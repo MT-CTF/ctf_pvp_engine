@@ -60,7 +60,7 @@ minetest.register_abm({
 			meta:set_string("team",team)
 			meta:set_string("infotext", "Owned by "..team)
 		end
-		
+
 		if not team then
 			return
 		end
@@ -83,12 +83,12 @@ minetest.register_abm({
 
 				-- Create bullet entity
 				local bullet=minetest.env:add_entity({x=pos.x,y=pos.y+0.5,z=pos.z}, "ctf_turret:arrow_entity")
-				
+
 				-- Set velocity
 				bullet:setvelocity({x=calc.x * ARROW_VELOCITY,y=calc.y * ARROW_VELOCITY,z=calc.z * ARROW_VELOCITY})
-				
+
 				-- Play sound
-				music_handle=minetest.sound_play("laser",{pos = pos, gain = 1.0, max_hear_distance = 50,})
+				minetest.sound_play("laser", {pos = pos, gain = 1.0, max_hear_distance = 50,})
 			end
 		end
 	end
@@ -108,7 +108,7 @@ THROWING_ARROW_ENTITY={
 		if self.timer > 2 then
 			self.object:remove()
 		end
-		
+
 		if self.timer > 0.2 then
 			local objs = minetest.env:get_objects_inside_radius({x=pos.x,y=pos.y,z=pos.z}, 1.5)
 			for k, obj in pairs(objs) do
@@ -118,8 +118,8 @@ THROWING_ARROW_ENTITY={
 				end
 			end
 		end
-		
-		local node = minetest.env:get_node(pos)		
+
+		local node = minetest.env:get_node(pos)
 		if node.name ~= "air" and node.name ~= "ctf_turret:turret" then
 			--minetest.env:add_item(self.lastpos, "throwing:arrow")
 			self.object:remove()
