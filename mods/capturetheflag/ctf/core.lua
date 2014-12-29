@@ -53,19 +53,21 @@ end
 
 function ctf.setting(name)
 	local set = minetest.setting_get("ctf_"..name)
+	local dset = ctf._defsettings[name]
 	if set ~= nil then
-		return set
-	elseif ctf._defsettings[name] ~= nil then
+		if type(dset) == "number" then
+			return tonumber(set)
+		elseif type(dset) == "bool" then
+			return minetest.is_yes(set)
+		else
+			return set
+		end
+	elseif dset ~= nil then
 		return ctf._defsettings[name]
 	else
 		print("[CaptureTheFlag] Setting "..name.." not found!")
 		return nil
 	end
-end
-
-function ctf.setting_bool(name)
-	local set = ctf.setting(name)
-	return minetest.is_yes(set)
 end
 
 function ctf.load()
@@ -167,7 +169,7 @@ function ctf.join(name, team, force)
 	if ctf.add_user(team, player) == true then
 		minetest.chat_send_all(name.." has joined team "..team)
 
-		if ctf.setting_bool("hud") then
+		if ctf.setting("hud") then
 			ctf.hud.update(minetest.get_player_by_name(name))
 		end
 

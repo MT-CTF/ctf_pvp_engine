@@ -93,7 +93,7 @@ local count = 0
 function ctf.hud.updateAll()
 	count = 0
 
-	if not ctf.setting_bool("hud") then
+	if not ctf.setting("hud") then
 		return
 	end
 
