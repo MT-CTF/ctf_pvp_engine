@@ -7,8 +7,24 @@ function ctf.register_on_save(func)
 	table.insert(ctf.registered_on_save, func)
 end
 
+function ctf.error(area, msg)
+	minetest.log("error", "CTF::" .. area .. " - " ..msg)
+end
+
+function ctf.log(area, msg)
+	if area and area ~= "" then
+		print("[CaptureTheFlag] (" .. area .. ") " .. msg)
+	else
+		print("[CaptureTheFlag] " .. msg)
+	end
+end
+
+function ctf.warning(area, msg)
+	minetest.log("warning", "[CaptureTheFlag] (" .. area .. ") " .. msg)
+end
+
 function ctf.init()
-	print("[CaptureTheFlag] Initialising...")
+	ctf.log("init", "Initialising!")
 
 	-- Set up structures
 	ctf._defsettings = {}
@@ -19,6 +35,7 @@ function ctf.init()
 	-- See minetest.conf.example in the root of this subgame
 
 	-- Settings: Feature enabling
+	ctf.log("init", "Creating Default Settings")
 	ctf._set("node_ownership",             true)
 	ctf._set("multiple_flags",             true)
 	ctf._set("flag_capture_take",          false)
@@ -44,11 +61,17 @@ function ctf.init()
 	ctf._set("team_gui_initial",           "news")
 
 	ctf.load()
+
+	ctf.log("init", "Done!")
 end
 
 -- Set default setting value
-function ctf._set(setting,default)
+function ctf._set(setting, default)
 	ctf._defsettings[setting] = default
+
+	if minetest.setting_get("ctf_"..setting) then
+		ctf.log("init", "- " .. setting .. ": " .. minetest.setting_get("ctf_"..setting))
+	end
 end
 
 function ctf.setting(name)
@@ -65,12 +88,13 @@ function ctf.setting(name)
 	elseif dset ~= nil then
 		return ctf._defsettings[name]
 	else
-		print("[CaptureTheFlag] Setting "..name.." not found!")
+		ctf.log("setting", name.." not found!")
 		return nil
 	end
 end
 
 function ctf.load()
+	ctf.log("io", "Loading CTF state")
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "r")
 	if file then
 		local table = minetest.deserialize(file:read("*all"))
@@ -83,11 +107,13 @@ function ctf.load()
 			end
 			return
 		end
+	else
+		ctf.log("io", "ctf.txt is not present in the world folder")
 	end
 end
 
 function ctf.save()
-	print("[CaptureTheFlag] Saving data...")
+	ctf.log("io", "Saving CTF state...")
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "w")
 	if file then
 		local out = {
@@ -107,6 +133,9 @@ function ctf.save()
 
 		file:write(minetest.serialize(out))
 		file:close()
+		ctf.log("io", "Saved.")
+	else
+		ctf.error("io", "CTF file failed to save!")
 	end
 end
 
@@ -131,6 +160,9 @@ function ctf.team(name) -- get or add a team
 
 		return ctf.teams[name.name]
 	else
+		if not ctf.teams[name] then
+			ctf.warning("team", "'" .. name.."' does not exist!")
+		end
 		return ctf.teams[name]
 	end
 end
@@ -150,8 +182,11 @@ function ctf.player(name)
 end
 
 -- Player joins team
+-- Called by /join or auto allocate.
+-- /team join uses ctf.add_user()
 function ctf.join(name, team, force)
 	if not name or name == "" or not team or team == "" then
+		ctf.log("team", "Missing parameters to ctf.join")
 		return false
 	end
 
@@ -159,14 +194,23 @@ function ctf.join(name, team, force)
 
 	if not player then
 		player = {name = name}
+		ctf.players[name] = player
 	end
 
 	if not force and not ctf.setting("players_can_change_team") and (not player.team or player.team == "") then
+		minetest.log("action", name .. " attempted to change to " .. team)
 		minetest.chat_send_player(name, "You are not allowed to switch teams, traitor!")
 		return false
 	end
 
+	if not ctf.team(team) then
+		minetest.log("action", name .. " attempted to join " .. team .. ", which doesn't exist")
+		minetest.chat_send_player(name, "No such team.")
+		return false
+	end
+
 	if ctf.add_user(team, player) == true then
+		minetest.log("action", name .. " joined team " .. team)
 		minetest.chat_send_all(name.." has joined team "..team)
 
 		if ctf.setting("hud") then
@@ -189,7 +233,7 @@ function ctf.add_user(team, user)
 
 		user.team = team
 		user.auth = false
-		_team.players[user.name]=user
+		_team.players[user.name] = user
 		ctf.players[user.name] = user
 		ctf.save()
 
@@ -201,18 +245,20 @@ end
 
 -- Cleans up the player lists
 function ctf.clean_player_lists()
+	ctf.log("utils", "Cleaning player lists")
 	for _, str in pairs(ctf.players) do
 		if str and str.team and ctf.teams[str.team] then
-			print("Adding player "..str.name.." to team "..str.team)
+			ctf.log("utils", " - Adding player "..str.name.." to team "..str.team)
 			ctf.teams[str.team].players[str.name] = str
 		else
-			print("Skipping player "..str.name)
+			ctf.log("utils", " - Skipping player "..str.name)
 		end
 	end
 end
 
 -- Get info for ctf.claimed
 function ctf.collect_claimed()
+	ctf.log("utils", "Collecting claimed locations")
 	ctf.claimed = {}
 	for _, team in pairs(ctf.teams) do
 		for i = 1, #team.flags do
@@ -242,7 +288,7 @@ function ctf.can_mod(player,team)
 end
 
 -- post a message to a team board
-function ctf.post(team,msg)
+function ctf.post(team, msg)
 	if not ctf.team(team) then
 		return false
 	end
@@ -251,20 +297,35 @@ function ctf.post(team,msg)
 		ctf.team(team).log = {}
 	end
 
-	table.insert(ctf.team(team).log,1,msg)
+
+	ctf.log("team", "message posted to team board")
+
+	table.insert(ctf.team(team).log, 1, msg)
 	ctf.save()
 
 	return true
 end
 
-minetest.register_on_newplayer(function(player)
-	local name = player:get_player_name()
-	local max_players = ctf.setting("maximum_in_team")
-	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
+-- Automatic Allocation
+function ctf.autoalloc(name, alloc_mode)
+	ctf.log("autoalloc", "Getting autoallocation for " .. name)
 
 	if alloc_mode == 0 then
 		return
-	elseif alloc_mode == 1 then
+	end
+	local max_players = ctf.setting("maximum_in_team")
+
+	local mtot = false -- more than one team
+	for key, team in pairs(ctf.teams) do
+		mtot = true
+		break
+	end
+	if not mtot then
+		ctf.error("autoalloc", "No teams to allocate " .. name .. " to!")
+		return
+	end
+
+	if alloc_mode == 1 then
 		local index = {}
 
 		for key, team in pairs(ctf.teams) do
@@ -274,13 +335,9 @@ minetest.register_on_newplayer(function(player)
 		end
 
 		if #index == 0 then
-			minetest.log("error", "[CaptureTheFlag] No teams to join!")
+			ctf.error("autoalloc", "No teams to join!")
 		else
-			local team = index[math.random(1, #index)]
-
-			print(name.." was allocated to "..team)
-
-			ctf.join(name, team)
+			return index[math.random(1, #index)]
 		end
 	elseif alloc_mode == 2 then
 		local one = nil
@@ -305,22 +362,18 @@ minetest.register_on_newplayer(function(player)
 		end
 
 		if not one and not two then
-			minetest.log("error", "[CaptureTheFlag] No teams to join!")
+			ctf.error("autoalloc", "No teams to join!")
 		elseif one and two then
 			if math.random() > 0.5 then
-				print(name.." was allocated to "..one)
-				ctf.join(name, one)
+				return one
 			else
-				print(name.." was allocated to "..two)
-				ctf.join(name, two)
+				return two
 			end
 		else
 			if one then
-				print(name.." was allocated to "..one)
-				ctf.join(name, one)
+				return one
 			else
-				print(name.." was allocated to "..two)
-				ctf.join(name, two)
+				return two
 			end
 		end
 	elseif alloc_mode == 3 then
@@ -335,12 +388,27 @@ minetest.register_on_newplayer(function(player)
 		end
 
 		if not smallest then
-			minetest.log("error", "[CaptureTheFlag] No teams to join!")
+			ctf.error("autoalloc", "No teams to join!")
 		else
-			print(name.." was allocated to "..smallest)
-			ctf.join(name, smallest)
+			return smallest
 		end
 	else
-		print("Unknown allocation mode: "..ctf.setting("allocate_mode"))
+		ctf.error("autoalloc", "Unknown allocation mode: "..ctf.setting("allocate_mode"))
 	end
+end
+
+minetest.register_on_newplayer(function(player)
+	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
+	if alloc_mode == 0 then
+		return
+	end
+	local name = player:get_player_name()
+	-- TODO: make this work correctly. (ie no need for minetest.after)
+	minetest.after(1, function()
+		local team = ctf.autoalloc(name, alloc_mode)
+		if team then
+			ctf.log("autoalloc", name .. " was allocated to " .. team)
+			ctf.join(name, team)
+		end
+	end)
 end)
