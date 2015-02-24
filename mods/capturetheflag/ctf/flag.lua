@@ -314,7 +314,6 @@ minetest.register_on_respawnplayer(function(player)
 	if player and ctf.player(player:get_player_name()) then
 		local team = ctf.player(player:get_player_name()).team
 		if team and ctf.team(team) and ctf.area.get_spawn(team)==true then
-			print("Player "..player:get_player_name().." moved to team spawn")
 			player:moveto(ctf.team(team).spawn, false)
 			return true
 		end
@@ -337,7 +336,7 @@ minetest.register_abm({
 
 		local flag_team_data = ctf.area.get_flag(pos)
 		if not flag_team_data or not ctf.team(flag_team_data.team)then
-			print("Flag does not exist! "..dump(pos))
+			ctf.log("flag", "Flag does not exist! Deleting nodes. "..dump(pos))
 			minetest.env:set_node(pos,{name="air"})
 			minetest.env:set_node(top,{name="air"})
 			return

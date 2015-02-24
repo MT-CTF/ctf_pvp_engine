@@ -53,7 +53,6 @@ function ctf.area.delete_flag(team, pos)
 		return
 	end
 
-	print(dump(ctf.team(team).flags))
 	for i = 1, #ctf.team(team).flags do
 		if (
 			ctf.team(team).flags[i].x == pos.x and
@@ -69,7 +68,7 @@ end
 -- Gets the nearest flag in a 25 metre radius block
 function ctf.area.nearest_flag(pos)
 	if not pos then
-		print ("No position provided to nearest_flag()")
+		ctf.error("No position provided to nearest_flag()")
 		return nil
 	end
 
@@ -153,13 +152,14 @@ function ctf.area.asset_flags(team)
 		return false
 	end
 
-	print("Checking the flags of "..team)
+	ctf.log("utils", "Checking the flags of "..team)
 
 	local tmp = ctf.team(team).flags
-
+	local get_res = minetest.env:get_node(tmp[i])
 	for i=1,#tmp do
-		if tmp[i] and (not minetest.env:get_node(tmp[i]) or not minetest.env:get_node(tmp[i]).name == "ctf:flag") then
-			print("Replacing flag...")
+		if tmp[i] and (not get_res or not get_res.name == "ctf:flag") then
+			ctf.log("utils", "Replacing flag...")
+			-- TODO: ctf.area.asset_flags
 		end
 	end
 end

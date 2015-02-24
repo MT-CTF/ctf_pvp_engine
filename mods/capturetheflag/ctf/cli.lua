@@ -24,8 +24,6 @@ minetest.register_chatcommand("team", {
 		local create = string.match(param,"^add ([%a%d_]+)")
 		local tplayer,tteam = string.match(param,"^join ([%a%d_]+) ([%a%d_]+)")
 		if test then
-			print("is a player request "..test)
-
 			if ctf.player(test) then
 				if ctf.player(test).team then
 					if ctf.player(test).auth then

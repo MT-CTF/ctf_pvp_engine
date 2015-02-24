@@ -67,13 +67,12 @@ minetest.register_on_leaveplayer(function(player)
 end)
 
 function ctf.hud.update(player)
-	ctf.log("hud", "Updating player HUD")
 	if not player then
-		ctf.log("hud", " - player not emerged")
 		return
 	end
 
-	local player_data = ctf.player(player:get_player_name())
+	local name = player:get_player_name()
+	local player_data = ctf.player(name)
 
 	if not player_data or not player_data.team or not ctf.team(player_data.team) then
 		return
@@ -97,8 +96,6 @@ function ctf.hud.update(player)
 		ctf.hud:change(player, "ctf:hud_team", "text", player_data.team)
 		ctf.hud:change(player, "ctf:hud_team", "number", color)
 	end
-
-	ctf.log("hud", " - Done.")
 end
 
 local count = 0

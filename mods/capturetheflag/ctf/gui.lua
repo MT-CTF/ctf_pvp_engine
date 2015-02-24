@@ -23,6 +23,7 @@ end
 
 -- Team interface
 function ctf.gui.team_board(name,team)
+	ctf.log("gui", name .. " views team_board")
 	if not ctf.setting("team_gui") or not ctf.setting("gui") then
 		return
 	end
@@ -61,7 +62,6 @@ function ctf.gui.team_board(name,team)
 			local height = (amount*0.5)+0.5
 
 			if height > 5 then
-				print("break!")
 				break
 			end
 
@@ -88,6 +88,7 @@ end
 
 -- Team interface
 function ctf.gui.team_flags(name,team)
+	ctf.log("gui", name .. " views team_flags")
 	if not ctf.setting("team_gui") or not ctf.setting("gui") then
 		return
 	end
@@ -148,6 +149,7 @@ end
 
 -- Team interface
 function ctf.gui.team_dip(name,team)
+	ctf.log("gui", name .. " views team_dip")
 	if not ctf.setting("team_gui") or not ctf.setting("gui") then
 		return
 	end
@@ -210,6 +212,7 @@ end
 
 -- Team interface
 function ctf.gui.team_settings(name,team)
+	ctf.log("gui", name .. " views team_settings")
 	if not ctf.setting("team_gui") or not ctf.setting("gui") then
 		return
 	end
@@ -279,7 +282,6 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			end
 			if ctf and ctf.team(ctf.players[name].team) and ctf.team(ctf.players[name].team).data then
 				if minetest.registered_items["ctf:flag_top_"..fields.color] then
-					print("Setting color...")
 					ctf.team(ctf.players[name].team).data.color = fields.color
 					ctf.save()
 				else
@@ -399,6 +401,7 @@ end)
 
 -- Flag interface
 function ctf.gui.flag_board(name,pos)
+	ctf.log("gui", name .. " views team_board")
 	local flag = ctf.area.get_flag(pos)
 	if not flag then
 		return
@@ -479,8 +482,6 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			msg = "A flag was named "..fields.flag_name.." at ("..ctf.gui.flag_data[name].pos.x..","..ctf.gui.flag_data[name].pos.z..")"
 		end
 
-		print(msg)
-
 		ctf.post(team,{msg=msg,icon="flag_info"})
 
 		return true
@@ -490,7 +491,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local flag = ctf.area.get_flag(ctf.gui.flag_data[name].pos)
 
 		if not flag then
-			print("No flag?!")
+			return
 		end
 
 		local team = flag.team

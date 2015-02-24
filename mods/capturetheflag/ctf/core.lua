@@ -20,7 +20,7 @@ function ctf.log(area, msg)
 end
 
 function ctf.warning(area, msg)
-	minetest.log("warning", "[CaptureTheFlag] (" .. area .. ") " .. msg)
+	print("WARNING: [CaptureTheFlag] (" .. area .. ") " .. msg)
 end
 
 function ctf.init()
@@ -143,11 +143,11 @@ end
 function ctf.team(name) -- get or add a team
 	if type(name) == "table" then
 		if not name.add_team then
-			error("Invalid table given to ctf.team")
+			ctf.error("Invalid table given to ctf.team")
 			return
 		end
 
-		print("Defining team "..name.name)
+		ctf.log("team", "Defining team "..name.name)
 
 		ctf.teams[name.name]={
 			data = name,
@@ -403,12 +403,9 @@ minetest.register_on_newplayer(function(player)
 		return
 	end
 	local name = player:get_player_name()
-	-- TODO: make this work correctly. (ie no need for minetest.after)
-	minetest.after(1, function()
-		local team = ctf.autoalloc(name, alloc_mode)
-		if team then
-			ctf.log("autoalloc", name .. " was allocated to " .. team)
-			ctf.join(name, team)
-		end
-	end)
+	local team = ctf.autoalloc(name, alloc_mode)
+	if team then
+		ctf.log("autoalloc", name .. " was allocated to " .. team)
+		ctf.join(name, team)
+	end
 end)
