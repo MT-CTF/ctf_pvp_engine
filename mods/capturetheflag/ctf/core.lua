@@ -143,7 +143,7 @@ end
 function ctf.team(name) -- get or add a team
 	if type(name) == "table" then
 		if not name.add_team then
-			ctf.error("Invalid table given to ctf.team")
+			ctf.error("team", "Invalid table given to ctf.team")
 			return
 		end
 
