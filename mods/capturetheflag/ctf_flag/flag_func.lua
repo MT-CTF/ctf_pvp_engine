@@ -1,8 +1,8 @@
-ctf.flag_func = {
+ctf_flag = {
 	on_punch_top = function(pos, node, puncher)
 		pos.y=pos.y-1
 
-		ctf.flag_func.on_punch(pos,node,puncher)
+		ctf_flag.on_punch(pos, node, puncher)
 	end,
 	on_rightclick_top = function(pos, node, clicker)
 		pos.y=pos.y-1
@@ -13,12 +13,12 @@ ctf.flag_func = {
 		end
 
 		if flag.claimed then
-			if ctf.setting("flag_capture_take") then
-				minetest.chat_send_player(player,"This flag has been taken by "..flag.claimed.player)
-				minetest.chat_send_player(player,"who is a member of team "..flag.claimed.team)
+			if ctf.setting("flag.capture_take") then
+				minetest.chat_send_player(player, "This flag has been taken by ".. flag.claimed.player)
+				minetest.chat_send_player(player, "who is a member of team ".. flag.claimed.team)
 				return
 			else
-				minetest.chat_send_player(player,"Oops! This flag should not be captured. Reverting.")
+				minetest.chat_send_player(player, "Oops! This flag should not be captured. Reverting.")
 				flag.claimed = nil
 			end
 		end
@@ -32,12 +32,12 @@ ctf.flag_func = {
 		end
 
 		if flag.claimed then
-			if ctf.setting("flag_capture_take") then
-				minetest.chat_send_player(player,"This flag has been taken by "..flag.claimed.player)
-				minetest.chat_send_player(player,"who is a member of team "..flag.claimed.team)
+			if ctf.setting("flag.capture_take") then
+				minetest.chat_send_player(player, "This flag has been taken by "..flag.claimed.player)
+				minetest.chat_send_player(player, "who is a member of team "..flag.claimed.team)
 				return
 			else
-				minetest.chat_send_player(player,"Oops! This flag should not be captured. Reverting.")
+				minetest.chat_send_player(player, "Oops! This flag should not be captured. Reverting...")
 				flag.claimed = nil
 			end
 		end
@@ -55,12 +55,12 @@ ctf.flag_func = {
 		end
 
 		if flag.claimed then
-			if ctf.setting("flag_capture_take") then
-				minetest.chat_send_player(player,"This flag has been taken by "..flag.claimed.player)
-				minetest.chat_send_player(player,"who is a member of team "..flag.claimed.team)
+			if ctf.setting("flag.capture_take") then
+				minetest.chat_send_player(player, "This flag has been taken by "..flag.claimed.player)
+				minetest.chat_send_player(player, "who is a member of team "..flag.claimed.team)
 				return
 			else
-				minetest.chat_send_player(player,"Oops! This flag should not be captured. Reverting.")
+				minetest.chat_send_player(player, "Oops! This flag should not be captured. Reverting.")
 				flag.claimed = nil
 			end
 		end
@@ -79,12 +79,12 @@ ctf.flag_func = {
 				end
 
 				if diplo ~= "war" then
-					minetest.chat_send_player(player,"You are at peace with this team!")
+					minetest.chat_send_player(player, "You are at peace with this team!")
 					return
 				end
 
 				local flag_name = flag.name
-				if ctf.setting("flag_capture_take") then
+				if ctf.setting("flag.capture_take") then
 					if flag_name and flag_name~="" then
 						minetest.chat_send_all(flag_name.." has been taken from "..team.." by "..player.." (team "..ctf.player(player).team..")")
 						ctf.post(team,{msg=flag_name.." has been taken by "..ctf.player(player).team,icon="flag_red"})
@@ -110,7 +110,7 @@ ctf.flag_func = {
 						ctf.post(ctf.player(player).team,{msg=player.." captured flag ("..pos.x..","..pos.z..") from "..team,icon="flag_green"})
 					end
 					ctf.team(team).spawn = nil
-					if ctf.setting("multiple_flags") == true then
+					if ctf.setting("flag.allow_multiple") == true then
 						ctf.area.delete_flag(team,pos)
 						ctf.area.add_flag(ctf.player(player).team,pos)
 					else
@@ -121,8 +121,8 @@ ctf.flag_func = {
 				ctf.save()
 			else
 				-- Clicking on their team's flag
-				if ctf.setting("flag_capture_take") then
-					ctf.flag_func._flagret(player)
+				if ctf.setting("flag.capture_take") then
+					ctf_flag._flagret(player)
 				end
 			end
 		else
@@ -147,7 +147,7 @@ ctf.flag_func = {
 				end
 				fteam.spawn = nil
 				local fpos = {x=ctf.claimed[i].x,y=ctf.claimed[i].y,z=ctf.claimed[i].z}
-				if ctf.setting("multiple_flags") == true then
+				if ctf.setting("flag.allow_multiple") == true then
 					ctf.area.delete_flag(fteam.data.name,fpos)
 					ctf.area.add_flag(ctf.claimed[i].claimed.team,fpos)
 				else
@@ -180,8 +180,8 @@ ctf.flag_func = {
 			-- add flag
 			ctf.area.add_flag(team,pos)
 
-			if ctf.teams[team].spawn and minetest.env:get_node(ctf.teams[team].spawn).name == "ctf:flag" then
-				if not ctf.setting("multiple_flags") then
+			if ctf.teams[team].spawn and minetest.env:get_node(ctf.teams[team].spawn).name == "ctf_flag:flag" then
+				if not ctf.setting("flag.allow_multiple") then
 					-- send message
 					minetest.chat_send_all(team.."'s flag has been moved")
 					minetest.env:set_node(ctf.team(team).spawn,{name="air"})
@@ -209,7 +209,7 @@ ctf.flag_func = {
 				ctf.save()
 			end
 
-			minetest.env:set_node(pos2,{name="ctf:flag_top_"..ctf.team(team).data.color})
+			minetest.env:set_node(pos2,{name="ctf_flag:flag_top_"..ctf.team(team).data.color})
 
 			local meta2 = minetest.env:get_meta(pos2)
 
@@ -220,146 +220,3 @@ ctf.flag_func = {
 		end
 	end
 }
-
--- The flag
-minetest.register_node("ctf:flag",{
-	description = "Flag",
-	drawtype="nodebox",
-	paramtype = "light",
-	walkable = false,
-	tiles = {
-		"default_wood.png",
-		"default_wood.png",
-		"default_wood.png",
-		"default_wood.png",
-		"default_wood.png",
-		"default_wood.png"
-	},
-	node_box = {
-		type = "fixed",
-		fixed = {
-			{0.250000,-0.500000,0.000000,0.312500,0.500000,0.062500}
-		}
-	},
-	groups = {immortal=1,is_flag=1,flag_bottom=1},
-	on_punch = ctf.flag_func.on_punch,
-	on_rightclick = ctf.flag_func.on_rightclick,
-	on_construct = ctf.flag_func.on_construct,
-	after_place_node = ctf.flag_func.after_place_node
-})
-ctf.flag_colors = {
-	red   = "0xFF0000",
-	green = "0x00FF00",
-	blue  = "0x0000FF"
-}
-
-for color, _ in pairs(ctf.flag_colors) do
-	minetest.register_node("ctf:flag_top_"..color,{
-		description = "You are not meant to have this! - flag top",
-		drawtype="nodebox",
-		paramtype = "light",
-		walkable = false,
-		tiles = {
-			"default_wood.png",
-			"default_wood.png",
-			"default_wood.png",
-			"default_wood.png",
-			"flag_"..color.."2.png",
-			"flag_"..color..".png"
-		},
-		node_box = {
-			type = "fixed",
-			fixed = {
-				{0.250000,-0.500000,0.000000,0.312500,0.500000,0.062500},
-				{-0.5,0,0.000000,0.250000,0.500000,0.062500}
-			}
-		},
-		groups = {immortal=1,is_flag=1,flag_top=1,not_in_creative_inventory=1},
-		on_punch = ctf.flag_func.on_punch_top,
-		on_rightclick = ctf.flag_func.on_rightclick_top
-	})
-end
-
-minetest.register_node("ctf:flag_captured_top",{
-	description = "You are not meant to have this! - flag captured",
-	drawtype="nodebox",
-	paramtype = "light",
-	walkable = false,
-	tiles = {
-		"default_wood.png",
-		"default_wood.png",
-		"default_wood.png",
-		"default_wood.png",
-		"default_wood.png",
-		"default_wood.png"
-	},
-	node_box = {
-		type = "fixed",
-		fixed = {
-			{0.250000,-0.500000,0.000000,0.312500,0.500000,0.062500}
-		}
-	},
-	groups = {immortal=1,is_flag=1,flag_top=1,not_in_creative_inventory=1},
-	on_punch = ctf.flag_func.on_punch_top,
-	on_rightclick = ctf.flag_func.on_rightclick_top
-})
-
--- On respawn
-minetest.register_on_respawnplayer(function(player)
-	if player and ctf.player(player:get_player_name()) then
-		local team = ctf.player(player:get_player_name()).team
-		if team and ctf.team(team) and ctf.area.get_spawn(team)==true then
-			player:moveto(ctf.team(team).spawn, false)
-			return true
-		end
-	end
-
-	return false
-end)
-
-minetest.register_abm({
-	nodenames = {"group:flag_bottom"},
-	inteval = 5,
-	chance = 1,
-	action = function(pos)
-		local top = {x=pos.x,y=pos.y+1,z=pos.z}
-		local flagmeta = minetest.env:get_meta(pos)
-
-		if not flagmeta then
-			return
-		end
-
-		local flag_team_data = ctf.area.get_flag(pos)
-		if not flag_team_data or not ctf.team(flag_team_data.team)then
-			ctf.log("flag", "Flag does not exist! Deleting nodes. "..dump(pos))
-			minetest.env:set_node(pos,{name="air"})
-			minetest.env:set_node(top,{name="air"})
-			return
-		end
-		local topmeta = minetest.env:get_meta(top)
-		local flag_name = flag_team_data.name
-		if flag_name and flag_name ~= "" then
-			flagmeta:set_string("infotext", flag_name.." - "..flag_team_data.team)
-		else
-			flagmeta:set_string("infotext", flag_team_data.team.."'s flag")
-		end
-
-		if not ctf.team(flag_team_data.team).data.color then
-			ctf.team(flag_team_data.team).data.color = "red"
-			ctf.save()
-		end
-
-		if flag_team_data.claimed then
-			minetest.env:set_node(top,{name="ctf:flag_captured_top"})
-		else
-			minetest.env:set_node(top,{name="ctf:flag_top_"..ctf.team(flag_team_data.team).data.color})
-		end
-
-		topmeta = minetest.env:get_meta(top)
-		if flag_name and flag_name ~= "" then
-			topmeta:set_string("infotext", flag_name.." - "..flag_team_data.team)
-		else
-			topmeta:set_string("infotext", flag_team_data.team.."'s flag")
-		end
-	end
-})

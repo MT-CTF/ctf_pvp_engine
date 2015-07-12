@@ -126,61 +126,6 @@ ctf.gui.register_tab("news", "News", function(name, team)
 end)
 
 -- Team interface
-ctf.gui.register_tab("flags", "Flags", function(name, team)
-	local result = ""
-	local t = ctf.team(team)
-
-	if not t then
-		return
-	end
-
-	local x = 1
-	local y = 2
-	result = result .. "label[1,1;Click a flag button to go there]"
-
-	if ctf.setting("gui.team.teleport_to_spawn") and minetest.get_setting("static_spawnpoint") then
-		local x,y,z = string.match(minetest.get_setting("static_spawnpoint"), "(%d+),(%d+),(%d+)")
-
-		result = result ..
-			"button[" .. x .. "," .. y .. ";2,1;goto_"
-			..f.x.."_"..f.y.."_"..f.z..";"
-
-		result = result ..  "Spawn]"
-		x = x + 2
-	end
-
-	for i=1, #t.flags do
-		local f = t.flags[i]
-
-		if x > 8 then
-			x = 1
-			y = y + 1
-		end
-
-		if y > 6 then
-			break
-		end
-
-		result = result ..
-			"button[" .. x .. "," .. y .. ";2,1;goto_"
-			..f.x.."_"..f.y.."_"..f.z..";"
-
-		if f.name then
-			result = result .. f.name .. "]"
-		else
-			result = result .. "("..f.x..","..f.y..","..f.z..")]"
-		end
-
-		x = x + 2
-	end
-
-	minetest.show_formspec(name, "ctf:flags",
-		"size[10,7]"..
-		ctf.gui.get_tabs(name,team)..
-		result)
-end)
-
--- Team interface
 ctf.gui.register_tab("diplo", "Diplomacy", function(name, team)
 	local result = ""
 	local data = {}
@@ -267,7 +212,6 @@ local function formspec_is_ctf_tab(fsname)
 			return true
 		end
 	end
-	print(fsname .. " is not a ctf_tab")
 	return false
 end
 
@@ -291,7 +235,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
 			ctf.team(ctf.players[name].team).log = {}
 			ctf.save()
-			ctf.gui.team_board(name, ctf.players[name].team)
+			ctf.gui.show(name, "news")
 		end
 		return true
 	end
@@ -299,10 +243,10 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	-- Settings page
 	if fields.save and formname=="ctf:settings" then
 		if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
-			ctf.gui.team_settings(name, ctf.players[name].team)
+			ctf.gui.show(name, "settings")
 		end
 		if ctf and ctf.team(ctf.players[name].team) and ctf.team(ctf.players[name].team).data then
-			if minetest.registered_items["ctf:flag_top_"..fields.color] then
+			if minetest.registered_items["ctf_flag:flag_top_"..fields.color] then
 				ctf.team(ctf.players[name].team).data.color = fields.color
 				ctf.save()
 			else
@@ -329,23 +273,9 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
 					table.remove(ctf.team(ctf.player(name).team).log,id)
 					ctf.save()
-					ctf.gui.team_board(name,ctf.player(name).team)
+					ctf.gui.show(name, "news")
 					return true
 				end
-			end
-		end
-	end
-end)
-
-minetest.register_on_player_receive_fields(function(player, formname, fields)
-	-- Todo: fix security issue here
-	local name = player:get_player_name()
-	if formname=="ctf:flags" then
-		for key, field in pairs(fields) do
-			local x,y,z = string.match(key, "goto_(%d+)_(%d+)_(%d+)")
-			if x and y and x then
-				player:setpos({x=x, y=y, z=z})
-				return true
 			end
 		end
 	end
@@ -357,7 +287,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		for key, field in pairs(fields) do
 			local newteam = string.match(key, "team_(.+)")
 			if newteam then
-				ctf.gui.team_dip(name,newteam)
+				ctf.gui.show(name, "diplo")
 				return true
 			end
 
@@ -375,7 +305,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 					end
 				end
 
-				ctf.gui.team_dip(name,team)
+				ctf.gui.show(name, "diplo")
 				return true
 			end
 
@@ -389,7 +319,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 					ctf.post(newteam,{msg=team.." has declared war on you"})
 				end
 
-				ctf.gui.team_dip(name,team)
+				ctf.gui.show(name, "diplo")
 				return true
 			end
 
@@ -401,7 +331,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 					ctf.post(newteam,{type="request",msg="alliance",team=team,mode="diplo"})
 				end
 
-				ctf.gui.team_dip(name,team)
+				ctf.gui.show(name, "diplo")
 				return true
 			end
 
@@ -413,123 +343,9 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 					ctf.diplo.cancel_requests(team,newteam)
 				end
 
-				ctf.gui.team_dip(name,team)
+				ctf.gui.show(name, "diplo")
 				return true
 			end
 		end
-	end
-end)
-
--- Flag interface
-function ctf.gui.flag_board(name,pos)
-	ctf.log("gui", name .. " views team_board")
-	local flag = ctf.area.get_flag(pos)
-	if not flag then
-		return
-	end
-
-	local team = flag.team
-	if not team then
-		return
-	end
-
-	if ctf.can_mod(name,team) == false then
-		if ctf.player(name) and ctf.player(name).team and ctf.player(name).team == team then
-			ctf.gui.team_board(name,team)
-		end
-		return
-	end
-
-	local flag_name = flag.name
-
-	if not ctf.setting("flag_names") then
-		flag.name = nil
-		return
-	end
-
-	if not ctf.setting("gui") then
-		return
-	end
-
-	if not flag_name then
-		flag_name = ""
-	end
-
-	if not ctf.gui.flag_data then
-		ctf.gui.flag_data = {}
-	end
-
-	ctf.gui.flag_data[name] = {pos=pos}
-
-	minetest.show_formspec(name, "ctf:flag_board",
-		"size[6,3]"..
-		"field[1,1;4,1;flag_name;Flag Name;"..flag_name.."]"..
-		"button_exit[1,2;2,1;save;Save]"..
-		"button_exit[3,2;2,1;delete;Delete]"
-	)
-end
-minetest.register_on_player_receive_fields(function(player, formname, fields)
-	local name = player:get_player_name()
-
-	if not formname=="ctf:flag_board" then
-		return false
-	end
-
-	if fields.save and fields.flag_name then
-		local flag = ctf.area.get_flag(ctf.gui.flag_data[name].pos)
-		if not flag then
-			return false
-		end
-
-		local team = flag.team
-		if not team then
-			return false
-		end
-
-		if ctf.can_mod(name,team) == false then
-			return false
-		end
-
-		local flag_name = flag.name
-		if not flag_name then
-			flag_name = ""
-		end
-
-		flag.name = fields.flag_name
-
-		local msg = flag_name.." was renamed to "..fields.flag_name
-
-		if flag_name=="" then
-			msg = "A flag was named "..fields.flag_name.." at ("..ctf.gui.flag_data[name].pos.x..","..ctf.gui.flag_data[name].pos.z..")"
-		end
-
-		ctf.post(team,{msg=msg,icon="flag_info"})
-
-		return true
-	elseif fields.delete then
-		local pos = ctf.gui.flag_data[name].pos
-
-		local flag = ctf.area.get_flag(ctf.gui.flag_data[name].pos)
-
-		if not flag then
-			return
-		end
-
-		local team = flag.team
-		if not team then
-			return
-		end
-
-		if ctf.can_mod(name,team) == false then
-			return false
-		end
-
-		ctf.area.delete_flag(team,pos)
-
-		minetest.env:set_node(pos,{name="air"})
-		pos.y=pos.y+1
-		minetest.env:set_node(pos,{name="air"})
-
-		return true
 	end
 end)

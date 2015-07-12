@@ -11,6 +11,10 @@ ctf.registered_on_init = {}
 function ctf.register_on_init(func)
 	table.insert(ctf.registered_on_init, func)
 end
+ctf.registered_on_new_team = {}
+function ctf.register_on_new_team(func)
+	table.insert(ctf.registered_on_new_team, func)
+end
 
 
 
@@ -49,28 +53,14 @@ function ctf.init()
 
 	-- See minetest.conf.example in the root of this subgame
 
-	-- Settings: Feature enabling
 	ctf.log("init", "Creating Default Settings")
-
-	-- Settings: Flags and Territory
-	ctf._set("node_ownership",             true)
-	ctf._set("multiple_flags",             true)
-	ctf._set("flag_capture_take",          false)
-	ctf._set("flag_names",                 true)
-
-	-- Settings: User Interface
-	ctf._set("hud",                        true)
-
-	-- Settings: Teams
 	ctf._set("diplomacy",                  true)
 	ctf._set("players_can_change_team",    true)
 	ctf._set("allocate_mode",              0)
 	ctf._set("maximum_in_team",            -1)
 	ctf._set("default_diplo_state",        "war")
-
-	-- Settings: Misc
-	ctf._set("flag_protect_distance",      25)
-	ctf._set("team_gui_initial",           "news")
+	ctf._set("node_ownership",             true)
+	ctf._set("hud",                        true)
 
 	for i = 1, #ctf.registered_on_init do
 		ctf.registered_on_init[i]()
@@ -172,12 +162,15 @@ function ctf.team(name) -- get or add a team
 
 		ctf.log("team", "Defining team "..name.name)
 
-		ctf.teams[name.name]={
+		ctf.teams[name.name] = {
 			data = name,
-			spawn=nil,
-			players={},
-			flags = {}
+			spawn = nil,
+			players = {}
 		}
+
+		for i = 1, #ctf.registered_on_new_team do
+			ctf.registered_on_new_team[i](ctf.teams[name.name])
+		end
 
 		ctf.save()
 

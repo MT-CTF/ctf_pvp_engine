@@ -72,16 +72,16 @@ function ctf.area.nearest_flag(pos)
 		return nil
 	end
 
-	local nodes = minetest.env:find_nodes_in_area(
+	local nodes = minetest.find_nodes_in_area(
 		{
-			x = pos.x - ctf.setting("flag_protect_distance"),
-			y = pos.y - ctf.setting("flag_protect_distance"),
-			z = pos.z - ctf.setting("flag_protect_distance")
+			x = pos.x - ctf.setting("flag.protect_distance"),
+			y = pos.y - ctf.setting("flag.protect_distance"),
+			z = pos.z - ctf.setting("flag.protect_distance")
 		},
 		{
-			x = pos.x + ctf.setting("flag_protect_distance"),
-			y = pos.y + ctf.setting("flag_protect_distance"),
-			z = pos.z + ctf.setting("flag_protect_distance")
+			x = pos.x + ctf.setting("flag.protect_distance"),
+			y = pos.y + ctf.setting("flag.protect_distance"),
+			z = pos.z + ctf.setting("flag.protect_distance")
 		},
 		{"group:is_flag"}
 	)
@@ -108,43 +108,44 @@ end
 function ctf.area.get_area(pos)
 	local closest = ctf.area.nearest_flag(pos)
 	if not closest then
-		return false
+		return nil
 	end
 	local flag = ctf.area.get_flag(closest)
 
 	if flag then
 		return flag.team
 	end
-	return false
+	return nil
 end
 
 -- updates the spawn position for a team
 function ctf.area.get_spawn(team)
 	ctf.area.asset_flags(team)
 
-	if team and ctf.teams and ctf.team(team) then
-		if ctf.team(team).spawn and minetest.env:get_node(ctf.team(team).spawn).name == "ctf:flag" then
-			local flag = ctf.area.get_flag(ctf.team(team).spawn)
+	if not ctf.team(team) then
+		return nil
+	end
 
-			if not flag then
-				return false
-			end
+	if ctf.team(team).spawn and minetest.env:get_node(ctf.team(team).spawn).name == "ctf:flag" then
+		local flag = ctf.area.get_flag(ctf.team(team).spawn)
 
-			local _team = flag.team
-
-			-- Check to see if spawn is already defined
-			if team == _team then
-				return true
-			end
+		if not flag then
+			return nil
 		end
 
-		-- Get new spawn
-		if #ctf.team(team).flags > 0 then
-			ctf.team(team).spawn = ctf.team(team).flags[1]
-			return true
+		local _team = flag.team
+
+		-- Check to see if spawn is already defined
+		if team == _team then
+			return nil
 		end
 	end
-	return false
+
+	-- Get new spawn
+	if #ctf.team(team).flags > 0 then
+		ctf.team(team).spawn = ctf.team(team).flags[1]
+		return ctf.team(team).spawn
+	end
 end
 
 function ctf.area.asset_flags(team)
@@ -164,3 +165,16 @@ function ctf.area.asset_flags(team)
 		end
 	end]]--
 end
+
+minetest.register_on_respawnplayer(function(player)
+	if player and ctf.player(player:get_player_name()) then
+		local team = ctf.player(player:get_player_name()).team
+		if ctf.team(team) then
+			local spawn = ctf.area.get_spawn(team)
+			player:moveto(spawn, false)
+			return true
+		end
+	end
+
+	return false
+end)
