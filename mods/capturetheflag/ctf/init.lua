@@ -23,8 +23,8 @@ minetest.register_privilege("ctf_admin", {
 
 -- Modules
 dofile(minetest.get_modpath("ctf").."/core.lua")
+dofile(minetest.get_modpath("ctf").."/teams.lua")
 dofile(minetest.get_modpath("ctf").."/diplomacy.lua")
-dofile(minetest.get_modpath("ctf").."/area.lua")
 dofile(minetest.get_modpath("ctf").."/gui.lua")
 dofile(minetest.get_modpath("ctf").."/hud.lua")
 
