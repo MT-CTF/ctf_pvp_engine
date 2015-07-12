@@ -108,18 +108,7 @@ minetest.register_chatcommand("team", {
 				ctf.players[name].team and
 				ctf.setting("gui")
 			) then
-				minetest.chat_send_player(name, "Showing the Team GUI")
-				if ctf.setting("team_gui_initial") == "news" and ctf.setting("news_gui") then
-					ctf.gui.team_board(name,ctf.players[name].team)
-				elseif ctf.setting("team_gui_initial") == "flags" and ctf.setting("flag_teleport_gui") then
-					ctf.gui.team_flags(name,ctf.players[name].team)
-				elseif ctf.setting("team_gui_initial") == "diplo" and ctf.setting("diplomacy") then
-					ctf.gui.team_dip(name,ctf.players[name].team)
-				elseif ctf.setting("team_gui_initial") == "admin" then
-					ctf.gui.team_settings(name,ctf.players[name].team)
-				elseif ctf.setting("news_gui") then
-					ctf.gui.team_board(name,ctf.players[name].team)
-				end
+				ctf.gui.show(name)
 			end
 		end
 	end,

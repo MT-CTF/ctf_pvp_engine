@@ -70,9 +70,9 @@ ctf.flag_func = {
 			return
 		end
 
-		if ctf.players and ctf.team(team) and ctf.player(player) and ctf.player(player).team then
+		if ctf.team(team) and ctf.player(player).team then
 			if ctf.player(player).team ~= team then
-				local diplo = ctf.diplo.get(team,ctf.player(player).team)
+				local diplo = ctf.diplo.get(team, ctf.player(player).team)
 
 				if not diplo then
 					diplo = ctf.setting("default_diplo_state")
@@ -82,11 +82,6 @@ ctf.flag_func = {
 					minetest.chat_send_player(player,"You are at peace with this team!")
 					return
 				end
-
-				--ctf.post(team,{msg=flag_name.." has been captured by "..ctf.player(player).team,icon="flag_red"})
-				--ctf.post(ctf.player(player).team,{msg=player.." captured '"..flag_name.."' from "..team,icon="flag_green"})
-				--ctf.post(team,{msg="The flag at ("..pos.x..","..pos.z..") has been captured by "..ctf.player(player).team,icon="flag_red"})
-				--ctf.post(ctf.player(player).team,{msg=player.." captured flag ("..pos.x..","..pos.z..") from "..team,icon="flag_green"})
 
 				local flag_name = flag.name
 				if ctf.setting("flag_capture_take") then

@@ -148,6 +148,7 @@ function ctf.area.get_spawn(team)
 end
 
 function ctf.area.asset_flags(team)
+	--[[
 	if not team or not ctf.team(team) then
 		return false
 	end
@@ -161,5 +162,5 @@ function ctf.area.asset_flags(team)
 			ctf.log("utils", "Replacing flag...")
 			-- TODO: ctf.area.asset_flags
 		end
-	end
+	end]]--
 end

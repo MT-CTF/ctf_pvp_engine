@@ -1,3 +1,4 @@
+-- Registered
 ctf.registered_on_load = {}
 function ctf.register_on_load(func)
 	table.insert(ctf.registered_on_load, func)
@@ -11,10 +12,12 @@ function ctf.register_on_init(func)
 	table.insert(ctf.registered_on_init, func)
 end
 
+
+
+-- Debug helpers
 function ctf.error(area, msg)
 	minetest.log("error", "CTF::" .. area .. " - " ..msg)
 end
-
 function ctf.log(area, msg)
 	if area and area ~= "" then
 		print("[CaptureTheFlag] (" .. area .. ") " .. msg)
@@ -22,10 +25,18 @@ function ctf.log(area, msg)
 		print("[CaptureTheFlag] " .. msg)
 	end
 end
-
+function ctf.action(area, msg)
+	if area and area ~= "" then
+		minetest.log("action", "[CaptureTheFlag] (" .. area .. ") " .. msg)
+	else
+		nubetest.log("action", "[CaptureTheFlag] " .. msg)
+	end
+end
 function ctf.warning(area, msg)
 	print("WARNING: [CaptureTheFlag] (" .. area .. ") " .. msg)
 end
+
+
 
 function ctf.init()
 	ctf.log("init", "Initialising!")
@@ -48,12 +59,7 @@ function ctf.init()
 	ctf._set("flag_names",                 true)
 
 	-- Settings: User Interface
-	ctf._set("gui",                        true)
 	ctf._set("hud",                        true)
-	ctf._set("team_gui",                   true)
-	ctf._set("flag_teleport_gui",          true)
-	ctf._set("spawn_in_flag_teleport_gui", false)
-	ctf._set("news_gui",                   true)
 
 	-- Settings: Teams
 	ctf._set("diplomacy",                  true)
@@ -92,6 +98,11 @@ function ctf.setting(name)
 	local set = minetest.setting_get("ctf."..name) or
 			minetest.setting_get("ctf_"..name)
 	local dset = ctf._defsettings[name]
+	if dset == nil then
+		ctf.error("setting", "No such setting - " .. name)
+		return nil
+	end
+
 	if set ~= nil then
 		if type(dset) == "number" then
 			return tonumber(set)
@@ -100,11 +111,8 @@ function ctf.setting(name)
 		else
 			return set
 		end
-	elseif dset ~= nil then
-		return ctf._defsettings[name]
 	else
-		ctf.log("setting", name.." not found!")
-		return nil
+		return dset
 	end
 end
 
@@ -191,8 +199,22 @@ function ctf.count_players_in_team(team)
 	return count
 end
 
+function ctf.new_player(name)
+	ctf.log("team", "Creating player " .. name)
+	ctf.players[name] = {
+		name = name
+	}
+end
+
 -- get a player
 function ctf.player(name)
+	if not ctf.players[name] then
+		ctf.new_player(name)
+	end
+	return ctf.players[name]
+end
+
+function ctf.player_or_nil(name)
 	return ctf.players[name]
 end
 
@@ -207,13 +229,9 @@ function ctf.join(name, team, force)
 
 	local player = ctf.player(name)
 
-	if not player then
-		player = {name = name}
-		ctf.players[name] = player
-	end
-
-	if not force and not ctf.setting("players_can_change_team") and (not player.team or player.team == "") then
-		minetest.log("action", name .. " attempted to change to " .. team)
+	if not force and not ctf.setting("players_can_change_team")
+			and not player.team then
+		ctf.action("teams", name .. " attempted to change to " .. team)
 		minetest.chat_send_player(name, "You are not allowed to switch teams, traitor!")
 		return false
 	end
@@ -237,12 +255,13 @@ function ctf.join(name, team, force)
 	return false
 end
 
+-- TODO: refactor ctf.add_user etc
 -- Add a player to a team in data structures
 function ctf.add_user(team, user)
 	local _team = ctf.team(team)
 	local _user = ctf.player(user.name)
 	if _team and user and user.name then
-		if _user and _user.team and ctf.team(_user.team) then
+		if _user.team and ctf.team(_user.team) then
 			ctf.teams[_user.team].players[user.name] = nil
 		end
 

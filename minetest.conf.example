@@ -1,3 +1,6 @@
+# These settings are out of date,
+#    look for `ctf._set(` lines in mods/capturetheflag/ etc and prepend `ctf.`
+
 #  Whether teams own the nodes around their flag
 #ctf.node_ownership = true
 #ctf.flag_protect_distance = 25
@@ -21,8 +24,8 @@
 #    news
 #    flags
 #    diplo
-#    admin
-#ctf.team_gui_initial = news
+#    settings
+#ctf.gui.team.initial = news
 
 #  Enable tabs in Team GUI
 #ctf.flag_teleport_gui = true
