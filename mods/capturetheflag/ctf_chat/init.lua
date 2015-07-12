@@ -1,8 +1,3 @@
--- CLI stuff
-minetest.register_privilege("team",{
-	description = "Team manager",
-})
-
 local function team_console_help(name)
 	minetest.chat_send_player(name,"Try:", false)
 	minetest.chat_send_player(name,"/team - show team panel", false)
@@ -152,23 +147,9 @@ minetest.register_chatcommand("list_teams", {
 	end,
 })
 
-minetest.register_chatcommand("ateam", {
-	params = "team name",
-	description = "Create a team",
-	privs = {team=true},
-	func = function(name, param)
-		minetest.chat_send_player(name, "This command will be made obsolete! Use '/team add name' instead!",false)
-		if string.match(param,"([%a%b_]-)") and ctf.team({name=param,add_team=true}) and param ~= "" and param~= nil then
-			minetest.chat_send_player(name, "Added team "..param,false)
-		else
-			minetest.chat_send_player(name, "Error adding team "..param,false)
-		end
-	end,
-})
-
 minetest.register_chatcommand("ctf", {
 	description = "Do admin cleaning stuff",
-	privs = {team=true},
+	privs = {ctf_admin=true},
 	func = function(name, param)
 		ctf.clean_player_lists()
 		ctf.collect_claimed()
