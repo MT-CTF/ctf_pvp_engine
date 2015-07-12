@@ -15,6 +15,17 @@ ctf.registered_on_new_team = {}
 function ctf.register_on_new_team(func)
 	table.insert(ctf.registered_on_new_team, func)
 end
+ctf.registered_on_territory_query = {}
+function ctf.register_on_territory_query(func)
+	table.insert(ctf.registered_on_territory_query, func)
+end
+
+function vector.distanceSQ(p1, p2)
+	local x = p1.x - p2.x
+	local y = p1.y - p2.y
+	local z = p1.z - p2.z
+	return x*x + y*y + z*z
+end
 
 
 

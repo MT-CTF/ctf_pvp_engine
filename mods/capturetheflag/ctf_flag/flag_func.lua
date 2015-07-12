@@ -7,7 +7,7 @@ ctf_flag = {
 	on_rightclick_top = function(pos, node, clicker)
 		pos.y=pos.y-1
 
-		local flag = ctf.area.get_flag(pos)
+		local flag = ctf_flag.get(pos)
 		if not flag then
 			return
 		end
@@ -26,7 +26,7 @@ ctf_flag = {
 		ctf.gui.flag_board(clicker:get_player_name(),pos)
 	end,
 	on_rightclick = function(pos, node, clicker)
-		local flag = ctf.area.get_flag(pos)
+		local flag = ctf_flag.get(pos)
 		if not flag then
 			return
 		end
@@ -49,7 +49,7 @@ ctf_flag = {
 			return
 		end
 
-		local flag = ctf.area.get_flag(pos)
+		local flag = ctf_flag.get(pos)
 		if not flag then
 			return
 		end
@@ -111,11 +111,11 @@ ctf_flag = {
 					end
 					ctf.team(team).spawn = nil
 					if ctf.setting("flag.allow_multiple") == true then
-						ctf.area.delete_flag(team,pos)
-						ctf.area.add_flag(ctf.player(player).team,pos)
+						ctf_flag.delete(team,pos)
+						ctf_flag.add(ctf.player(player).team,pos)
 					else
 						minetest.env:set_node(pos,{name="air"})
-						ctf.area.delete_flag(team,pos)
+						ctf_flag.delete(team,pos)
 					end
 				end
 				ctf.save()
@@ -148,11 +148,11 @@ ctf_flag = {
 				fteam.spawn = nil
 				local fpos = {x=ctf.claimed[i].x,y=ctf.claimed[i].y,z=ctf.claimed[i].z}
 				if ctf.setting("flag.allow_multiple") == true then
-					ctf.area.delete_flag(fteam.data.name,fpos)
-					ctf.area.add_flag(ctf.claimed[i].claimed.team,fpos)
+					ctf_flag.delete(fteam.data.name,fpos)
+					ctf_flag.add(ctf.claimed[i].claimed.team,fpos)
 				else
 					minetest.env:set_node(fpos,{name="air"})
-					ctf.area.delete_flag(fteam.data.name,fpos)
+					ctf_flag.delete(fteam.data.name,fpos)
 				end
 				ctf.collect_claimed()
 			end
@@ -178,7 +178,7 @@ ctf_flag = {
 			meta:set_string("infotext", team.."'s flag")
 
 			-- add flag
-			ctf.area.add_flag(team,pos)
+			ctf_flag.add(team, pos)
 
 			if ctf.teams[team].spawn and minetest.env:get_node(ctf.teams[team].spawn).name == "ctf_flag:flag" then
 				if not ctf.setting("flag.allow_multiple") then
@@ -199,23 +199,23 @@ ctf_flag = {
 			ctf.save()
 
 			local pos2 = {
-						x=pos.x,
-						y=pos.y+1,
-						z=pos.z
-					}
+				x = pos.x,
+				y = pos.y+1,
+				z = pos.z
+			}
 
 			if not ctf.team(team).data.color then
 				ctf.team(team).data.color = "red"
 				ctf.save()
 			end
 
-			minetest.env:set_node(pos2,{name="ctf_flag:flag_top_"..ctf.team(team).data.color})
+			minetest.env:set_node(pos2, {name="ctf_flag:flag_top_"..ctf.team(team).data.color})
 
 			local meta2 = minetest.env:get_meta(pos2)
 
 			meta2:set_string("infotext", team.."'s flag")
 		else
-			minetest.chat_send_player(placer:get_player_name(),"You are not part of a team!")
+			minetest.chat_send_player(placer:get_player_name(), "You are not part of a team!")
 			minetest.env:set_node(pos,{name="air"})
 		end
 	end

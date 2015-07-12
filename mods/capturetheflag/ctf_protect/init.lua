@@ -2,18 +2,16 @@
 local old_is_protected = minetest.is_protected
 
 function minetest.is_protected(pos, name)
-	local team = ctf.area.get_area(pos)
+	local team = ctf.area.get_territory_owner(pos)
 
-	if not team then
+	if not team or not ctf.team(team) then
 		return old_is_protected(pos, name)
 	end
 
-	if ctf.players and ctf.player(name) and ctf.player(name).team then
-		if ctf.player(name).team == team then
-			return old_is_protected(pos, name)
-		end
+	if ctf.player(name).team == team then
+		return old_is_protected(pos, name)
+	else
+		minetest.chat_send_player(name, "You cannot dig on team "..team.."'s land")
+		return true
 	end
-
-	minetest.chat_send_player(name, "You cannot dig on team "..team.."'s land")
-	return true
 end

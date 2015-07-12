@@ -70,7 +70,7 @@ end)
 -- Flag interface
 function ctf.gui.flag_board(name,pos)
 	ctf.log("gui", name .. " views flag board")
-	local flag = ctf.area.get_flag(pos)
+	local flag = ctf_flag.get(pos)
 	if not flag then
 		return
 	end
@@ -123,7 +123,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	end
 
 	if fields.save and fields.flag_name then
-		local flag = ctf.area.get_flag(ctf.gui.flag_data[name].pos)
+		local flag = ctf_flag.get(ctf.gui.flag_data[name].pos)
 		if not flag then
 			return false
 		end
@@ -156,7 +156,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	elseif fields.delete then
 		local pos = ctf.gui.flag_data[name].pos
 
-		local flag = ctf.area.get_flag(ctf.gui.flag_data[name].pos)
+		local flag = ctf_flag.get(ctf.gui.flag_data[name].pos)
 
 		if not flag then
 			return
@@ -171,7 +171,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			return false
 		end
 
-		ctf.area.delete_flag(team,pos)
+		ctf_flag.delete(team,pos)
 
 		minetest.env:set_node(pos,{name="air"})
 		pos.y=pos.y+1

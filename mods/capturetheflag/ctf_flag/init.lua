@@ -9,9 +9,112 @@ init()
 ctf.register_on_new_team(function(team)
 	team.flags = {}
 end)
+ctf.register_on_territory_query(function(pos)
+	local closest = nil
+	local closest_team = nil
+	local closest_distSQ = 1000000
+	local pd = ctf.setting("flag.protect_distance")
+	local pdSQ = pd * pd
+
+	for tname, team in pairs(ctf.teams) do
+		for i = 1, #team.flags do
+			local distSQ = vector.distanceSQ(pos, team.flags[i])
+			if distSQ < pdSQ and distSQ < closest_distSQ then
+				closest = team.flags[i]
+				closest_team = tname
+				closest_distSQ = distSQ
+			end
+		end
+	end
+
+	return closest_team, closest_distSQ
+end)
 ctf_flag = {}
 dofile(minetest.get_modpath("ctf_flag") .. "/gui.lua")
 dofile(minetest.get_modpath("ctf_flag") .. "/flag_func.lua")
+
+-- add a flag to a team
+function ctf_flag.add(team, pos)
+	if not team or team == "" then
+		return
+	end
+
+	if not ctf.team(team).flags then
+		ctf.team(team).flags = {}
+	end
+
+	pos.team = team
+	table.insert(ctf.team(team).flags,pos)
+	ctf.save()
+end
+
+-- get a flag from a team
+function ctf_flag.get(pos)
+	if not pos then
+		return
+	end
+
+	local result = nil
+	for _, team in pairs(ctf.teams) do
+		for i = 1, #team.flags do
+			if (
+				team.flags[i].x == pos.x and
+				team.flags[i].y == pos.y and
+				team.flags[i].z == pos.z
+			) then
+				if result then
+					minetest.chat_send_all("[CTF ERROR] Multiple teams have same flag. Please report this to the server operator / admin")
+					print("CTF ERROR DATA")
+					print("Multiple teams have same flag.")
+					print("This is a sign of ctf.txt corruption.")
+					print("----------------")
+					print(dump(result))
+					print(dump(team.flags[i]))
+					print("----------------")
+				else
+					result = team.flags[i]
+				end
+			end
+		end
+	end
+	return result
+end
+
+-- delete a flag from a team
+function ctf_flag.delete(team, pos)
+	if not team or team == "" then
+		return
+	end
+
+	for i = 1, #ctf.team(team).flags do
+		if (
+			ctf.team(team).flags[i].x == pos.x and
+			ctf.team(team).flags[i].y == pos.y and
+			ctf.team(team).flags[i].z == pos.z
+		) then
+			table.remove(ctf.team(team).flags,i)
+			return
+		end
+	end
+end
+
+function ctf_flag.asset_flags(team)
+	--[[
+	if not team or not ctf.team(team) then
+		return false
+	end
+
+	ctf.log("utils", "Checking the flags of "..team)
+
+	local tmp = ctf.team(team).flags
+	local get_res = minetest.env:get_node(tmp[i])
+	for i=1,#tmp do
+		if tmp[i] and (not get_res or not get_res.name == "ctf:flag") then
+			ctf.log("utils", "Replacing flag...")
+			-- TODO: ctf_flag.asset_flags
+		end
+	end]]--
+end
 
 -- The flag
 minetest.register_node("ctf_flag:flag", {
@@ -108,7 +211,7 @@ minetest.register_abm({
 			return
 		end
 
-		local flag_team_data = ctf.area.get_flag(pos)
+		local flag_team_data = ctf_flag.get(pos)
 		if not flag_team_data or not ctf.team(flag_team_data.team)then
 			ctf.log("flag", "Flag does not exist! Deleting nodes. "..dump(pos))
 			minetest.env:set_node(pos,{name="air"})
