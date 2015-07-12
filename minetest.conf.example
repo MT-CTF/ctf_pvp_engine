@@ -1,64 +1,64 @@
 #  Whether teams own the nodes around their flag
-#ctf_node_ownership = true
-#ctf_flag_protect_distance = 25
+#ctf.node_ownership = true
+#ctf.flag_protect_distance = 25
 
 #  Can teams have multiple flags?
-#ctf_multiple_flags = true
+#ctf.multiple_flags = true
 
 #  Whether flags need to be taken to other teams flag to win
-#ctf_flag_capture_take = false
+#ctf.flag_capture_take = false
 
 #  Are GUIs enabled
-#ctf_gui = true
+#ctf.gui = true
 
 #  Is the HUD enabled
-#ctf_hud = true
+#ctf.hud = true
 
 #  Team GUI on /team
-#ctf_team_gui = true
+#ctf.team_gui = true
 
 #  Default tab when opening Team GUI
 #    news
 #    flags
 #    diplo
 #    admin
-#ctf_team_gui_initial = news
+#ctf.team_gui_initial = news
 
 #  Enable tabs in Team GUI
-#ctf_flag_teleport_gui = true
-#ctf_news_gui = true
-#ctf_diplomacy = true
+#ctf.flag_teleport_gui = true
+#ctf.news_gui = true
+#ctf.diplomacy = true
 
 #  Show the spawn as a target in flag teleport Team GUI
-#ctf_spawn_in_flag_teleport_gui = false
+#ctf.spawn_in_flag_teleport_gui = false
 
 #  Can flags have names?
-#ctf_flag_names = true
+#ctf.flag_names = true
 
 #  Do teams have their own chat channel?
-#ctf_team_channel = true
+#ctf.team_channel = true
 
 #  Can players chat with other teams on /all. If team_channel is disabled, this setting does nothing.
-#ctf_global_channel = true
+#ctf.global_channel = true
 
 #  Can players change teams using /join?
-#ctf_players_can_change_team",true)
+#ctf.players_can_change_team",true)
 
 #  How are players allocated to teams?
 #    0: none,
 #    1: random,
 #    2: one of first two largest groups,
 #    3 smallest group
-#ctf_allocate_mode = 0
+#ctf.allocate_mode = 0
 
 #  Maximum number in team, obeyed by allocation and /join. Admins don't obey this
-#ctf_maximum_in_team = -1
+#ctf.maximum_in_team = -1
 
 #  The default Diplomacy state (if diplomacy is enabled)
 #    war
 #    peace
 #    alliance
-#ctf_default_diplo_state = war
+#ctf.default_diplo_state = war
 
 #  Chatplus distance - how far players can hear each other
-#ctf_chatplus_distance = -1
+#ctf.chatplus_distance = -1

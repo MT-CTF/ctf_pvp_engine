@@ -1,3 +1,10 @@
+function init()
+	-- Settings: Chat
+	ctf._set("team_channel",               true)
+	ctf._set("global_channel",             true)
+end
+init()
+
 local function team_console_help(name)
 	minetest.chat_send_player(name,"Try:", false)
 	minetest.chat_send_player(name,"/team - show team panel", false)

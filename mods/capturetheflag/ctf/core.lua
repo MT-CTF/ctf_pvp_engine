@@ -6,6 +6,10 @@ ctf.registered_on_save = {}
 function ctf.register_on_save(func)
 	table.insert(ctf.registered_on_save, func)
 end
+ctf.registered_on_init = {}
+function ctf.register_on_init(func)
+	table.insert(ctf.registered_on_init, func)
+end
 
 function ctf.error(area, msg)
 	minetest.log("error", "CTF::" .. area .. " - " ..msg)
@@ -36,22 +40,24 @@ function ctf.init()
 
 	-- Settings: Feature enabling
 	ctf.log("init", "Creating Default Settings")
+
+	-- Settings: Flags and Territory
 	ctf._set("node_ownership",             true)
 	ctf._set("multiple_flags",             true)
 	ctf._set("flag_capture_take",          false)
+	ctf._set("flag_names",                 true)
+
+	-- Settings: User Interface
 	ctf._set("gui",                        true)
 	ctf._set("hud",                        true)
 	ctf._set("team_gui",                   true)
 	ctf._set("flag_teleport_gui",          true)
 	ctf._set("spawn_in_flag_teleport_gui", false)
 	ctf._set("news_gui",                   true)
-	ctf._set("diplomacy",                  true)
-	ctf._set("flag_names",                 true)
-	ctf._set("team_channel",               true)
-	ctf._set("global_channel",             true)
-	ctf._set("players_can_change_team",    true)
 
 	-- Settings: Teams
+	ctf._set("diplomacy",                  true)
+	ctf._set("players_can_change_team",    true)
 	ctf._set("allocate_mode",              0)
 	ctf._set("maximum_in_team",            -1)
 	ctf._set("default_diplo_state",        "war")
@@ -59,6 +65,10 @@ function ctf.init()
 	-- Settings: Misc
 	ctf._set("flag_protect_distance",      25)
 	ctf._set("team_gui_initial",           "news")
+
+	for i = 1, #ctf.registered_on_init do
+		ctf.registered_on_init[i]()
+	end
 
 	ctf.load()
 
@@ -69,13 +79,18 @@ end
 function ctf._set(setting, default)
 	ctf._defsettings[setting] = default
 
-	if minetest.setting_get("ctf_"..setting) then
+	if minetest.setting_get("ctf."..setting) then
+		ctf.log("init", "- " .. setting .. ": " .. minetest.setting_get("ctf."..setting))
+	elseif minetest.setting_get("ctf_"..setting) then
 		ctf.log("init", "- " .. setting .. ": " .. minetest.setting_get("ctf_"..setting))
+		ctf.warning("init", "deprecated setting ctf_"..setting..
+				" used, use ctf."..setting.." instead.")
 	end
 end
 
 function ctf.setting(name)
-	local set = minetest.setting_get("ctf_"..name)
+	local set = minetest.setting_get("ctf."..name) or
+			minetest.setting_get("ctf_"..name)
 	local dset = ctf._defsettings[name]
 	if set ~= nil then
 		if type(dset) == "number" then
