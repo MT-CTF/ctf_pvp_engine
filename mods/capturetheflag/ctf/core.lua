@@ -60,7 +60,6 @@ function ctf.init()
 	ctf._defsettings = {}
 	ctf.teams = {}
 	ctf.players = {}
-	ctf.claimed = {}
 
 	-- See minetest.conf.example in the root of this subgame
 
@@ -160,19 +159,6 @@ function ctf.save()
 		ctf.log("io", "Saved.")
 	else
 		ctf.error("io", "CTF file failed to save!")
-	end
-end
-
--- Get info for ctf.claimed
-function ctf.collect_claimed()
-	ctf.log("utils", "Collecting claimed locations")
-	ctf.claimed = {}
-	for _, team in pairs(ctf.teams) do
-		for i = 1, #team.flags do
-			if team.flags[i].claimed then
-				table.insert(ctf.claimed, team.flags[i])
-			end
-		end
 	end
 end
 

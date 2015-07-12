@@ -278,7 +278,7 @@ function ctf.area.get_spawn(team)
 		return nil
 	end
 
-	if ctf.team(team).spawn and minetest.env:get_node(ctf.team(team).spawn).name == "ctf:flag" then
+	if ctf.team(team).spawn and minetest.env:get_node(ctf.team(team).spawn).name == "ctf_flag:flag" then
 		local flag = ctf_flag.get(ctf.team(team).spawn)
 
 		if not flag then

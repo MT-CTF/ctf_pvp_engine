@@ -6,8 +6,6 @@ ctf.register_on_init(function()
 	ctf._set("gui",                        true)
 	ctf._set("gui.team",                   true)
 	ctf._set("gui.team.initial",           "news")
-	ctf._set("gui.team.teleport_to_flag",  true)
-	ctf._set("gui.team.teleport_to_spawn", false)
 
 	for name, tab in pairs(ctf.gui.tabs) do
 		ctf._set("gui.tab." .. name,       true)
@@ -246,7 +244,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			ctf.gui.show(name, "settings")
 		end
 		if ctf and ctf.team(ctf.players[name].team) and ctf.team(ctf.players[name].team).data then
-			if minetest.registered_items["ctf_flag:flag_top_"..fields.color] then
+			if ctf.flag_colors[fields.color] then
 				ctf.team(ctf.players[name].team).data.color = fields.color
 				ctf.save()
 			else

@@ -143,17 +143,19 @@ minetest.register_chatcommand("list_teams", {
 	end,
 })
 
-minetest.register_chatcommand("ctf", {
+minetest.register_chatcommand("ctf_clean", {
 	description = "Do admin cleaning stuff",
 	privs = {ctf_admin=true},
 	func = function(name, param)
 		ctf.clean_player_lists()
-		ctf.collect_claimed()
+		if ctf_flag.collect_claimed then
+			ctf.collect_claimed()
+		end
 		minetest.chat_send_player(name, "CTF cleaned!")
 	end,
 })
 
-minetest.register_chatcommand("reload_ctf", {
+minetest.register_chatcommand("ctf_reload", {
 	description = "reload the ctf main frame and get settings",
 	privs = {team=true},
 	func = function(name, param)

@@ -21,6 +21,13 @@ minetest.register_privilege("ctf_admin", {
 	description = "Can create teams, manage players, assign team owners.",
 })
 
+-- Colors
+ctf.flag_colors = {
+	red   = "0xFF0000",
+	green = "0x00FF00",
+	blue  = "0x0000FF"
+}
+
 -- Modules
 dofile(minetest.get_modpath("ctf").."/core.lua")
 dofile(minetest.get_modpath("ctf").."/teams.lua")
@@ -31,4 +38,3 @@ dofile(minetest.get_modpath("ctf").."/hud.lua")
 -- Init
 ctf.init()
 ctf.clean_player_lists()
-ctf.collect_claimed()

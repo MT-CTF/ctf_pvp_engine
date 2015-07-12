@@ -4,6 +4,8 @@ function init()
 	ctf._set("flag.capture_take",          false)
 	ctf._set("flag.names",                 true)
 	ctf._set("flag.protect_distance",      25)
+	ctf._set("gui.team.teleport_to_flag",  true)
+	ctf._set("gui.team.teleport_to_spawn", false)
 end
 init()
 ctf.register_on_new_team(function(team)
@@ -32,6 +34,18 @@ end)
 ctf_flag = {}
 dofile(minetest.get_modpath("ctf_flag") .. "/gui.lua")
 dofile(minetest.get_modpath("ctf_flag") .. "/flag_func.lua")
+
+function ctf_flag.collect_claimed()
+	ctf.log("utils", "Collecting claimed locations")
+	ctf_flag.claimed = {}
+	for _, team in pairs(ctf.teams) do
+		for i = 1, #team.flags do
+			if team.flags[i].claimed then
+				table.insert(ctf_flag.claimed, team.flags[i])
+			end
+		end
+	end
+end
 
 -- add a flag to a team
 function ctf_flag.add(team, pos)
@@ -142,11 +156,6 @@ minetest.register_node("ctf_flag:flag", {
 	on_construct = ctf_flag.on_construct,
 	after_place_node = ctf_flag.after_place_node
 })
-ctf.flag_colors = {
-	red   = "0xFF0000",
-	green = "0x00FF00",
-	blue  = "0x0000FF"
-}
 
 for color, _ in pairs(ctf.flag_colors) do
 	minetest.register_node("ctf_flag:flag_top_"..color,{
