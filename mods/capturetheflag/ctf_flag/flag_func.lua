@@ -1,29 +1,77 @@
+local function do_capture(attname, flag, returned)
+	print("Do capture " .. attname)
+	print(flag.x .. ", " .. flag.y .. ", " .. flag.z)
+
+	local team = flag.team
+	local attacker = ctf.player(attname)
+
+	local flag_name = ""
+	if flag.name then
+		flag_name = flag.name .. " "
+	end
+	flag_name = team .. "'s " .. flag_name .. "flag"
+
+
+	if ctf.setting("flag.capture_take") and not returned then
+		minetest.chat_send_all(flag_name.." has been captured from "..team..
+				" by "..attname.." (team "..attacker.team..")")
+
+		ctf.action("flag", attname .. " picked up " .. flag_name)
+
+		-- Post to flag owner's board
+		ctf.post(team, {
+				msg = flag_name .. " has been taken by " .. attname .. " of ".. attacker.team,
+				icon="flag_red" })
+
+		-- Post to attacker's board
+		ctf.post(attacker.team, {
+				msg = attname .. " snatched '" .. flag_name .. "' from " .. team,
+				icon="flag_green"})
+
+		-- Add to claimed list
+		flag.claimed = {
+			team = attacker.team,
+			player = attname
+		}
+		table.insert(ctf_flag.claimed, flag)
+	else
+		minetest.chat_send_all(flag_name.." has been captured from "..team..
+				" by "..attname.." (team "..attacker.team..")")
+
+		ctf.action("flag", attname .. " captured " .. flag_name)
+
+		-- Post to flag owner's board
+		ctf.post(team, {
+				msg = flag_name .. " has been captured by " .. attacker.team,
+				icon="flag_red"})
+
+		-- Post to attacker's board
+		ctf.post(attacker.team, {
+				msg = attname .. " captured '" .. flag_name .. "' from " .. team,
+				icon="flag_green"})
+
+		-- Take flag
+		if ctf.setting("flag.allow_multiple") then
+			ctf_flag.delete(team, vector.new(flag))
+			ctf_flag.add(attacker.team, vector.new(flag))
+		else
+			minetest.env:set_node(pos,{name="air"})
+			ctf_flag.delete(team,pos)
+		end
+	end
+
+	ctf.save()
+end
+
+
 ctf_flag = {
 	on_punch_top = function(pos, node, puncher)
-		pos.y=pos.y-1
-
+		pos.y = pos.y - 1
 		ctf_flag.on_punch(pos, node, puncher)
 	end,
 	on_rightclick_top = function(pos, node, clicker)
-		pos.y=pos.y-1
-
-		local flag = ctf_flag.get(pos)
-		if not flag then
-			return
-		end
-
-		if flag.claimed then
-			if ctf.setting("flag.capture_take") then
-				minetest.chat_send_player(player, "This flag has been taken by ".. flag.claimed.player)
-				minetest.chat_send_player(player, "who is a member of team ".. flag.claimed.team)
-				return
-			else
-				minetest.chat_send_player(player, "Oops! This flag should not be captured. Reverting.")
-				flag.claimed = nil
-			end
-		end
-
-		ctf.gui.flag_board(clicker:get_player_name(),pos)
+		pos.y = pos.y - 1
+		ctf_flag.on_rightclick(pos, node, clicker)
 	end,
 	on_rightclick = function(pos, node, clicker)
 		local flag = ctf_flag.get(pos)
@@ -56,8 +104,8 @@ ctf_flag = {
 
 		if flag.claimed then
 			if ctf.setting("flag.capture_take") then
-				minetest.chat_send_player(player, "This flag has been taken by "..flag.claimed.player)
-				minetest.chat_send_player(player, "who is a member of team "..flag.claimed.team)
+				minetest.chat_send_player(player, "This flag has been taken by " .. flag.claimed.player)
+				minetest.chat_send_player(player, "who is a member of team " .. flag.claimed.team)
 				return
 			else
 				minetest.chat_send_player(player, "Oops! This flag should not be captured. Reverting.")
@@ -71,89 +119,32 @@ ctf_flag = {
 		end
 
 		if ctf.team(team) and ctf.player(player).team then
-			if ctf.player(player).team ~= team then
-				local diplo = ctf.diplo.get(team, ctf.player(player).team)
-
-				if not diplo then
-					diplo = ctf.setting("default_diplo_state")
+			if ctf.player(player).team == team then
+				-- Clicking on their team's flag
+				if ctf.setting("flag.capture_take") then
+					ctf_flag._flagret(player)
 				end
+			else
+				-- Clicked on another team's flag
+				local diplo = ctf.diplo.get(team, ctf.player(player).team) or
+						ctf.setting("default_diplo_state")
 
 				if diplo ~= "war" then
 					minetest.chat_send_player(player, "You are at peace with this team!")
 					return
 				end
 
-				local flag_name = flag.name
-				if ctf.setting("flag.capture_take") then
-					if flag_name and flag_name~="" then
-						minetest.chat_send_all(flag_name.." has been taken from "..team.." by "..player.." (team "..ctf.player(player).team..")")
-						ctf.post(team,{msg=flag_name.." has been taken by "..ctf.player(player).team,icon="flag_red"})
-						ctf.post(ctf.player(player).team,{msg=player.." snatched '"..flag_name.."' from "..team,icon="flag_green"})
-					else
-						minetest.chat_send_all(team.."'s flag at ("..pos.x..","..pos.z..") has taken by "..player.." (team "..ctf.player(player).team..")")
-						ctf.post(team,{msg="The flag at ("..pos.x..","..pos.z..") has been taken by "..ctf.player(player).team,icon="flag_red"})
-						ctf.post(ctf.player(player).team,{msg=player.." snatched flag ("..pos.x..","..pos.z..") from "..team,icon="flag_green"})
-					end
-					flag.claimed = {
-						team = ctf.player(player).team,
-						player = player
-					}
-					table.insert(ctf_flag.claimed, flag)
-				else
-					if flag_name and flag_name~="" then
-						minetest.chat_send_all(flag_name.." has been taken from "..team.." by "..player.." (team "..ctf.player(player).team..")")
-						ctf.post(team,{msg=flag_name.." has been captured by "..ctf.player(player).team,icon="flag_red"})
-						ctf.post(ctf.player(player).team,{msg=player.." captured '"..flag_name.."' from "..team,icon="flag_green"})
-					else
-						minetest.chat_send_all(team.."'s flag at ("..pos.x..","..pos.z..") has been captured by "..player.." (team "..ctf.player(player).team..")")
-						ctf.post(team,{msg="The flag at ("..pos.x..","..pos.z..") has been captured by "..ctf.player(player).team,icon="flag_red"})
-						ctf.post(ctf.player(player).team,{msg=player.." captured flag ("..pos.x..","..pos.z..") from "..team,icon="flag_green"})
-					end
-					ctf.team(team).spawn = nil
-					if ctf.setting("flag.allow_multiple") == true then
-						ctf_flag.delete(team,pos)
-						ctf_flag.add(ctf.player(player).team,pos)
-					else
-						minetest.env:set_node(pos,{name="air"})
-						ctf_flag.delete(team,pos)
-					end
-				end
-				ctf.save()
-			else
-				-- Clicking on their team's flag
-				if ctf.setting("flag.capture_take") then
-					ctf_flag._flagret(player)
-				end
+				do_capture(player, flag)
 			end
 		else
 			minetest.chat_send_player(puncher:get_player_name(),"You are not part of a team!")
 		end
 	end,
 	_flagret = function(player)
-		minetest.chat_send_player(player,"Own flag")
-		for i=1, #ctf_flag.claimed do
+		minetest.chat_send_player(player, "Own flag")
+		for i = 1, #ctf_flag.claimed do
 			if ctf_flag.claimed[i].claimed.player == player then
-				minetest.chat_send_player(player,"Returning flag")
-				local fteam = ctf.team(ctf_flag.claimed[i].team)
-				local flag_name = ctf_flag.claimed[i].name
-				if flag_name and flag_name~="" then
-					minetest.chat_send_all(flag_name.." has been taken from "..fteam.data.name.." by "..ctf_flag.claimed[i].claimed.player.." (team "..ctf_flag.claimed[i].claimed.team..")")
-					ctf.post(fteam,{msg=flag_name.." has been captured by "..ctf_flag.claimed[i].claimed.team,icon="flag_red"})
-					ctf.post(ctf_flag.claimed[i].claimed.team,{msg=player.." captured '"..flag_name.."' from "..fteam.data.name,icon="flag_green"})
-				else
-					minetest.chat_send_all(fteam.data.name.."'s flag at ("..ctf_flag.claimed[i].x..","..ctf_flag.claimed[i].z..") has been captured by "..player.." (team "..ctf_flag.claimed[i].claimed.team..")")
-					ctf.post(fteam.data.name,{msg="The flag at ("..ctf_flag.claimed[i].x..","..ctf_flag.claimed[i].z..") has been captured by "..ctf_flag.claimed[i].claimed.team,icon="flag_red"})
-					ctf.post(ctf_flag.claimed[i].claimed.team,{msg=player.." captured flag ("..ctf_flag.claimed[i].x..","..ctf_flag.claimed[i].z..") from "..fteam.data.name,icon="flag_green"})
-				end
-				fteam.spawn = nil
-				local fpos = {x=ctf_flag.claimed[i].x,y=ctf_flag.claimed[i].y,z=ctf_flag.claimed[i].z}
-				if ctf.setting("flag.allow_multiple") == true then
-					ctf_flag.delete(fteam.data.name,fpos)
-					ctf_flag.add(ctf_flag.claimed[i].claimed.team,fpos)
-				else
-					minetest.env:set_node(fpos,{name="air"})
-					ctf_flag.delete(fteam.data.name,fpos)
-				end
+				do_capture(player, ctf_flag.claimed[i], true)
 				ctf_flag.collect_claimed()
 			end
 		end

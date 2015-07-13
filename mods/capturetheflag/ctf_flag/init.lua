@@ -8,6 +8,7 @@ ctf.register_on_init(function()
 	ctf._set("gui.tab.flags",              true)
 	ctf._set("gui.team.teleport_to_flag",  true)
 	ctf._set("gui.team.teleport_to_spawn", false)
+	ctf._set("flag.capture_mode",          "take")
 end)
 ctf.register_on_new_team(function(team)
 	team.flags = {}
@@ -32,7 +33,6 @@ ctf.register_on_territory_query(function(pos)
 
 	return closest_team, closest_distSQ
 end)
-ctf_flag = {}
 function ctf.get_spawn(team)
 	if not ctf.team(team) then
 		return nil
@@ -50,8 +50,17 @@ function ctf.get_spawn(team)
 		return nil
 	end
 end
+
 dofile(minetest.get_modpath("ctf_flag") .. "/gui.lua")
 dofile(minetest.get_modpath("ctf_flag") .. "/flag_func.lua")
+
+ctf_flag.registered_on_flag_capture = {}
+function ctf_flag.register_on_flag_capture(func)
+	if ctf._mt_loaded then
+		error("You can't register callbacks at game time!")
+	end
+	table.insert(ctf_flag.registered_on_flag_capture, func)
+end
 
 function ctf_flag.collect_claimed()
 	ctf.log("utils", "Collecting claimed locations")
@@ -64,6 +73,7 @@ function ctf_flag.collect_claimed()
 		end
 	end
 end
+ctf_flag.collect_claimed()
 
 -- add a flag to a team
 function ctf_flag.add(team, pos)
