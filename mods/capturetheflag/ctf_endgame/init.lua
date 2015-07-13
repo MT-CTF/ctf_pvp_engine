@@ -33,6 +33,19 @@ ctf_flag.register_on_capture(function(attname, flag)
 		minetest.after(0.5, function()
 			ctf.reset()
 			minetest.delete_area(vector.new(-16*2, -16*2, -16*2), vector.new(16*2, 16*2, 16*2))
+			ctf.team({name="red", color="red", add_team=true})
+			ctf.team({name="blue", color="blue", add_team=true})
+			for name, player in pairs(ctf.players) do
+				local alloc_mode = tonumber(ctf.setting("allocate_mode"))
+				if alloc_mode == 0 then
+					return
+				end
+				local team = ctf.autoalloc(name, alloc_mode)
+				if team then
+					ctf.log("autoalloc", name .. " was allocated to " .. team)
+					ctf.join(name, team)
+				end
+			end
 		end)
 	end
 end)
