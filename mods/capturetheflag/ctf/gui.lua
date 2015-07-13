@@ -248,7 +248,15 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				ctf.team(ctf.players[name].team).data.color = fields.color
 				ctf.save()
 			else
-				minetest.chat_send_player(name,"Color "..fields.color.." does not exist!")
+				local colors = ""
+				for color, code in pairs(ctf.flag_colors) do
+					if color ~= "" then
+						color ..= ", "
+					end
+					color ..= color
+				end
+				minetest.chat_send_player(name,"Color "..fields.color..
+						" does not exist! Available: " .. colors)
 			end
 		end
 		return true
