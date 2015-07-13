@@ -14,7 +14,7 @@ local function do_capture(attname, flag, returned)
 
 	if ctf.setting("flag.capture_take") and not returned then
 		minetest.chat_send_all(flag_name.." has been picked up by "..
-				attname.." (team "..attacker.team..") from "..team)
+				attname.." (team "..attacker.team..")")
 
 		ctf.action("flag", attname .. " picked up " .. flag_name)
 
@@ -33,13 +33,12 @@ local function do_capture(attname, flag, returned)
 			team = attacker.team,
 			player = attname
 		}
-		table.insert(ctf_flag.claimed, flag)
 
 		for i = 1, #ctf_flag.registered_on_pick_up do
 			ctf_flag.registered_on_pick_up[i](attname, flag)
 		end
 	else
-		minetest.chat_send_all(flag_name.." has been captured from "..team..
+		minetest.chat_send_all(flag_name.." has been captured "..
 				" by "..attname.." (team "..attacker.team..")")
 
 		ctf.action("flag", attname .. " captured " .. flag_name)
@@ -68,8 +67,30 @@ local function do_capture(attname, flag, returned)
 		end
 	end
 
+	ctf_flag.collect_claimed()
 	ctf.save()
 end
+
+minetest.register_on_dieplayer(function(player)
+	local name = player:get_player_name()
+
+	for i = 1, #ctf_flag.claimed do
+		local flag = ctf_flag.claimed[i]
+		if flag.claimed.player == name then
+			flag.claimed = nil
+			ctf_flag.collect_claimed()
+
+			local flag_name = ""
+			if flag.name then
+				flag_name = flag.name .. " "
+			end
+			flag_name = flag.team .. "'s " .. flag_name .. "flag"
+
+			minetest.chat_send_all(flag_name.." has returned.")
+
+		end
+	end
+end)
 
 
 ctf_flag = {
