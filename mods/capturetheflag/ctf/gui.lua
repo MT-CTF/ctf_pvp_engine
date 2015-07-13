@@ -250,10 +250,10 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			else
 				local colors = ""
 				for color, code in pairs(ctf.flag_colors) do
-					if color ~= "" then
-						color ..= ", "
+					if colors ~= "" then
+						colors = colors .. ", "
 					end
-					color ..= color
+					colors = colors .. color
 				end
 				minetest.chat_send_player(name,"Color "..fields.color..
 						" does not exist! Available: " .. colors)

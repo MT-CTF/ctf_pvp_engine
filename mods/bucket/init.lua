@@ -30,12 +30,14 @@ local function check_protection(pos, name, text)
 end
 
 -- Register a new liquid
---   source = name of the source node
---   flowing = name of the flowing node
---   itemname = name of the new bucket item (or nil if liquid is not takeable)
---   inventory_image = texture of the new bucket item (ignored if itemname == nil)
+--    source = name of the source node
+--    flowing = name of the flowing node
+--    itemname = name of the new bucket item (or nil if liquid is not takeable)
+--    inventory_image = texture of the new bucket item (ignored if itemname == nil)
+--    name = text description of the bucket item
+--    groups = (optional) groups of the bucket item, for example {water_bucket = 1}
 -- This function can be called from any mod (that depends on bucket).
-function bucket.register_liquid(source, flowing, itemname, inventory_image, name)
+function bucket.register_liquid(source, flowing, itemname, inventory_image, name, groups)
 	bucket.liquids[source] = {
 		source = source,
 		flowing = flowing,
@@ -49,6 +51,7 @@ function bucket.register_liquid(source, flowing, itemname, inventory_image, name
 			inventory_image = inventory_image,
 			stack_max = 1,
 			liquids_pointable = true,
+			groups = groups,
 			on_place = function(itemstack, user, pointed_thing)
 				-- Must be pointing to node
 				if pointed_thing.type ~= "node" then
@@ -105,7 +108,7 @@ end
 minetest.register_craftitem("bucket:bucket_empty", {
 	description = "Empty Bucket",
 	inventory_image = "bucket.png",
-	stack_max = 1,
+	stack_max = 99,
 	liquids_pointable = true,
 	on_use = function(itemstack, user, pointed_thing)
 		-- Must be pointing to node
@@ -115,17 +118,41 @@ minetest.register_craftitem("bucket:bucket_empty", {
 		-- Check if pointing to a liquid source
 		local node = minetest.get_node(pointed_thing.under)
 		local liquiddef = bucket.liquids[node.name]
-		if liquiddef ~= nil and liquiddef.itemname ~= nil and
-				node.name == liquiddef.source then
+		local item_count = user:get_wielded_item():get_count()
+
+		if liquiddef ~= nil
+		and liquiddef.itemname ~= nil
+		and node.name == liquiddef.source then
 			if check_protection(pointed_thing.under,
 					user:get_player_name(),
 					"take ".. node.name) then
 				return
 			end
 
+			-- default set to return filled bucket
+			local giving_back = liquiddef.itemname
+
+			-- check if holding more than 1 empty bucket
+			if item_count > 1 then
+
+				-- if space in inventory add filled bucked, otherwise drop as item
+				local inv = user:get_inventory()
+				if inv:room_for_item("main", {name=liquiddef.itemname}) then
+					inv:add_item("main", liquiddef.itemname)
+				else
+					local pos = user:getpos()
+					pos.y = math.floor(pos.y + 0.5)
+					core.add_item(pos, liquiddef.itemname)
+				end
+
+				-- set to return empty buckets minus 1
+				giving_back = "bucket:bucket_empty "..tostring(item_count-1)
+
+			end
+
 			minetest.add_node(pointed_thing.under, {name="air"})
 
-			return ItemStack(liquiddef.itemname)
+			return ItemStack(giving_back)
 		end
 	end,
 })
@@ -135,7 +162,17 @@ bucket.register_liquid(
 	"default:water_flowing",
 	"bucket:bucket_water",
 	"bucket_water.png",
-	"Water Bucket"
+	"Water Bucket",
+	{water_bucket = 1}
+)
+
+bucket.register_liquid(
+	"default:river_water_source",
+	"default:river_water_flowing",
+	"bucket:bucket_river_water",
+	"bucket_river_water.png",
+	"River Water Bucket",
+	{water_bucket = 1}
 )
 
 bucket.register_liquid(
@@ -152,3 +189,4 @@ minetest.register_craft({
 	burntime = 60,
 	replacements = {{"bucket:bucket_lava", "bucket:bucket_empty"}},
 })
+

@@ -1,15 +1,12 @@
 -- Minetest 0.4 mod: default
 -- See README.txt for licensing and other information.
 
--- The API documentation in here was moved into doc/lua_api.txt
-
-WATER_ALPHA = 160
-WATER_VISC = 1
-LAVA_VISC = 7
-LIGHT_MAX = 14
+-- The API documentation in here was moved into game_api.txt
 
 -- Definitions made by this mod that other mods can use too
 default = {}
+
+default.LIGHT_MAX = 14
 
 -- GUI related stuff
 default.gui_bg = "bgcolor[#080808BB;true]"
@@ -24,7 +21,7 @@ function default.get_hotbar_bg(x,y)
 	return out
 end
 
-default.gui_suvival_form = "size[8,8.5]"..
+default.gui_survival_form = "size[8,8.5]"..
 			default.gui_bg..
 			default.gui_bg_img..
 			default.gui_slots..
@@ -33,6 +30,8 @@ default.gui_suvival_form = "size[8,8.5]"..
 			"list[current_player;craft;1.75,0.5;3,3;]"..
 			"list[current_player;craftpreview;5.75,1.5;1,1;]"..
 			"image[4.75,1.5;1,1;gui_furnace_arrow_bg.png^[transformR270]"..
+			"listring[current_player;main]"..
+			"listring[current_player;craft]"..
 			default.get_hotbar_bg(0,4.25)
 
 -- Load files
@@ -46,3 +45,4 @@ dofile(minetest.get_modpath("default").."/mapgen.lua")
 dofile(minetest.get_modpath("default").."/player.lua")
 dofile(minetest.get_modpath("default").."/trees.lua")
 dofile(minetest.get_modpath("default").."/aliases.lua")
+dofile(minetest.get_modpath("default").."/legacy.lua")

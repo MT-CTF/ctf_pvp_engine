@@ -23,6 +23,7 @@ minetest.after(0, function()
 			name = name,
 			drops = def.drops,
 			flammable = def.groups.flammable,
+			on_blast = def.on_blast,
 		}
 	end
 end)
@@ -79,6 +80,10 @@ local function destroy(drops, pos, cid)
 		return
 	end
 	local def = cid_data[cid]
+	if def and def.on_blast then
+		def.on_blast(vector.new(pos), 1)
+		return
+	end
 	if def and def.flammable then
 		minetest.set_node(pos, fire_node)
 	else
@@ -172,12 +177,6 @@ local function explode(pos, radius)
 	local p = {}
 
 	local c_air = minetest.get_content_id("air")
-	local c_tnt = minetest.get_content_id("tnt:tnt")
-	local c_tnt_burning = minetest.get_content_id("tnt:tnt_burning")
-	local c_gunpowder = minetest.get_content_id("tnt:gunpowder")
-	local c_gunpowder_burning = minetest.get_content_id("tnt:gunpowder_burning")
-	local c_boom = minetest.get_content_id("tnt:boom")
-	local c_fire = minetest.get_content_id("fire:basic_flame")
 
 	for z = -radius, radius do
 	for y = -radius, radius do
@@ -189,13 +188,7 @@ local function explode(pos, radius)
 			p.x = pos.x + x
 			p.y = pos.y + y
 			p.z = pos.z + z
-			if cid == c_tnt or cid == c_gunpowder then
-				burn(p)
-			elseif cid ~= c_tnt_burning and
-					cid ~= c_gunpowder_burning and
-					cid ~= c_air and
-					cid ~= c_fire and
-					cid ~= c_boom then
+			if cid ~= c_air then
 				destroy(drops, p, cid)
 			end
 		end
@@ -222,6 +215,7 @@ end
 minetest.register_node("tnt:tnt", {
 	description = "TNT",
 	tiles = {"tnt_top.png", "tnt_bottom.png", "tnt_side.png"},
+	is_ground_content = false,
 	groups = {dig_immediate=2, mesecon=2},
 	sounds = default.node_sound_wood_defaults(),
 	on_punch = function(pos, node, puncher)
@@ -230,6 +224,9 @@ minetest.register_node("tnt:tnt", {
 			minetest.set_node(pos, {name="tnt:tnt_burning"})
 			minetest.get_node_timer(pos):start(4)
 		end
+	end,
+	on_blast = function(pos, intensity)
+		burn(pos)
 	end,
 	mesecons = {effector = {action_on = boom}},
 })
@@ -250,40 +247,48 @@ minetest.register_node("tnt:tnt_burning", {
 	drop = "",
 	sounds = default.node_sound_wood_defaults(),
 	on_timer = boom,
+	-- unaffected by explosions
+	on_blast = function() end,
 })
 
 minetest.register_node("tnt:boom", {
 	drawtype = "plantlike",
 	tiles = {"tnt_boom.png"},
-	light_source = LIGHT_MAX,
+	light_source = default.LIGHT_MAX,
 	walkable = false,
 	drop = "",
 	groups = {dig_immediate=3},
 	on_timer = function(pos, elapsed)
 		minetest.remove_node(pos)
 	end,
+	-- unaffected by explosions
+	on_blast = function() end,
 })
 
 minetest.register_node("tnt:gunpowder", {
 	description = "Gun Powder",
 	drawtype = "raillike",
 	paramtype = "light",
+	is_ground_content = false,
 	sunlight_propagates = true,
 	walkable = false,
-	tiles = {"tnt_gunpowder.png",},
+	tiles = {"tnt_gunpowder_straight.png", "tnt_gunpowder_curved.png", "tnt_gunpowder_t_junction.png", "tnt_gunpowder_crossing.png"},
 	inventory_image = "tnt_gunpowder_inventory.png",
 	wield_image = "tnt_gunpowder_inventory.png",
 	selection_box = {
 		type = "fixed",
 		fixed = {-1/2, -1/2, -1/2, 1/2, -1/2+1/16, 1/2},
 	},
-	groups = {dig_immediate=2,attached_node=1},
+	groups = {dig_immediate=2,attached_node=1,connect_to_raillike=minetest.raillike_group("gunpowder")},
 	sounds = default.node_sound_leaves_defaults(),
 	
 	on_punch = function(pos, node, puncher)
 		if puncher:get_wielded_item():get_name() == "default:torch" then
 			burn(pos)
 		end
+	end,
+	on_blast = function(pos, intensity)
+		burn(pos)
 	end,
 })
 
@@ -294,7 +299,34 @@ minetest.register_node("tnt:gunpowder_burning", {
 	walkable = false,
 	light_source = 5,
 	tiles = {{
-		name = "tnt_gunpowder_burning_animated.png",
+		name = "tnt_gunpowder_burning_straight_animated.png",
+		animation = {
+			type = "vertical_frames",
+			aspect_w = 16,
+			aspect_h = 16,
+			length = 1,
+		}
+	},
+	{
+		name = "tnt_gunpowder_burning_curved_animated.png",
+		animation = {
+			type = "vertical_frames",
+			aspect_w = 16,
+			aspect_h = 16,
+			length = 1,
+		}
+	},
+	{
+		name = "tnt_gunpowder_burning_t_junction_animated.png",
+		animation = {
+			type = "vertical_frames",
+			aspect_w = 16,
+			aspect_h = 16,
+			length = 1,
+		}
+	},
+	{
+		name = "tnt_gunpowder_burning_crossing_animated.png",
 		animation = {
 			type = "vertical_frames",
 			aspect_w = 16,
@@ -307,7 +339,7 @@ minetest.register_node("tnt:gunpowder_burning", {
 		fixed = {-1/2, -1/2, -1/2, 1/2, -1/2+1/16, 1/2},
 	},
 	drop = "",
-	groups = {dig_immediate=2,attached_node=1},
+	groups = {dig_immediate=2,attached_node=1,connect_to_raillike=minetest.raillike_group("gunpowder")},
 	sounds = default.node_sound_leaves_defaults(),
 	on_timer = function(pos, elapsed)
 		for dx = -1, 1 do
@@ -324,7 +356,9 @@ minetest.register_node("tnt:gunpowder_burning", {
 		end
 		end
 		minetest.remove_node(pos)
-	end
+	end,
+	-- unaffected by explosions
+	on_blast = function() end,
 })
 
 minetest.register_abm({

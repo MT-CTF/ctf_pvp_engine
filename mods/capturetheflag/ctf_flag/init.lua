@@ -4,6 +4,7 @@ function init()
 	ctf._set("flag.capture_take",          false)
 	ctf._set("flag.names",                 true)
 	ctf._set("flag.protect_distance",      25)
+	ctf._set("gui.tab.flags",              true)
 	ctf._set("gui.team.teleport_to_flag",  true)
 	ctf._set("gui.team.teleport_to_spawn", false)
 end

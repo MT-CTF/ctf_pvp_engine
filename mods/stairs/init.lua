@@ -7,14 +7,22 @@ stairs = {}
 function stairs.register_stair(subname, recipeitem, groups, images, description, sounds)
 	minetest.register_node(":stairs:stair_" .. subname, {
 		description = description,
-		drawtype = "nodebox",
+		drawtype = "mesh",
+		mesh = "stairs_stair.obj",
 		tiles = images,
 		paramtype = "light",
 		paramtype2 = "facedir",
-		is_ground_content = true,
+		is_ground_content = false,
 		groups = groups,
 		sounds = sounds,
-		node_box = {
+		selection_box = {
+			type = "fixed",
+			fixed = {
+				{-0.5, -0.5, -0.5, 0.5, 0, 0.5},
+				{-0.5, 0, 0, 0.5, 0.5, 0.5},
+			},
+		},
+		collision_box = {
 			type = "fixed",
 			fixed = {
 				{-0.5, -0.5, -0.5, 0.5, 0, 0.5},
@@ -87,7 +95,7 @@ function stairs.register_slab(subname, recipeitem, groups, images, description, 
 		tiles = images,
 		paramtype = "light",
 		paramtype2 = "facedir",
-		is_ground_content = true,
+		is_ground_content = false,
 		groups = groups,
 		sounds = sounds,
 		node_box = {
@@ -296,3 +304,16 @@ stairs.register_stair_and_slab("pinewood", "default:pinewood",
 		"Pinewood Slab",
 		default.node_sound_wood_defaults())
 
+stairs.register_stair_and_slab("obsidian", "default:obsidian",
+		{cracky=1,level=2},
+		{"default_obsidian.png"},
+		"Obsidian Stair",
+		"Obsidian Slab",
+		default.node_sound_stone_defaults())
+
+stairs.register_stair_and_slab("obsidianbrick", "default:obsidianbrick",
+		{cracky=1,level=2},
+		{"default_obsidian_brick.png"},
+		"Obsidian Brick Stair",
+		"Obsidian Brick Slab",
+		default.node_sound_stone_defaults())
