@@ -1,5 +1,6 @@
 -- Initialise
-function init()
+ctf.register_on_init(function()
+	ctf.log("flag", "Initialising...")
 	ctf._set("flag.allow_multiple",        true)
 	ctf._set("flag.capture_take",          false)
 	ctf._set("flag.names",                 true)
@@ -7,8 +8,7 @@ function init()
 	ctf._set("gui.tab.flags",              true)
 	ctf._set("gui.team.teleport_to_flag",  true)
 	ctf._set("gui.team.teleport_to_spawn", false)
-end
-init()
+end)
 ctf.register_on_new_team(function(team)
 	team.flags = {}
 end)

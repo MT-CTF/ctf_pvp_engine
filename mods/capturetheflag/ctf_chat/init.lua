@@ -1,11 +1,11 @@
-ctf_chat = {}
-function ctf_chat.init()
+ctf.register_on_init(function()
+	ctf.log("chat", "Initialising...")
+
 	-- Settings: Chat
-	ctf._set("chat.team_channel",               true)
-	ctf._set("chat.global_channel",             true)
+	ctf._set("chat.team_channel",          true)
+	ctf._set("chat.global_channel",        true)
 	ctf._set("chat.default",               "global")
-end
-ctf_chat.init()
+end)
 
 local function team_console_help(name)
 	minetest.chat_send_player(name,"Try:", false)
@@ -126,9 +126,19 @@ minetest.register_chatcommand("ctf_clean", {
 	end,
 })
 
+minetest.register_chatcommand("ctf_reset", {
+	description = "Delete all CTF saved states and start again.",
+	privs = {ctf_admin=true},
+	func = function(name, param)
+		minetest.chat_send_all("The CTF core was reset. All team memberships," ..
+				"flags, land ownerships etc have been deleted.")
+		ctf.reset()
+	end,
+})
+
 minetest.register_chatcommand("ctf_reload", {
 	description = "reload the ctf main frame and get settings",
-	privs = {team=true},
+	privs = {ctf_admin=true},
 	func = function(name, param)
 		ctf.save()
 		ctf.init()
@@ -139,7 +149,7 @@ minetest.register_chatcommand("ctf_reload", {
 minetest.register_chatcommand("team_owner", {
 	params = "player name",
 	description = "Make player team owner",
-	privs = {team=true},
+	privs = {ctf_admin=true},
 	func = function(name, param)
 		if ctf and ctf.players and ctf.player(param) and ctf.player(param).team and ctf.team(ctf.player(param).team) then
 			if ctf.player(param).auth == true then

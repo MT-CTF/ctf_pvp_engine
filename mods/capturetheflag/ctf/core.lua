@@ -1,22 +1,43 @@
 -- Registered
 ctf.registered_on_load = {}
 function ctf.register_on_load(func)
+	if ctf._mt_loaded then
+		error("You can't register callbacks at game time!")
+	end
 	table.insert(ctf.registered_on_load, func)
+	if ctf._loaddata then
+		func(ctf._loaddata)
+	end
 end
 ctf.registered_on_save = {}
 function ctf.register_on_save(func)
+	if ctf._mt_loaded then
+		error("You can't register callbacks at game time!")
+	end
 	table.insert(ctf.registered_on_save, func)
 end
 ctf.registered_on_init = {}
 function ctf.register_on_init(func)
+	if ctf._mt_loaded then
+		error("You can't register callbacks at game time!")
+	end
 	table.insert(ctf.registered_on_init, func)
+	if ctf._inited then
+		func()
+	end
 end
 ctf.registered_on_new_team = {}
 function ctf.register_on_new_team(func)
+	if ctf._mt_loaded then
+		error("You can't register callbacks at game time!")
+	end
 	table.insert(ctf.registered_on_new_team, func)
 end
 ctf.registered_on_territory_query = {}
 function ctf.register_on_territory_query(func)
+	if ctf._mt_loaded then
+		error("You can't register callbacks at game time!")
+	end
 	table.insert(ctf.registered_on_territory_query, func)
 end
 
@@ -51,9 +72,8 @@ function ctf.warning(area, msg)
 	print("WARNING: [CaptureTheFlag] (" .. area .. ") " .. msg)
 end
 
-
-
 function ctf.init()
+	ctf._inited = true
 	ctf.log("init", "Initialising!")
 
 	-- Set up structures
@@ -79,6 +99,12 @@ function ctf.init()
 	ctf.load()
 
 	ctf.log("init", "Done!")
+end
+
+function ctf.reset()
+	ctf.log("io", "Deleting CTF save data...")
+	os.remove(minetest.get_worldpath().."/ctf.txt")
+	ctf.init()
 end
 
 -- Set default setting value
@@ -130,10 +156,16 @@ function ctf.load()
 			end
 			return
 		end
+		ctf._loaddata = table
 	else
 		ctf.log("io", "ctf.txt is not present in the world folder")
 	end
 end
+
+minetest.after(0, function()
+	ctf._loaddata = nil
+	ctf._mt_loaded = true
+end)
 
 function ctf.save()
 	ctf.log("io", "Saving CTF state...")

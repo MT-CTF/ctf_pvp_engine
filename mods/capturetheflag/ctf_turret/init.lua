@@ -1,7 +1,8 @@
-function init()
+ctf.register_on_init(function()
+	ctf.log("turrets", "Initialising...")
+
 	ctf._set("turrets", true)
-end
-init()
+end)
 
 if ctf.setting("turrets") then
 	ARROW_DAMAGE = 2
