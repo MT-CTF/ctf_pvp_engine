@@ -89,6 +89,9 @@ function ctf_flag.add(team, pos)
 		return
 	end
 
+	ctf.log("flag", "Adding flag to " .. team .. " at (" .. pos.x ..
+			", " .. pos.y .. ", " .. pos.z .. ")")
+
 	if not ctf.team(team).flags then
 		ctf.team(team).flags = {}
 	end
@@ -135,6 +138,9 @@ function ctf_flag.delete(team, pos)
 	if not team or team == "" then
 		return
 	end
+
+	ctf.log("flag", "Deleting flag from " .. team .. " at (" .. pos.x ..
+			", " .. pos.y .. ", " .. pos.z .. ")")
 
 	for i = 1, #ctf.team(team).flags do
 		if (
