@@ -7,7 +7,6 @@ function ctf_chat.init()
 end
 ctf_chat.init()
 
-
 local function team_console_help(name)
 	minetest.chat_send_player(name,"Try:", false)
 	minetest.chat_send_player(name,"/team - show team panel", false)
@@ -59,17 +58,7 @@ minetest.register_chatcommand("team", {
 				minetest.chat_send_player(name, "You can not do this!",false)
 			end
 		elseif param == "all" then
-			minetest.chat_send_player(name, "Teams:",false)
-			for k,v in pairs(ctf.teams) do
-				if v and v.players then
-					local numPlayers = ctf.count_players_in_team(k)
-					local numFlags = 0
-					for k, v in pairs(v.flags) do
-						numFlags = numFlags + 1
-					end
-					minetest.chat_send_player(name, ">> "..k.." ("..numFlags.." flags, "..numPlayers.." players)")
-				end
-			end
+			ctf.list_teams(name)
 		elseif ctf.team(param) then
 			minetest.chat_send_player(name,"Team "..param..":",false)
 			local count = 0
@@ -124,27 +113,6 @@ minetest.register_chatcommand("join", {
 		ctf.join(name, param, false)
 	end,
 })
-minetest.register_chatcommand("list_teams", {
-	params = "",
-	description = "List all available teams",
-	func = function(name, param)
-		minetest.chat_send_player(name, "This command will be made obsolete! Use '/team all' instead!",false)
-		minetest.chat_send_player(name, "Teams:")
-		for k,v in pairs(ctf.teams) do
-			if v and v.players then
-				local numItems = 0
-				for k,v in pairs(v.players) do
-				    numItems = numItems + 1
-				end
-				local numItems2 = 0
-				for k,v in pairs(v.flags) do
-				    numItems2 = numItems2 + 1
-				end
-				minetest.chat_send_player(name, ">> "..k.." ("..numItems2.." flags, "..numItems.." players)",false)
-			end
-		end
-	end,
-})
 
 minetest.register_chatcommand("ctf_clean", {
 	description = "Do admin cleaning stuff",
@@ -152,7 +120,7 @@ minetest.register_chatcommand("ctf_clean", {
 	func = function(name, param)
 		ctf.clean_player_lists()
 		if ctf_flag.collect_claimed then
-			ctf.collect_claimed()
+			ctf_flag.collect_claimed()
 		end
 		minetest.chat_send_player(name, "CTF cleaned!")
 	end,

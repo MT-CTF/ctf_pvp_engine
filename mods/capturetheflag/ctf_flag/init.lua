@@ -33,6 +33,23 @@ ctf.register_on_territory_query(function(pos)
 	return closest_team, closest_distSQ
 end)
 ctf_flag = {}
+function ctf.get_spawn(team)
+	if not ctf.team(team) then
+		return nil
+	end
+
+	if ctf.team(team).spawn then
+		return ctf.team(team).spawn
+	end
+
+	-- Get spawn from first flag
+	ctf_flag.asset_flags(team)
+	if #ctf.team(team).flags > 0 then
+		return ctf.team(team).flags[1]
+	else
+		return nil
+	end
+end
 dofile(minetest.get_modpath("ctf_flag") .. "/gui.lua")
 dofile(minetest.get_modpath("ctf_flag") .. "/flag_func.lua")
 

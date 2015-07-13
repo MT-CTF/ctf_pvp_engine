@@ -29,6 +29,29 @@ function ctf.team(name) -- get or add a team
 	end
 end
 
+function ctf.list_teams(name)
+	minetest.chat_send_player(name, "Teams:")
+	for tname, team in pairs(ctf.teams) do
+		if team and team.players then
+			local details = ""
+
+			local numPlayers = ctf.count_players_in_team(tname)
+			details = numPlayers .. " members"
+
+			if team.flags then
+				local numFlags = 0
+				for flagid, flag in pairs(team.flags) do
+					numFlags = numFlags + 1
+				end
+				details = details .. ", " .. numFlags .. " flags"
+			end
+
+			minetest.chat_send_player(name, ">> " .. tname ..
+					" (" .. details .. ")")
+		end
+	end
+end
+
 -- Count number of players in a team
 function ctf.count_players_in_team(team)
 	local count = 0
@@ -78,6 +101,7 @@ function ctf.join(name, team, force)
 	if not ctf.team(team) then
 		minetest.log("action", name .. " attempted to join " .. team .. ", which doesn't exist")
 		minetest.chat_send_player(name, "No such team.")
+		ctf.list_teams(name)
 		return false
 	end
 
@@ -272,43 +296,26 @@ end)
 
 -- updates the spawn position for a team
 function ctf.get_spawn(team)
-	ctf_flag.asset_flags(team)
-
-	if not ctf.team(team) then
-		return nil
-	end
-
-	if ctf.team(team).spawn and minetest.env:get_node(ctf.team(team).spawn).name == "ctf_flag:flag" then
-		local flag = ctf_flag.get(ctf.team(team).spawn)
-
-		if not flag then
-			return nil
-		end
-
-		local _team = flag.team
-
-		-- Check to see if spawn is already defined
-		if team == _team then
-			return nil
-		end
-	end
-
-	-- Get new spawn
-	if #ctf.team(team).flags > 0 then
-		ctf.team(team).spawn = ctf.team(team).flags[1]
+	if ctf.team(team) and ctf.team(team).spawn then
 		return ctf.team(team).spawn
+	else
+		return nil
 	end
 end
 
 minetest.register_on_respawnplayer(function(player)
-	if player and ctf.player(player:get_player_name()) then
-		local team = ctf.player(player:get_player_name()).team
-		if ctf.team(team) then
-			local spawn = ctf.get_spawn(team)
-			player:moveto(spawn, false)
-			return true
-		end
+	if not player then
+		return false
 	end
 
-	return false
+	local name = player:get_player_name()
+	local team = ctf.player(name).team
+
+	if ctf.team(team) then
+		local spawn = ctf.get_spawn(team)
+		player:moveto(spawn, false)
+		return true
+	else
+		return false
+	end
 end)
