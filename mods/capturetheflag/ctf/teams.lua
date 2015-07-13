@@ -1,5 +1,5 @@
 -- Get or add a team
-function ctf.team(name) -- get or add a team
+function ctf.team(name)
 	if type(name) == "table" then
 		if not name.add_team then
 			ctf.error("team", "Invalid table given to ctf.team")
@@ -26,6 +26,19 @@ function ctf.team(name) -- get or add a team
 			ctf.warning("team", "'" .. name.."' does not exist!")
 		end
 		return ctf.teams[name]
+	end
+end
+
+function ctf.remove_team(name)
+	local team = ctf.team(name)
+	if team then
+		for username, player in pairs(team.players) do
+			player.team = nil
+		end
+		for i = 1, #team.flags do
+			team.flags[i].team = nil
+		end
+		ctf.teams[name] = nil
 	end
 end
 

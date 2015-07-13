@@ -54,12 +54,20 @@ end
 dofile(minetest.get_modpath("ctf_flag") .. "/gui.lua")
 dofile(minetest.get_modpath("ctf_flag") .. "/flag_func.lua")
 
-ctf_flag.registered_on_flag_capture = {}
-function ctf_flag.register_on_flag_capture(func)
+ctf_flag.registered_on_capture = {}
+function ctf_flag.register_on_capture(func)
 	if ctf._mt_loaded then
 		error("You can't register callbacks at game time!")
 	end
-	table.insert(ctf_flag.registered_on_flag_capture, func)
+	table.insert(ctf_flag.registered_on_capture, func)
+end
+
+ctf_flag.registered_on_pick_up = {}
+function ctf_flag.register_on_pick_up(func)
+	if ctf._mt_loaded then
+		error("You can't register callbacks at game time!")
+	end
+	table.insert(ctf_flag.registered_on_pick_up, func)
 end
 
 function ctf_flag.collect_claimed()

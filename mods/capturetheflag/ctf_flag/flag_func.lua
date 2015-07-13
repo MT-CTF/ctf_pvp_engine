@@ -13,8 +13,8 @@ local function do_capture(attname, flag, returned)
 
 
 	if ctf.setting("flag.capture_take") and not returned then
-		minetest.chat_send_all(flag_name.." has been captured from "..team..
-				" by "..attname.." (team "..attacker.team..")")
+		minetest.chat_send_all(flag_name.." has been picked up by "..
+				attname.." (team "..attacker.team..") from "..team)
 
 		ctf.action("flag", attname .. " picked up " .. flag_name)
 
@@ -34,6 +34,10 @@ local function do_capture(attname, flag, returned)
 			player = attname
 		}
 		table.insert(ctf_flag.claimed, flag)
+
+		for i = 1, #ctf_flag.registered_on_pick_up do
+			ctf_flag.registered_on_pick_up[i](attname, flag)
+		end
 	else
 		minetest.chat_send_all(flag_name.." has been captured from "..team..
 				" by "..attname.." (team "..attacker.team..")")
@@ -57,6 +61,10 @@ local function do_capture(attname, flag, returned)
 		else
 			minetest.env:set_node(pos,{name="air"})
 			ctf_flag.delete(team,pos)
+		end
+
+		for i = 1, #ctf_flag.registered_on_capture do
+			ctf_flag.registered_on_capture[i](attname, flag)
 		end
 	end
 
