@@ -1,9 +1,12 @@
-function init()
+ctf_chat = {}
+function ctf_chat.init()
 	-- Settings: Chat
-	ctf._set("team_channel",               true)
-	ctf._set("global_channel",             true)
+	ctf._set("chat.team_channel",               true)
+	ctf._set("chat.global_channel",             true)
+	ctf._set("chat.default",               "global")
 end
-init()
+ctf_chat.init()
+
 
 local function team_console_help(name)
 	minetest.chat_send_player(name,"Try:", false)
@@ -185,24 +188,6 @@ minetest.register_chatcommand("team_owner", {
 	end,
 })
 
-minetest.register_chatcommand("all", {
-	params = "msg",
-	description = "Send a message on the global channel",
-	func = function(name, param)
-		if not ctf.setting("global_channel") then
-			minetest.chat_send_player(name,"The global channel is disabled",false)
-			return
-		end
-
-		if ctf.player(name) and ctf.player(name).team then
-			minetest.chat_send_all(ctf.player(name).team.." <"..name.."> "..param)
-		else
-			minetest.chat_send_all("GLOBAL <"..name.."> "..param)
-		end
-
-	end,
-})
-
 minetest.register_chatcommand("post", {
 	params = "message",
 	description = "Post a message on your team's message board",
@@ -226,29 +211,77 @@ minetest.register_chatcommand("post", {
 	end,
 })
 
+minetest.register_chatcommand("all", {
+	params = "msg",
+	description = "Send a message on the global channel",
+	func = function(name, param)
+		if not ctf.setting("chat.global_channel") then
+			minetest.chat_send_player(name, "The global channel is disabled")
+			return
+		end
+
+		if ctf.player(name) and ctf.player(name).team then
+			minetest.chat_send_all(ctf.player(name).team .. " <" ..
+					name .. "> " .. param)
+		else
+			minetest.chat_send_all("<"..name.."> "..param)
+		end
+	end
+})
+
+minetest.register_chatcommand("t", {
+	params = "msg",
+	description = "Send a message on the team channel",
+	func = function(name, param)
+		if not ctf.setting("chat.team_channel") then
+			minetest.chat_send_player(name, "The team channel is disabled.")
+			return
+		end
+
+		if ctf.player(name).team then
+			local team = ctf.team(ctf.player(name).team)
+			if team then
+				for username, to in pairs(team.players) do
+					minetest.chat_send_player(username,
+							"<" .. name .. "> ** " .. param .. " **")
+				end
+			end
+		else
+			minetest.chat_send_player(name,
+					"You're not in a team, so you have no team to talk to.")
+		end
+	end
+})
+
 -- Chat plus stuff
 if chatplus then
-	chatplus.register_handler(function(from,to,msg)
-		if not ctf.setting("team_channel") then
+	chatplus.register_handler(function(from, to, msg)
+		if not ctf.setting("chat.team_channel") or
+				ctf.setting("chat.default") ~= "team" then
+			-- Send to global
 			return nil
 		end
 
+		-- Send to team
 		local fromp = ctf.player(from)
 		local top = ctf.player(to)
 
 		if not fromp then
-			if not ctf.setting("global_channel") then
-				minetest.chat_send_player(from,"You are not yet part of a team, so you have no mates to send to",false)
+			if not ctf.setting("chat.global_channel") then
+				-- Send to global
+				return nil
 			else
-				minetest.chat_send_player(to,"GLOBAL <"..from.."> "..msg,false)
+				-- Global channel is disabled
+				minetest.chat_send_player(from,
+						"You are not yet part of a team! Join one so you can chat to people.",
+						false)
+				return false
 			end
-			return false
 		end
 
-		if not top then
-			return false
+		if top.team == fromp.team then
+			minetest.chat_send_player(to, "<" .. from .. "> ** " .. msg .. " **")
 		end
-
-		return (fromp.team == top.team)
+		return false
 	end)
 end
