@@ -2,7 +2,7 @@
 local old_is_protected = minetest.is_protected
 
 function minetest.is_protected(pos, name)
-	local team = ctf.area.get_territory_owner(pos)
+	local team = ctf.get_territory_owner(pos)
 
 	if not team or not ctf.team(team) then
 		return old_is_protected(pos, name)

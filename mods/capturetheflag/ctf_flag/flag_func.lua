@@ -193,7 +193,7 @@ ctf_flag = {
 					ctf.team(team).spawn = pos
 				end
 			else
-				ctf.area.get_spawn(team)
+				ctf.get_spawn(team)
 			end
 
 			ctf.save()

@@ -162,8 +162,7 @@ function ctf.save()
 	end
 end
 
-ctf.area = {}
-function ctf.area.get_territory_owner(pos)
+function ctf.get_territory_owner(pos)
 	local largest = nil
 	local largest_weight = 0
 	for i = 1, #ctf.registered_on_territory_query do

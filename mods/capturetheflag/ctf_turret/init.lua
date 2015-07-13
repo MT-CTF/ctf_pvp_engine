@@ -60,7 +60,7 @@ if ctf.setting("turrets") then
 				return
 			end
 
-			local app = ctf.area.get_territory_owner(pos)
+			local app = ctf.get_territory_owner(pos)
 			if app and app~=team then
 				team = app
 				meta:set_string("team",team)

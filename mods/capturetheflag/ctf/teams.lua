@@ -271,7 +271,7 @@ minetest.register_on_newplayer(function(player)
 end)
 
 -- updates the spawn position for a team
-function ctf.area.get_spawn(team)
+function ctf.get_spawn(team)
 	ctf_flag.asset_flags(team)
 
 	if not ctf.team(team) then
@@ -304,7 +304,7 @@ minetest.register_on_respawnplayer(function(player)
 	if player and ctf.player(player:get_player_name()) then
 		local team = ctf.player(player:get_player_name()).team
 		if ctf.team(team) then
-			local spawn = ctf.area.get_spawn(team)
+			local spawn = ctf.get_spawn(team)
 			player:moveto(spawn, false)
 			return true
 		end
