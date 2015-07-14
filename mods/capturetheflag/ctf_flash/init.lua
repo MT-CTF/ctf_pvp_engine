@@ -1,9 +1,11 @@
 ctf.register_on_init(function()
 	ctf.log("flash", "Initialising...")
-	ctf._set("gui.team.teleport_to_spawn", false)
-	ctf._set("flash",                      false)
-	ctf._set("flash.teams",                "red, red, 15, 7, 39; blue, blue, -9, 9, -43")
-	ctf._set("flash.remove_leaveplayer",   true)
+	ctf._set("remove_player_on_leave",     true)
+	ctf._set("new_game.teams",             "")
+	ctf._set("new_game.clear_inv",         false)
+	-- ^ name, color, x, y, z; name, color, x, y, z
+	-- ^ eg: red, red, 15, 7, 39; blue, blue, -9, 9, -43
+
 end)
 
 local function safe_place(pos, node)
@@ -46,15 +48,19 @@ minetest.register_on_joinplayer(function(player)
 end)
 
 minetest.register_on_leaveplayer(function(player)
-	if ctf.setting("flash.remove_leaveplayer") then
+	if ctf.setting("remove_player_on_leave") then
 		ctf.remove_player(player:get_player_name())
 	end
 end)
 
 ctf.register_on_new_game(function()
+	local teams = ctf.setting("new_game.teams")
+	if teams:trim() == "" then
+		return
+	end
 	ctf.log("flash", "Setting up new game!")
 
-	local teams = ctf.setting("flash.teams"):split(";")
+	teams = teams:split(";")
 	local pos = {}
 	for i, v in pairs(teams) do
 		local team = v:split(",")
@@ -91,16 +97,10 @@ ctf.register_on_new_game(function()
 
 	for i, player in pairs(minetest.get_connected_players()) do
 		local name = player:get_player_name()
-		local inv = player:get_inventory()
-		inv:set_list("main", {})
-		inv:set_list("craft", {})
-
 		local alloc_mode = tonumber(ctf.setting("allocate_mode"))
-		if alloc_mode == 0 then
-			return
-		end
 		local team = ctf.autoalloc(name, alloc_mode)
-		if team then
+
+		if alloc_mode ~= 0 and team then
 			ctf.log("autoalloc", name .. " was allocated to " .. team)
 			ctf.join(name, team)
 		end
@@ -113,10 +113,13 @@ ctf.register_on_new_game(function()
 			end
 		end
 
-		minetest.log("action", "Giving initial stuff to player "..player:get_player_name())
-		player:get_inventory():add_item('main', 'default:pick_steel')
-		player:get_inventory():add_item('main', 'default:sword_steel')
-		player:get_inventory():add_item('main', 'default:cobble 99')
+		if ctf.setting("new_game.clear_inv_on_new_game") then
+			local inv = player:get_inventory()
+			inv:set_list("main", {})
+			inv:set_list("craft", {})
+			give_initial_stuff(player)
+		end
+
 		player:set_hp(20)
 	end
 	minetest.chat_send_all("Next round!")

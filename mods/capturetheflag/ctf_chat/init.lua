@@ -144,6 +144,17 @@ minetest.register_chatcommand("ctf_reload", {
 	end
 })
 
+minetest.register_chatcommand("ctf_ls", {
+	description = "ctf: list settings",
+	privs = {ctf_admin=true},
+	func = function(name, param)
+		minetest.chat_send_player(name, "Settings:")
+		for set, def in orderedPairs(ctf._defsettings) do
+			minetest.chat_send_player(name, " - " .. set .. ": " .. dump(ctf.setting(set)))
+		end
+	end
+})
+
 minetest.register_chatcommand("team_owner", {
 	params = "player name",
 	description = "Make player team owner",

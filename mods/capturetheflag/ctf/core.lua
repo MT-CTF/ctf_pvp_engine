@@ -1,3 +1,47 @@
+-- Awaiting core support.
+local function __genOrderedIndex( t )
+    local orderedIndex = {}
+    for key in pairs(t) do
+        table.insert( orderedIndex, key )
+    end
+    table.sort( orderedIndex )
+    return orderedIndex
+end
+
+local function orderedNext(t, state)
+    -- Equivalent of the next function, but returns the keys in the alphabetic
+    -- order. We use a temporary ordered key table that is stored in the
+    -- table being iterated.
+
+    local key = nil
+    if state == nil then
+        t.__orderedIndex = __genOrderedIndex( t )
+        key = t.__orderedIndex[1]
+    else
+        for i = 1,table.getn(t.__orderedIndex) do
+            if t.__orderedIndex[i] == state then
+                key = t.__orderedIndex[i+1]
+            end
+        end
+    end
+
+    if key then
+        return key, t[key]
+    end
+
+    -- no more value to return, cleanup
+    t.__orderedIndex = nil
+    return
+end
+
+function orderedPairs(t)
+    -- Equivalent of the pairs() function on tables. Allows to iterate
+    -- in order
+    return orderedNext, t, nil
+end
+
+
+
 -- Registered
 ctf.registered_on_load = {}
 function ctf.register_on_load(func)
@@ -118,13 +162,17 @@ end
 
 -- Set default setting value
 function ctf._set(setting, default)
+	if ctf._defsettings[setting] then
+		ctf.warning("settings", "Setting " .. dump(setting) .. " redeclared!")
+		ctf.warning("settings", debug.traceback())
+	end
 	ctf._defsettings[setting] = default
 
 	if minetest.setting_get("ctf."..setting) then
-		ctf.log("init", "- " .. setting .. ": " .. minetest.setting_get("ctf."..setting))
+		ctf.log("settings", "- " .. setting .. ": " .. minetest.setting_get("ctf."..setting))
 	elseif minetest.setting_get("ctf_"..setting) then
-		ctf.log("init", "- " .. setting .. ": " .. minetest.setting_get("ctf_"..setting))
-		ctf.warning("init", "deprecated setting ctf_"..setting..
+		ctf.log("settings", "- " .. setting .. ": " .. minetest.setting_get("ctf_"..setting))
+		ctf.warning("settings", "deprecated setting ctf_"..setting..
 				" used, use ctf."..setting.." instead.")
 	end
 end
