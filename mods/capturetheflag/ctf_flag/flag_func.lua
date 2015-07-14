@@ -66,7 +66,6 @@ local function do_capture(attname, flag, returned)
 		end
 	end
 
-	ctf_flag.collect_claimed()
 	ctf.needs_save = true
 end
 
@@ -155,10 +154,11 @@ ctf_flag = {
 		end
 	end,
 	_flagret = function(name)
-		for i = 1, #ctf_flag.claimed do
-			if ctf_flag.claimed[i].claimed.player == name then
-				do_capture(name, ctf_flag.claimed[i], true)
-				ctf_flag.collect_claimed()
+		local claimed = ctf_flag.collect_claimed()
+		for i = 1, #claimed do
+			local flag = claimed[i]
+			if flag.claimed.player == name then
+				do_capture(name, flag, true)
 			end
 		end
 	end,

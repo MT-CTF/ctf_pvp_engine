@@ -10,11 +10,10 @@ local function safe_place(pos, node)
 	end
 end
 
-ctf_flag.collect_claimed()
-for i, flag in pairs(ctf_flag.claimed) do
+local claimed = ctf_flag.collect_claimed()
+for i, flag in pairs(claimed) do
 	flag.claimed = nil
 end
-ctf_flag.collect_claimed()
 
 minetest.register_on_joinplayer(function(player)
 	if ctf.team(ctf.player(player:get_player_name()).team) then

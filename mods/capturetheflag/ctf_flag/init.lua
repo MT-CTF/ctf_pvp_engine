@@ -71,27 +71,28 @@ function ctf_flag.register_on_pick_up(func)
 end
 
 function ctf_flag.collect_claimed()
-	ctf.log("utils", "Collecting claimed locations")
-	ctf_flag.claimed = {}
+	ctf.log("flag", "Collecting claimed locations")
+	local claimed = {}
 	for _, team in pairs(ctf.teams) do
 		for i = 1, #team.flags do
 			if team.flags[i].claimed then
-				table.insert(ctf_flag.claimed, team.flags[i])
+				table.insert(claimed, team.flags[i])
 			end
 		end
 	end
+	return claimed
 end
-ctf_flag.collect_claimed()
 
 function ctf_flag.player_drop_flag(name)
 	if not name then
 		return
 	end
-	for i = 1, #ctf_flag.claimed do
-		local flag = ctf_flag.claimed[i]
+
+	local claimed = ctf_flag.collect_claimed()
+	for i = 1, #claimed do
+		local flag = claimed[i]
 		if flag.claimed.player == name then
 			flag.claimed = nil
-			ctf_flag.collect_claimed()
 
 			local flag_name = ""
 			if flag.name then

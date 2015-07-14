@@ -117,9 +117,6 @@ minetest.register_chatcommand("ctf_clean", {
 	func = function(name, param)
 		ctf.log("chat", "Cleaning CTF...")
 		ctf.clean_player_lists()
-		if ctf_flag and ctf_flag.collect_claimed then
-			ctf_flag.collect_claimed()
-		end
 		if ctf_flag and ctf_flag.assert_flags then
 			ctf_flag.assert_flags()
 		end
