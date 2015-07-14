@@ -43,7 +43,7 @@ function ctf.get_spawn(team)
 	end
 
 	-- Get spawn from first flag
-	ctf_flag.asset_flags(team)
+	ctf_flag.assert_flags(team)
 	if #ctf.team(team).flags > 0 then
 		return ctf.team(team).flags[1]
 	else
@@ -154,22 +154,30 @@ function ctf_flag.delete(team, pos)
 	end
 end
 
-function ctf_flag.asset_flags(team)
-	--[[
-	if not team or not ctf.team(team) then
+function ctf_flag.assert_flags()
+	ctf.log("flag", "Checking flags...")
+	for tname, team in pairs(ctf.teams) do
+		ctf_flag.assert_flags_team(tname)
+	end
+end
+
+function ctf_flag.assert_flags_team(tname)
+	local team = ctf.team(tname)
+	if not tname or not team then
 		return false
 	end
 
-	ctf.log("utils", "Checking the flags of "..team)
+	ctf.log("flag", " - of "..tname)
 
-	local tmp = ctf.team(team).flags
-	local get_res = minetest.env:get_node(tmp[i])
-	for i=1,#tmp do
-		if tmp[i] and (not get_res or not get_res.name == "ctf:flag") then
-			ctf.log("utils", "Replacing flag...")
-			-- TODO: ctf_flag.asset_flags
+	for i=1, #team.flags do
+		local flag = team.flags[i]
+		minetest.get_voxel_manip(flag, { x = flag.x + 1, y = flag.y + 1, z = flag.z + 1})
+		local nodename = minetest.get_node(flag).name
+		if nodename ~= "ctf_flag:flag" then
+			ctf.log("flag", "   - found " .. nodename .. ", correcting...")
+			minetest.set_node(flag, { name = "ctf_flag:flag"})
 		end
-	end]]--
+	end
 end
 
 -- The flag

@@ -115,9 +115,13 @@ minetest.register_chatcommand("ctf_clean", {
 	description = "Do admin cleaning stuff",
 	privs = {ctf_admin=true},
 	func = function(name, param)
+		ctf.log("chat", "Cleaning CTF...")
 		ctf.clean_player_lists()
-		if ctf_flag.collect_claimed then
+		if ctf_flag and ctf_flag.collect_claimed then
 			ctf_flag.collect_claimed()
+		end
+		if ctf_flag and ctf_flag.assert_flags then
+			ctf_flag.assert_flags()
 		end
 		minetest.chat_send_player(name, "CTF cleaned!")
 	end,

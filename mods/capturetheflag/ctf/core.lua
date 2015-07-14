@@ -182,6 +182,9 @@ minetest.after(0, function()
 end)
 
 function ctf.check_save()
+	if ctf_flag and ctf_flag.assert_flags then
+		ctf_flag.assert_flags()
+	end
 	if ctf.needs_save then
 		ctf.save()
 	end
