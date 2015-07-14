@@ -75,7 +75,7 @@ minetest.register_chatcommand("team", {
 					"' to team '" .. tteam .. "'",false)
 			local privs = minetest.get_player_privs(name)
 			if privs and privs.ctf_admin == true then
-				if ctf.join(tplayer, tteam, true) then
+				if ctf.join(tplayer, tteam, true, name) then
 					minetest.chat_send_all(tplayer.." has joined team "..tteam)
 				else
 					minetest.char_send_player(name, "Failed to add player to team.")
@@ -107,7 +107,7 @@ minetest.register_chatcommand("join", {
 	params = "team name",
 	description = "Add to team",
 	func = function(name, param)
-		ctf.join(name, param, false)
+		ctf.join(name, param, false, name)
 	end,
 })
 

@@ -40,6 +40,16 @@ function ctf.register_on_territory_query(func)
 	end
 	table.insert(ctf.registered_on_territory_query, func)
 end
+ctf.registered_on_new_game = {}
+function ctf.register_on_new_game(func)
+	if ctf._mt_loaded then
+		error("You can't register callbacks at game time!")
+	end
+	table.insert(ctf.registered_on_new_game, func)
+	if ctf._new_game then
+		func()
+	end
+end
 
 function vector.distanceSQ(p1, p2)
 	local x = p1.x - p2.x
@@ -159,6 +169,10 @@ function ctf.load()
 		ctf._loaddata = table
 	else
 		ctf.log("io", "ctf.txt is not present in the world folder")
+		ctf._new_game = true
+		for i = 1, #ctf.registered_on_new_game do
+			ctf.registered_on_new_game[i]()
+		end
 	end
 end
 

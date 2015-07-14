@@ -99,7 +99,7 @@ end
 
 -- Player joins team
 -- Called by /join, /team join or auto allocate.
-function ctf.join(name, team, force)
+function ctf.join(name, team, force, by)
 	if not name or name == "" or not team or team == "" then
 		ctf.log("team", "Missing parameters to ctf.join")
 		return false
@@ -109,17 +109,36 @@ function ctf.join(name, team, force)
 
 	if not force and not ctf.setting("players_can_change_team")
 			and not player.team then
-		ctf.action("teams", name .. " attempted to change to " .. team)
-		minetest.chat_send_player(name, "You are not allowed to switch teams, traitor!")
+		if by then
+			if by == name then
+				ctf.action("teams", name .. " attempted to change to " .. team)
+				minetest.chat_send_player(by, "You are not allowed to switch teams, traitor!")
+			else
+				ctf.action("teams", by .. " attempted to change " .. name .. " to " .. team)
+				minetest.chat_send_player(by, "Failed to add " .. name .. " to " .. team ..
+						" as players_can_change_team = false")
+			end
+		else
+			ctf.log("teams", "failed to add " .. name .. " to " .. team ..
+					" as players_can_change_team = false")
+		end
 		return false
 	end
 
-
 	local team_data = ctf.team(team)
-	if team_data then
-		minetest.log("action", name .. " attempted to join " .. team .. ", which doesn't exist")
-		minetest.chat_send_player(name, "No such team.")
-		ctf.list_teams(name)
+	if not team_data then
+		if by then
+			minetest.chat_send_player(by, "No such team.")
+			ctf.list_teams(by)
+			if by == name then
+				minetest.log("action", by .. " tried to move " .. name .. " to " .. team .. ", which doesn't exist")
+			else
+				minetest.log("action", name .. " attempted to join " .. team .. ", which doesn't exist")
+			end
+		else
+			ctf.log("teams", "failed to add " .. name .. " to " .. team ..
+					" as team does not exist")
+		end
 		return false
 	end
 
@@ -287,6 +306,11 @@ minetest.register_on_newplayer(function(player)
 	if team then
 		ctf.log("autoalloc", name .. " was allocated to " .. team)
 		ctf.join(name, team)
+
+		local spawn = ctf.get_spawn(team)
+		if spawn then
+			player:moveto(spawn, false)
+		end
 	end
 end)
 
