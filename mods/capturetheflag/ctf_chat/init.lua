@@ -71,20 +71,17 @@ minetest.register_chatcommand("team", {
 				end
 			end
 		elseif tplayer and tteam then
-			minetest.chat_send_player(name,"joining '"..tplayer.."' to team '"..tteam.."'",false)
+			minetest.chat_send_player(name, "joining '" .. tplayer ..
+					"' to team '" .. tteam .. "'",false)
 			local privs = minetest.get_player_privs(name)
-			if privs and privs.team == true then
-				local player = ctf.player(tplayer)
-
-				if not player then
-					player = {name=tplayer}
-				end
-
-				if ctf.add_user(tteam,tplayer) == true then
+			if privs and privs.ctf_admin == true then
+				if ctf.join(tplayer, tteam, true) then
 					minetest.chat_send_all(tplayer.." has joined team "..tteam)
+				else
+					minetest.char_send_player(name, "Failed to add player to team.")
 				end
 			else
-				minetest.chat_send_player(name, "You can not do this!")
+				minetest.chat_send_player(name, "You do not have the required privileges!")
 			end
 		elseif param=="help" then
 			team_console_help(name)

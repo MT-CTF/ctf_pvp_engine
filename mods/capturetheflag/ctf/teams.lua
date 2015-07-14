@@ -75,6 +75,10 @@ function ctf.count_players_in_team(team)
 end
 
 function ctf.new_player(name)
+	if not name then
+		ctf.error("team", "Can't create a blank player")
+		ctf.log("team", debug.traceback())
+	end
 	ctf.log("team", "Creating player " .. name)
 	ctf.players[name] = {
 		name = name
@@ -94,8 +98,7 @@ function ctf.player_or_nil(name)
 end
 
 -- Player joins team
--- Called by /join or auto allocate.
--- /team join uses ctf.add_user()
+-- Called by /join, /team join or auto allocate.
 function ctf.join(name, team, force)
 	if not name or name == "" or not team or team == "" then
 		ctf.log("team", "Missing parameters to ctf.join")
@@ -111,46 +114,26 @@ function ctf.join(name, team, force)
 		return false
 	end
 
-	if not ctf.team(team) then
+
+	local team_data = ctf.team(team)
+	if team_data then
 		minetest.log("action", name .. " attempted to join " .. team .. ", which doesn't exist")
 		minetest.chat_send_player(name, "No such team.")
 		ctf.list_teams(name)
 		return false
 	end
 
-	if ctf.add_user(team, player) == true then
-		minetest.log("action", name .. " joined team " .. team)
-		minetest.chat_send_all(name.." has joined team "..team)
+	player.team = team
+	team_data.players[player.name] = player
 
-		if ctf.setting("hud") then
-			ctf.hud.update(minetest.get_player_by_name(name))
-		end
+	minetest.log("action", name .. " joined team " .. team)
+	minetest.chat_send_all(name.." has joined team "..team)
 
-		return true
+	if ctf.setting("hud") then
+		ctf.hud.update(minetest.get_player_by_name(name))
 	end
-	return false
-end
 
--- TODO: refactor ctf.add_user etc
--- Add a player to a team in data structures
-function ctf.add_user(team, user)
-	local _team = ctf.team(team)
-	local _user = ctf.player(user.name)
-	if _team and user and user.name then
-		if _user.team and ctf.team(_user.team) then
-			ctf.teams[_user.team].players[user.name] = nil
-		end
-
-		user.team = team
-		user.auth = false
-		_team.players[user.name] = user
-		ctf.players[user.name] = user
-		ctf.needs_save = true
-
-		return true
-	else
-		return false
-	end
+	return true
 end
 
 -- Cleans up the player lists
