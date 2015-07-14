@@ -23,7 +23,7 @@ function ctf.team(name)
 		return ctf.teams[name.name]
 	else
 		if not ctf.teams[name] then
-			ctf.warning("team", "'" .. name.."' does not exist!")
+			ctf.warning("team", dump(name) .. " does not exist!")
 		end
 		return ctf.teams[name]
 	end
