@@ -60,7 +60,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		for key, field in pairs(fields) do
 			local x,y,z = string.match(key, "goto_(%d+)_(%d+)_(%d+)")
 			if x and y and x then
-				player:setpos({x=x, y=y, z=z})
+				player:setpos({ x=tonumber(x), y=tonumber(y), z=tonumber(z) })
 				return true
 			end
 		end
