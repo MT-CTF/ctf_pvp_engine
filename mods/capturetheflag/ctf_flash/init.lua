@@ -16,6 +16,32 @@ for i, flag in pairs(ctf_flag.claimed) do
 end
 ctf_flag.collect_claimed()
 
+minetest.register_on_joinplayer(function(player)
+	if ctf.team(ctf.player(player:get_player_name()).team) then
+		return
+	end
+
+	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
+	if alloc_mode == 0 then
+		return
+	end
+	local name = player:get_player_name()
+	local team = ctf.autoalloc(name, alloc_mode)
+	if team then
+		ctf.log("autoalloc", name .. " was allocated to " .. team)
+		ctf.join(name, team)
+
+		local spawn = ctf.get_spawn(team)
+		if spawn then
+			player:moveto(spawn, false)
+		end
+	end
+end)
+
+minetest.register_on_leaveplayer(function(player)
+	ctf.remove_player(player:get_player_name())
+end)
+
 ctf.register_on_new_game(function()
 	ctf.log("flash", "Setting up new game!")
 

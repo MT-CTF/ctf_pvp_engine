@@ -23,7 +23,10 @@ function ctf.team(name)
 		return ctf.teams[name.name]
 	else
 		if not ctf.teams[name] then
-			ctf.warning("team", dump(name) .. " does not exist!")
+			if name then
+				ctf.warning("team", dump(name) .. " does not exist!")
+			end
+			return nil
 		end
 		return ctf.teams[name]
 	end
@@ -95,6 +98,17 @@ end
 
 function ctf.player_or_nil(name)
 	return ctf.players[name]
+end
+
+function ctf.remove_player(name)
+	local player = ctf.players[name]
+	if player then
+		local team = ctf.team(ctf.players.team)
+		if team then
+			team.players[name] = nil
+		end
+		ctf.players[name] = nil
+	end
 end
 
 -- Player joins team
