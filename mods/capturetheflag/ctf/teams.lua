@@ -142,6 +142,13 @@ function ctf.join(name, team, force, by)
 		return false
 	end
 
+	if player.team then
+		local oldteam = ctf.team(player.team)
+		if oldteam then
+			oldteam.players[player.name] = nil
+		end
+	end
+
 	player.team = team
 	team_data.players[player.name] = player
 
