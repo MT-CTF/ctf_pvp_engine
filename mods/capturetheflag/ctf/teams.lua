@@ -101,9 +101,10 @@ function ctf.player_or_nil(name)
 end
 
 function ctf.remove_player(name)
+	ctf.log("team", "Removing player ".. dump(name))
 	local player = ctf.players[name]
 	if player then
-		local team = ctf.team(ctf.players.team)
+		local team = ctf.team(player.team)
 		if team then
 			team.players[name] = nil
 		end
