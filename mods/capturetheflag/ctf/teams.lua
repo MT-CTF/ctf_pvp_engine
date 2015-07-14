@@ -108,7 +108,7 @@ function ctf.join(name, team, force, by)
 	local player = ctf.player(name)
 
 	if not force and not ctf.setting("players_can_change_team")
-			and not player.team then
+			and player.team and ctf.team(player.team) then
 		if by then
 			if by == name then
 				ctf.action("teams", name .. " attempted to change to " .. team)
