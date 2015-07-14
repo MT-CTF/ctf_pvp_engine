@@ -1,3 +1,11 @@
+ctf.register_on_init(function()
+	ctf.log("flash", "Initialising...")
+	ctf._set("gui.team.teleport_to_spawn", false)
+	ctf._set("flash",                      false)
+	ctf._set("flash.teams",                "red, red, 15, 7, 39; blue, blue, -9, 9, -43")
+	ctf._set("flash.remove_leaveplayer",   true)
+end)
+
 local function safe_place(pos, node)
 	ctf.log("flash", "attempting to place...")
 	minetest.get_voxel_manip(pos, { x = pos.x + 1, y = pos.y + 1, z = pos.z + 1})
@@ -38,25 +46,47 @@ minetest.register_on_joinplayer(function(player)
 end)
 
 minetest.register_on_leaveplayer(function(player)
-	ctf.remove_player(player:get_player_name())
+	if ctf.setting("flash.remove_leaveplayer") then
+		ctf.remove_player(player:get_player_name())
+	end
 end)
 
 ctf.register_on_new_game(function()
 	ctf.log("flash", "Setting up new game!")
 
-	ctf.team({name="red", color="red", add_team=true})
-	ctf.team({name="blue", color="blue", add_team=true})
+	local teams = ctf.setting("flash.teams"):split(";")
+	local pos = {}
+	for i, v in pairs(teams) do
+		local team = v:split(",")
+		if #team == 5 then
+			local name  = team[1]:trim()
+			local color = team[2]:trim()
+			local x     = tonumber(team[3]:trim())
+			local y     = tonumber(team[4]:trim())
+			local z     = tonumber(team[5]:trim())
+			pos[name] = {
+				x = x,
+				y = y,
+				z = z
+			}
 
-	local fred = {x=15, y=7, z=39, team="red"}
-	local fblue = {x=-9, y=9, z=-43, team="blue"}
-	ctf_flag.add("red", fred)
-	ctf_flag.add("blue", fblue)
+			ctf.team({
+				name=name,
+				color=color,
+				add_team=true
+			})
+
+			ctf_flag.add(name, pos[name])
+		else
+			ctf.warning("flash", "Invalid team setup: " .. dump(v))
+		end
+	end
 
 	minetest.after(0, function()
-		safe_place(fred, {name="ctf_flag:flag"})
-		safe_place(fblue, {name="ctf_flag:flag"})
-		ctf_flag.update(fred)
-		ctf_flag.update(fblue)
+		for name, p in pairs(pos) do
+			safe_place(p, {name="ctf_flag:flag"})
+			ctf_flag.update(p)
+		end
 	end)
 
 	for i, player in pairs(minetest.get_connected_players()) do

@@ -1,7 +1,6 @@
 ctf.register_on_init(function()
 	ctf._set("endgame.destroy_team",       true)
 	ctf._set("endgame.break_alliances",    true)
-	ctf._set("endgame.reset_on_winner",    true)
 end)
 
 ctf_flag.register_on_capture(function(attname, flag)
