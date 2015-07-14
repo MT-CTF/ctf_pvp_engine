@@ -264,7 +264,7 @@ minetest.register_abm({
 	chance = 1,
 	action = function(pos)
 		local top = {x=pos.x,y=pos.y+1,z=pos.z}
-		local flagmeta = minetest.env:get_meta(pos)
+		local flagmeta = minetest.get_meta(pos)
 
 		if not flagmeta then
 			return
@@ -273,11 +273,11 @@ minetest.register_abm({
 		local flag_team_data = ctf_flag.get(pos)
 		if not flag_team_data or not ctf.team(flag_team_data.team)then
 			ctf.log("flag", "Flag does not exist! Deleting nodes. "..dump(pos))
-			minetest.env:set_node(pos,{name="air"})
-			minetest.env:set_node(top,{name="air"})
+			minetest.set_node(pos,{name="air"})
+			minetest.set_node(top,{name="air"})
 			return
 		end
-		local topmeta = minetest.env:get_meta(top)
+		local topmeta = minetest.get_meta(top)
 		local flag_name = flag_team_data.name
 		if flag_name and flag_name ~= "" then
 			flagmeta:set_string("infotext", flag_name.." - "..flag_team_data.team)
@@ -291,12 +291,12 @@ minetest.register_abm({
 		end
 
 		if flag_team_data.claimed then
-			minetest.env:set_node(top,{name="ctf_flag:flag_captured_top"})
+			minetest.set_node(top,{name="ctf_flag:flag_captured_top"})
 		else
-			minetest.env:set_node(top,{name="ctf_flag:flag_top_"..ctf.team(flag_team_data.team).data.color})
+			minetest.set_node(top,{name="ctf_flag:flag_top_"..ctf.team(flag_team_data.team).data.color})
 		end
 
-		topmeta = minetest.env:get_meta(top)
+		topmeta = minetest.get_meta(top)
 		if flag_name and flag_name ~= "" then
 			topmeta:set_string("infotext", flag_name.." - "..flag_team_data.team)
 		else

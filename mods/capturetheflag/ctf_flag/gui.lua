@@ -173,9 +173,9 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
 		ctf_flag.delete(team,pos)
 
-		minetest.env:set_node(pos,{name="air"})
+		minetest.set_node(pos,{name="air"})
 		pos.y=pos.y+1
-		minetest.env:set_node(pos,{name="air"})
+		minetest.set_node(pos,{name="air"})
 
 		return true
 	end

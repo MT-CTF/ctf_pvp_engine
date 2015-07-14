@@ -30,18 +30,18 @@ if ctf.setting("turrets") then
 		},
 		groups = {cracky=3, stone=1},
 		on_construct = function(pos)
-			local meta = minetest.env:get_meta(pos)
+			local meta = minetest.get_meta(pos)
 			meta:set_string("infotext", "Unowned turret")
 		end,
 		after_place_node = function(pos, placer)
-			local meta = minetest.env:get_meta(pos)
+			local meta = minetest.get_meta(pos)
 
 			if meta and ctf.players and ctf.player(placer:get_player_name()) and ctf.player(placer:get_player_name()).team then
 				local team = ctf.player(placer:get_player_name()).team
 				meta:set_string("team", team)
 				meta:set_string("infotext", "Owned by "..team)
 			else
-				minetest.env:set_node(pos,{name="air"})
+				minetest.set_node(pos,{name="air"})
 			end
 		end
 	})
@@ -51,7 +51,7 @@ if ctf.setting("turrets") then
 		interval = 0.25,
 		chance = 4,
 		action = function(pos, node)
-			local meta = minetest.env:get_meta(pos)
+			local meta = minetest.get_meta(pos)
 			if not meta then
 				return
 			end
@@ -72,7 +72,7 @@ if ctf.setting("turrets") then
 				return
 			end
 
-			local objects = minetest.env:get_objects_inside_radius(pos, 15)
+			local objects = minetest.get_objects_inside_radius(pos, 15)
 			for _,obj in ipairs(objects) do
 				if (
 					obj:is_player() and
@@ -89,7 +89,7 @@ if ctf.setting("turrets") then
 					}
 
 					-- Create bullet entity
-					local bullet=minetest.env:add_entity({x=pos.x,y=pos.y+0.5,z=pos.z}, "ctf_turret:arrow_entity")
+					local bullet=minetest.add_entity({x=pos.x,y=pos.y+0.5,z=pos.z}, "ctf_turret:arrow_entity")
 
 					-- Set velocity
 					bullet:setvelocity({x=calc.x * ARROW_VELOCITY,y=calc.y * ARROW_VELOCITY,z=calc.z * ARROW_VELOCITY})
@@ -117,7 +117,7 @@ if ctf.setting("turrets") then
 			end
 
 			if self.timer > 0.2 then
-				local objs = minetest.env:get_objects_inside_radius({x=pos.x,y=pos.y,z=pos.z}, 1.5)
+				local objs = minetest.get_objects_inside_radius({x=pos.x,y=pos.y,z=pos.z}, 1.5)
 				for k, obj in pairs(objs) do
 					if obj:is_player() then
 						obj:set_hp(obj:get_hp() - ARROW_DAMAGE)
@@ -126,9 +126,9 @@ if ctf.setting("turrets") then
 				end
 			end
 
-			local node = minetest.env:get_node(pos)
+			local node = minetest.get_node(pos)
 			if node.name ~= "air" and node.name ~= "ctf_turret:turret" then
-				--minetest.env:add_item(self.lastpos, "throwing:arrow")
+				--minetest.add_item(self.lastpos, "throwing:arrow")
 				self.object:remove()
 			end
 		end

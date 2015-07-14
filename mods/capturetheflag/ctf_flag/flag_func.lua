@@ -58,7 +58,7 @@ local function do_capture(attname, flag, returned)
 			ctf_flag.delete(team, vector.new(flag))
 			ctf_flag.add(attacker.team, vector.new(flag))
 		else
-			minetest.env:set_node(pos,{name="air"})
+			minetest.set_node(pos,{name="air"})
 			ctf_flag.delete(team,pos)
 		end
 
@@ -179,7 +179,7 @@ ctf_flag = {
 		end
 	end,
 	on_construct = function(pos)
-		local meta = minetest.env:get_meta(pos)
+		local meta = minetest.get_meta(pos)
 		meta:set_string("infotext", "Unowned flag")
 	end,
 	after_place_node = function(pos, placer)
@@ -187,7 +187,7 @@ ctf_flag = {
 			return
 		end
 
-		local meta = minetest.env:get_meta(pos)
+		local meta = minetest.get_meta(pos)
 
 		if not meta then
 			return
@@ -200,12 +200,12 @@ ctf_flag = {
 			-- add flag
 			ctf_flag.add(team, pos)
 
-			if ctf.teams[team].spawn and minetest.env:get_node(ctf.teams[team].spawn).name == "ctf_flag:flag" then
+			if ctf.teams[team].spawn and minetest.get_node(ctf.teams[team].spawn).name == "ctf_flag:flag" then
 				if not ctf.setting("flag.allow_multiple") then
 					-- send message
 					minetest.chat_send_all(team.."'s flag has been moved")
-					minetest.env:set_node(ctf.team(team).spawn,{name="air"})
-					minetest.env:set_node({
+					minetest.set_node(ctf.team(team).spawn,{name="air"})
+					minetest.set_node({
 						x=ctf.team(team).spawn.x,
 						y=ctf.team(team).spawn.y+1,
 						z=ctf.team(team).spawn.z
@@ -229,14 +229,14 @@ ctf_flag = {
 				ctf.needs_save = true
 			end
 
-			minetest.env:set_node(pos2, {name="ctf_flag:flag_top_"..ctf.team(team).data.color})
+			minetest.set_node(pos2, {name="ctf_flag:flag_top_"..ctf.team(team).data.color})
 
-			local meta2 = minetest.env:get_meta(pos2)
+			local meta2 = minetest.get_meta(pos2)
 
 			meta2:set_string("infotext", team.."'s flag")
 		else
 			minetest.chat_send_player(placer:get_player_name(), "You are not part of a team!")
-			minetest.env:set_node(pos,{name="air"})
+			minetest.set_node(pos,{name="air"})
 		end
 	end
 }
