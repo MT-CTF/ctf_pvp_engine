@@ -70,9 +70,7 @@ local function do_capture(attname, flag, returned)
 	ctf.needs_save = true
 end
 
-minetest.register_on_dieplayer(function(player)
-	local name = player:get_player_name()
-
+function ctf_flag.player_drop_flag(name)
 	for i = 1, #ctf_flag.claimed do
 		local flag = ctf_flag.claimed[i]
 		if flag.claimed.player == name then
@@ -89,7 +87,12 @@ minetest.register_on_dieplayer(function(player)
 
 		end
 	end
-end)
+end
+local function player_drop_flag(player)
+	return ctf_flag.player_drop_flag(player:get_player_name())
+end
+minetest.register_on_dieplayer(player_drop_flag)
+minetest.register_on_leaveplayer(player_drop_flag)
 
 
 ctf_flag = {
