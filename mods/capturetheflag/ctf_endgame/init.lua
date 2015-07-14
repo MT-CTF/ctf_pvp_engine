@@ -42,7 +42,7 @@ ctf_flag.register_on_capture(function(attname, flag)
 		minetest.chat_send_all("Team " .. winner .. " won!")
 		minetest.chat_send_all("Resetting the map, this may take a few moments...")
 		minetest.after(0.5, function()
-			minetest.delete_area(vector.new(-16*3, -16*3, -16*3), vector.new(16*3, 16*3, 16*3))
+			minetest.delete_area(vector.new(-16*4, -16*4, -16*4), vector.new(16*4, 16*4, 16*4))
 
 			minetest.after(1, function()
 				ctf.reset()
@@ -58,7 +58,7 @@ ctf.register_on_new_game(function()
 	ctf.team({name="blue", color="blue", add_team=true})
 
 	local fred = {x=15, y=7, z=39, team="red"}
-	local fblue = {x=-9, y=9, z=-50, team="blue"}
+	local fblue = {x=-9, y=9, z=-43, team="blue"}
 	ctf_flag.add("red", fred)
 	ctf_flag.add("blue", fblue)
 
