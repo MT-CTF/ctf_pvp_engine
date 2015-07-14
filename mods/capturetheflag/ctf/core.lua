@@ -99,7 +99,6 @@ function ctf.init()
 	ctf._set("allocate_mode",              0)
 	ctf._set("maximum_in_team",            -1)
 	ctf._set("default_diplo_state",        "war")
-	ctf._set("node_ownership",             true)
 	ctf._set("hud",                        true)
 
 	for i = 1, #ctf.registered_on_init do
@@ -142,7 +141,7 @@ function ctf.setting(name)
 	if set ~= nil then
 		if type(dset) == "number" then
 			return tonumber(set)
-		elseif type(dset) == "bool" then
+		elseif type(dset) == "boolean" then
 			return minetest.is_yes(set)
 		else
 			return set
