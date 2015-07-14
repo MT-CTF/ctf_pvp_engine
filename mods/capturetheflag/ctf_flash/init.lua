@@ -30,6 +30,8 @@ ctf.register_on_new_game(function()
 	minetest.after(0, function()
 		safe_place(fred, {name="ctf_flag:flag"})
 		safe_place(fblue, {name="ctf_flag:flag"})
+		ctf_flag.update(fred)
+		ctf_flag.update(fblue)
 	end)
 
 	for i, player in pairs(minetest.get_connected_players()) do
@@ -60,6 +62,7 @@ ctf.register_on_new_game(function()
 		player:get_inventory():add_item('main', 'default:pick_steel')
 		player:get_inventory():add_item('main', 'default:sword_steel')
 		player:get_inventory():add_item('main', 'default:cobble 99')
+		player:set_hp(20)
 	end
 	minetest.chat_send_all("Next round!")
 end)
