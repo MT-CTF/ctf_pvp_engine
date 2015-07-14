@@ -70,6 +70,12 @@ ctf_flag.register_on_capture(function(attname, flag)
 						ctf.log("autoalloc", name .. " was allocated to " .. team)
 						ctf.join(name, team)
 					end
+
+					team = ctf.player(name).team
+					if ctf.team(team) then
+						local spawn = ctf.get_spawn(team)
+						player:moveto(spawn, false)
+					end
 				end
 				minetest.log("endgame", "reset done")
 				minetest.chat_send_all("All done! Next round!")
