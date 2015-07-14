@@ -98,7 +98,7 @@ function ctf_flag.add(team, pos)
 
 	pos.team = team
 	table.insert(ctf.team(team).flags,pos)
-	ctf.save()
+	ctf.needs_save = true
 end
 
 -- get a flag from a team
@@ -279,7 +279,7 @@ minetest.register_abm({
 
 		if not ctf.team(flag_team_data.team).data.color then
 			ctf.team(flag_team_data.team).data.color = "red"
-			ctf.save()
+			ctf.needs_save = true
 		end
 
 		if flag_team_data.claimed then

@@ -18,7 +18,7 @@ function ctf.team(name)
 			ctf.registered_on_new_team[i](ctf.teams[name.name])
 		end
 
-		ctf.save()
+		ctf.needs_save = true
 
 		return ctf.teams[name.name]
 	else
@@ -145,7 +145,7 @@ function ctf.add_user(team, user)
 		user.auth = false
 		_team.players[user.name] = user
 		ctf.players[user.name] = user
-		ctf.save()
+		ctf.needs_save = true
 
 		return true
 	else
@@ -198,7 +198,7 @@ function ctf.post(team, msg)
 	ctf.log("team", "message posted to team board")
 
 	table.insert(ctf.team(team).log, 1, msg)
-	ctf.save()
+	ctf.needs_save = true
 
 	return true
 end

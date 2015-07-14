@@ -68,7 +68,7 @@ local function do_capture(attname, flag, returned)
 	end
 
 	ctf_flag.collect_claimed()
-	ctf.save()
+	ctf.needs_save = true
 end
 
 minetest.register_on_dieplayer(function(player)
@@ -216,7 +216,7 @@ ctf_flag = {
 				ctf.get_spawn(team)
 			end
 
-			ctf.save()
+			ctf.needs_save = true
 
 			local pos2 = {
 				x = pos.x,
@@ -226,7 +226,7 @@ ctf_flag = {
 
 			if not ctf.team(team).data.color then
 				ctf.team(team).data.color = "red"
-				ctf.save()
+				ctf.needs_save = true
 			end
 
 			minetest.env:set_node(pos2, {name="ctf_flag:flag_top_"..ctf.team(team).data.color})

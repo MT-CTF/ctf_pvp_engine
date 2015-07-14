@@ -167,6 +167,14 @@ minetest.after(0, function()
 	ctf._mt_loaded = true
 end)
 
+function ctf.check_save()
+	if ctf.needs_save then
+		ctf.save()
+	end
+	minetest.after(10, ctf.check_save)
+end
+minetest.after(10, ctf.check_save)
+
 function ctf.save()
 	ctf.log("io", "Saving CTF state...")
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "w")

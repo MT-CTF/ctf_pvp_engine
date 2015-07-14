@@ -232,7 +232,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	if fields.clear then
 		if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
 			ctf.team(ctf.players[name].team).log = {}
-			ctf.save()
+			ctf.needs_save = true
 			ctf.gui.show(name, "news")
 		end
 		return true
@@ -246,7 +246,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		if ctf and ctf.team(ctf.players[name].team) and ctf.team(ctf.players[name].team).data then
 			if ctf.flag_colors[fields.color] then
 				ctf.team(ctf.players[name].team).data.color = fields.color
-				ctf.save()
+				ctf.needs_save = true
 			else
 				local colors = ""
 				for color, code in pairs(ctf.flag_colors) do
@@ -278,7 +278,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 					end
 
 					table.remove(ctf.team(ctf.player(name).team).log,id)
-					ctf.save()
+					ctf.needs_save = true
 					ctf.gui.show(name, "news")
 					return true
 				end
