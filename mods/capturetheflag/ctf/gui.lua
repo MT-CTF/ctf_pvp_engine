@@ -36,7 +36,6 @@ function ctf.gui.show(name, tab, team)
 
 	if not team or not ctf.team(team) then
 		team = ctf.player(name).team
-		print(team)
 	end
 
 	if team and team ~= "" and ctf.team(team) then
