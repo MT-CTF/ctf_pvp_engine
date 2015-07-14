@@ -83,6 +83,7 @@ function ctf.hud.update(player)
 	if not color then
 		color = "0x000000"
 	end
+	player:set_nametag_attributes({ color = "0xFF" .. string.sub(color, 3) })
 	if not ctf.hud:exists(player, "ctf:hud_team") then
 		return ctf.hud:add(player, "ctf:hud_team", {
 			hud_elem_type = "text",
