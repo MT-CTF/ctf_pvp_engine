@@ -90,6 +90,11 @@ ctf.register_on_new_game(function()
 				player:moveto(spawn, false)
 			end
 		end
+
+		minetest.log("action", "Giving initial stuff to player "..player:get_player_name())
+		player:get_inventory():add_item('main', 'default:pick_steel')
+		player:get_inventory():add_item('main', 'default:sword_steel')
+		player:get_inventory():add_item('main', 'default:cobble 99')
 	end
 	minetest.log("endgame", "reset done")
 	minetest.chat_send_all("Next round!")
