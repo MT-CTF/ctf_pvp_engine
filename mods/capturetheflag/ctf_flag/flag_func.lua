@@ -70,24 +70,6 @@ local function do_capture(attname, flag, returned)
 	ctf.needs_save = true
 end
 
-function ctf_flag.player_drop_flag(name)
-	for i = 1, #ctf_flag.claimed do
-		local flag = ctf_flag.claimed[i]
-		if flag.claimed.player == name then
-			flag.claimed = nil
-			ctf_flag.collect_claimed()
-
-			local flag_name = ""
-			if flag.name then
-				flag_name = flag.name .. " "
-			end
-			flag_name = flag.team .. "'s " .. flag_name .. "flag"
-
-			minetest.chat_send_all(flag_name.." has returned.")
-
-		end
-	end
-end
 local function player_drop_flag(player)
 	return ctf_flag.player_drop_flag(player:get_player_name())
 end

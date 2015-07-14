@@ -83,6 +83,28 @@ function ctf_flag.collect_claimed()
 end
 ctf_flag.collect_claimed()
 
+function ctf_flag.player_drop_flag(name)
+	if not name then
+		return
+	end
+	for i = 1, #ctf_flag.claimed do
+		local flag = ctf_flag.claimed[i]
+		if flag.claimed.player == name then
+			flag.claimed = nil
+			ctf_flag.collect_claimed()
+
+			local flag_name = ""
+			if flag.name then
+				flag_name = flag.name .. " "
+			end
+			flag_name = flag.team .. "'s " .. flag_name .. "flag"
+
+			ctf.action("flag", name .. " dropped " .. flag_name)
+			minetest.chat_send_all(flag_name.." has returned.")
+		end
+	end
+end
+
 -- add a flag to a team
 function ctf_flag.add(team, pos)
 	if not team or team == "" then

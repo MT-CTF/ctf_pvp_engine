@@ -194,6 +194,7 @@ minetest.after(10, ctf.check_save)
 function ctf.save()
 	ctf.log("io", "Saving CTF state...")
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "w")
+	ctf.needs_save = false
 	if file then
 		local out = {
 			teams = ctf.teams,
