@@ -101,6 +101,52 @@ function ctf_flag.add(team, pos)
 	ctf.needs_save = true
 end
 
+function ctf_flag.update(pos)
+	if minetest.get_node(pos).name ~= "ctf_flag:flag" then
+		return
+	end
+
+	local top = {x=pos.x,y=pos.y+1,z=pos.z}
+	local flagmeta = minetest.get_meta(pos)
+
+	if not flagmeta then
+		return
+	end
+
+	local flag_team_data = ctf_flag.get(pos)
+	if not flag_team_data or not ctf.team(flag_team_data.team)then
+		ctf.log("flag", "Flag does not exist! Deleting nodes. "..dump(pos))
+		minetest.set_node(pos,{name="air"})
+		minetest.set_node(top,{name="air"})
+		return
+	end
+	local topmeta = minetest.get_meta(top)
+	local flag_name = flag_team_data.name
+	if flag_name and flag_name ~= "" then
+		flagmeta:set_string("infotext", flag_name.." - "..flag_team_data.team)
+	else
+		flagmeta:set_string("infotext", flag_team_data.team.."'s flag")
+	end
+
+	if not ctf.team(flag_team_data.team).data.color then
+		ctf.team(flag_team_data.team).data.color = "red"
+		ctf.needs_save = true
+	end
+
+	if flag_team_data.claimed then
+		minetest.set_node(top,{name="ctf_flag:flag_captured_top"})
+	else
+		minetest.set_node(top,{name="ctf_flag:flag_top_"..ctf.team(flag_team_data.team).data.color})
+	end
+
+	topmeta = minetest.get_meta(top)
+	if flag_name and flag_name ~= "" then
+		topmeta:set_string("infotext", flag_name.." - "..flag_team_data.team)
+	else
+		topmeta:set_string("infotext", flag_team_data.team.."'s flag")
+	end
+end
+
 -- get a flag from a team
 function ctf_flag.get(pos)
 	if not pos then
@@ -262,45 +308,5 @@ minetest.register_abm({
 	nodenames = {"group:flag_bottom"},
 	inteval = 5,
 	chance = 1,
-	action = function(pos)
-		local top = {x=pos.x,y=pos.y+1,z=pos.z}
-		local flagmeta = minetest.get_meta(pos)
-
-		if not flagmeta then
-			return
-		end
-
-		local flag_team_data = ctf_flag.get(pos)
-		if not flag_team_data or not ctf.team(flag_team_data.team)then
-			ctf.log("flag", "Flag does not exist! Deleting nodes. "..dump(pos))
-			minetest.set_node(pos,{name="air"})
-			minetest.set_node(top,{name="air"})
-			return
-		end
-		local topmeta = minetest.get_meta(top)
-		local flag_name = flag_team_data.name
-		if flag_name and flag_name ~= "" then
-			flagmeta:set_string("infotext", flag_name.." - "..flag_team_data.team)
-		else
-			flagmeta:set_string("infotext", flag_team_data.team.."'s flag")
-		end
-
-		if not ctf.team(flag_team_data.team).data.color then
-			ctf.team(flag_team_data.team).data.color = "red"
-			ctf.needs_save = true
-		end
-
-		if flag_team_data.claimed then
-			minetest.set_node(top,{name="ctf_flag:flag_captured_top"})
-		else
-			minetest.set_node(top,{name="ctf_flag:flag_top_"..ctf.team(flag_team_data.team).data.color})
-		end
-
-		topmeta = minetest.get_meta(top)
-		if flag_name and flag_name ~= "" then
-			topmeta:set_string("infotext", flag_name.." - "..flag_team_data.team)
-		else
-			topmeta:set_string("infotext", flag_team_data.team.."'s flag")
-		end
-	end
+	action = ctf_flag.update
 })
