@@ -68,8 +68,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 end)
 
 -- Flag interface
-function ctf.gui.flag_board(name,pos)
-	ctf.log("gui", name .. " views flag board")
+function ctf.gui.flag_board(name, pos)
 	local flag = ctf_flag.get(pos)
 	if not flag then
 		return
@@ -80,12 +79,14 @@ function ctf.gui.flag_board(name,pos)
 		return
 	end
 
-	if ctf.can_mod(name,team) == false then
-		if ctf.player(name) and ctf.player(name).team and ctf.player(name).team == team then
-			ctf.gui.show(name, "news")
+	if not ctf.can_mod(name, team) then
+		if ctf.player(name).team and ctf.player(name).team == team then
+			ctf.gui.show(name)
 		end
 		return
 	end
+
+	ctf.log("gui", name .. " views flag board")
 
 	local flag_name = flag.name
 
