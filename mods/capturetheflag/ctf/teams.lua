@@ -42,6 +42,9 @@ function ctf.remove_team(name)
 			team.flags[i].team = nil
 		end
 		ctf.teams[name] = nil
+		return true
+	else
+		return false
 	end
 end
 
@@ -109,6 +112,9 @@ function ctf.remove_player(name)
 			team.players[name] = nil
 		end
 		ctf.players[name] = nil
+		return true
+	else
+		return false
 	end
 end
 

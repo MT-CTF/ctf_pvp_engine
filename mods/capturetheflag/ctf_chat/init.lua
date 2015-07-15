@@ -8,16 +8,16 @@ ctf.register_on_init(function()
 end)
 
 local function team_console_help(name)
-	minetest.chat_send_player(name,"Try:", false)
-	minetest.chat_send_player(name,"/team - show team panel", false)
-	minetest.chat_send_player(name,"/team all - list all teams", false)
-	minetest.chat_send_player(name,"/team name - show details about team 'name'", false)
-	minetest.chat_send_player(name,"/team player name - get which team 'player' is in", false)
+	minetest.chat_send_player(name,"Try:")
+	minetest.chat_send_player(name,"/team - show team panel")
+	minetest.chat_send_player(name,"/team all - list all teams")
+	minetest.chat_send_player(name,"/team name - show details about team 'name'")
+	minetest.chat_send_player(name,"/team player name - get which team 'player' is in")
 
 	local privs = minetest.get_player_privs(name)
 	if privs and privs.team == true then
-		minetest.chat_send_player(name,"/team add name - add a team called name (admin only)", false)
-		minetest.chat_send_player(name,"/team join player team - add 'player' to team 'team' (admin only)", false)
+		minetest.chat_send_player(name,"/team add name - add a team called name (admin only)")
+		minetest.chat_send_player(name,"/team join player team - add 'player' to team 'team' (admin only)")
 	end
 end
 
@@ -26,22 +26,10 @@ minetest.register_chatcommand("team", {
 	func = function(name, param)
 		local test = string.match(param,"^player ([%a%d_]+)")
 		local create = string.match(param,"^add ([%a%d_]+)")
-		local tplayer,tteam = string.match(param,"^join ([%a%d_]+) ([%a%d_]+)")
-		if test then
-			if ctf.player(test) then
-				if ctf.player(test).team then
-					if ctf.player(test).auth then
-						minetest.chat_send_player(name,test.." is in team "..ctf.player(test).team.." (team owner)",false)
-					else
-						minetest.chat_send_player(name,test.." is in team "..ctf.player(test).team,false)
-					end
-				else
-					minetest.chat_send_player(name,test.." is not in a team",false)
-				end
-			else
-				minetest.chat_send_player(name,"Player '"..test.."' could not be found",false)
-			end
-		elseif create then
+		local remove = string.match(param,"^remove ([%a%d_]+)")
+		local tplayer, tteam = string.match(param,"^join ([%a%d_]+) ([%a%d_]+)")
+		local tlplayer = string.match(param,"^removeplr ([%a%d_]+)")
+		if create then
 			local privs = minetest.get_player_privs(name)
 			if privs and privs.team == true then
 				if (
@@ -50,44 +38,78 @@ minetest.register_chatcommand("team", {
 					and create ~= ""
 					and create ~= nil
 				) then
-					minetest.chat_send_player(name, "Added team '"..create.."'",false)
+					minetest.chat_send_player(name, "Added team '"..create.."'")
 				else
-					minetest.chat_send_player(name, "Error adding team '"..create.."'",false)
+					minetest.chat_send_player(name, "Error adding team '"..create.."'")
 				end
 			else
-				minetest.chat_send_player(name, "You can not do this!",false)
+				minetest.chat_send_player(name, "You are not a ctf_admin!")
+			end
+		elseif remove then
+			local privs = minetest.get_player_privs(name)
+			if privs and privs.team == true then
+				if ctf.remove_team(remove) then
+					minetest.chat_send_player(name, "Removed team '" .. remove .. "'")
+				else
+					minetest.chat_send_player(name, "Error removing team '" .. remove .. "'")
+				end
+			else
+				minetest.chat_send_player(name, "You are not a ctf_admin!")
 			end
 		elseif param == "all" then
 			ctf.list_teams(name)
 		elseif ctf.team(param) then
-			minetest.chat_send_player(name,"Team "..param..":",false)
+			minetest.chat_send_player(name,"Team "..param..":")
 			local count = 0
 			for _,value in pairs(ctf.team(param).players) do
 				count = count + 1
 				if value.aut == true then
-					minetest.chat_send_player(name,count..">> "..value.name.." (team owner)",false)
+					minetest.chat_send_player(name, count .. ">> " .. value.name
+							.. " (team owner)")
 				else
-					minetest.chat_send_player(name,count..">> "..value.name,false)
+					minetest.chat_send_player(name, count .. ">> " .. value.name)
 				end
 			end
-		elseif tplayer and tteam then
-			minetest.chat_send_player(name, "joining '" .. tplayer ..
-					"' to team '" .. tteam .. "'",false)
-			local privs = minetest.get_player_privs(name)
-			if privs and privs.ctf_admin == true then
-				if ctf.join(tplayer, tteam, true, name) then
-					minetest.chat_send_all(tplayer.." has joined team "..tteam)
+		elseif ctf.player_or_nil(param) or test then
+			if not test then
+				test = param
+			end
+			if ctf.player(test).team then
+				if ctf.player(test).auth then
+					minetest.chat_send_player(name, test ..
+							" is in team " .. ctf.player(test).team.." (team owner)")
 				else
-					minetest.char_send_player(name, "Failed to add player to team.")
+					minetest.chat_send_player(name, test ..
+							" is in team " .. ctf.player(test).team)
 				end
 			else
-				minetest.chat_send_player(name, "You do not have the required privileges!")
+				minetest.chat_send_player(name, test.." is not in a team")
+			end
+		elseif tplayer and tteam then
+			local privs = minetest.get_player_privs(name)
+			if privs and privs.ctf_admin == true then
+				if not ctf.join(tplayer, tteam, true, name) then
+					minetest.chat_send_player(name, "Failed to add player to team.")
+				end
+			else
+				minetest.chat_send_player(name, "You are not a ctf_admin!")
+			end
+		elseif tlplayer then
+			local privs = minetest.get_player_privs(name)
+			if privs and privs.ctf_admin == true then
+				if ctf.remove_player(tlplayer) then
+					minetest.chat_send_player(name, "Removed player " .. tlplayer)
+				else
+					minetest.chat_send_player(name, "Failed to remove player.")
+				end
+			else
+				minetest.chat_send_player(name, "You are not a ctf_admin!")
 			end
 		elseif param=="help" then
 			team_console_help(name)
 		else
 			if param~="" and param~= nil then
-				minetest.chat_send_player(name,"'"..param.."' is an invalid parameter to /team",false)
+				minetest.chat_send_player(name,"'"..param.."' is an invalid parameter to /team")
 				team_console_help(name)
 			end
 			if (
@@ -163,14 +185,14 @@ minetest.register_chatcommand("team_owner", {
 		if ctf and ctf.players and ctf.player(param) and ctf.player(param).team and ctf.team(ctf.player(param).team) then
 			if ctf.player(param).auth == true then
 				ctf.player(param).auth = false
-				minetest.chat_send_player(name, param.." was downgraded from team admin status",false)
+				minetest.chat_send_player(name, param.." was downgraded from team admin status")
 			else
 				ctf.player(param).auth = true
-				minetest.chat_send_player(name, param.." was upgraded to an admin of "..ctf.player(name).team,false)
+				minetest.chat_send_player(name, param.." was upgraded to an admin of "..ctf.player(name).team)
 			end
 			ctf.needs_save = true
 		else
-			minetest.chat_send_player(name, "Unable to do that :/ "..param.." does not exist, or is not part of a valid team.",false)
+			minetest.chat_send_player(name, "Unable to do that :/ "..param.." does not exist, or is not part of a valid team.")
 		end
 	end,
 })
