@@ -113,7 +113,7 @@ ctf.register_on_new_game(function()
 			end
 		end
 
-		if ctf.setting("new_game.clear_inv_on_new_game") then
+		if ctf.setting("new_game.clear_inv") then
 			local inv = player:get_inventory()
 			inv:set_list("main", {})
 			inv:set_list("craft", {})
