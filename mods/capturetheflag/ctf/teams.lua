@@ -361,9 +361,11 @@ minetest.register_on_respawnplayer(function(player)
 
 	if ctf.team(team) then
 		local spawn = ctf.get_spawn(team)
-		player:moveto(spawn, false)
-		return true
-	else
-		return false
+		if spawn then
+			player:moveto(spawn, false)
+			return true
+		end
 	end
+
+	return false
 end)
