@@ -1,28 +1,34 @@
-Capture The Flag
-================
+CTF PvP Engine
+==============
 
-This is a highly customisable game for PvP servers.
+A highly modular framework for the Minetest game engine, in order to allow
+the development of Capture the Flag / City vs City games. Good for any
+sort of game where players can join teams - flags are optional, everything
+is highly configurable.
 
-All settings and features can be modified by editing the settings in this game's configuration.
+Licenses
+========
 
-**See forum thread for instructions and feature**
+Created by: [rubenwardy](http://rubenwardy.com/).  
+Copyright (c) 2013 - 2015  
+**Code:** LGPL 2.1 or later.  
+**Textures:** CC-BY-SA 3.0
 
-What is this game for?
-----------------------
+Modules
+=======
 
-This game can be used for many PvP purposes.
-
-* Traditional capture the flag.
-* Country wars - players can make cities and defend them.
-* Obstacle courses - players can make their bases hard to get to with traps.
-
-License
--------
-
-This mod was made by Andrew "rubenwardy" Ward.
-
-License for Code: LGPL 2.1 or later.
-License for Textures: CC BY-SA 3.0 or later.
-
-This subgame is a fork of minetest_game with capture the flag mods added.
-minetest_game is licensed under LGPL 2.1 or later for code, and CC BY-SA 3.0 or later for textures.
+* ctf
+	* core - adds saving, loading and settings. All modules depend on this.
+	* teams - add the concepts of teams and players. All modules except core depend on this.
+	* diplomacy - adds inter team states of war, peace and alliances.
+	  Requires ctf.teams
+	* gui - adds the team gui on /team. Allows tabs to be registered.
+	* hud - adds the name of the team in the TR of the screen, and sets the color
+	        of  a player's name.
+* ctf_chat - adds chat commands and chat channels.
+* ctf_flag - adds flags and flag taking.
+* ctf_match - adds the concept of winning, match build time,
+              and reseting the map / setting up a new game.
+              Requires ctf_flag
+* ctf_protect - Adds node ownership / protection to teams. Requires ctf_flag.
+* ctf_turret - Adds auto-firing turrets that fire on enemies.
