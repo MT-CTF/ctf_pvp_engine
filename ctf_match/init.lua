@@ -58,7 +58,7 @@ for i, flag in pairs(claimed) do
 	flag.claimed = nil
 end
 
-ctf.register_on_newgame(function()
+ctf.register_on_new_game(function()
 	local teams = ctf.setting("newgame.teams")
 	if teams:trim() == "" then
 		return
