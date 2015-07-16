@@ -22,13 +22,19 @@ function ctf.team(name)
 
 		return ctf.teams[name.name]
 	else
-		if not ctf.teams[name] then
-			if name then
+		local team = ctf.teams[name]
+		if team then
+			if not team.data or not team.players then
+				ctf.warning("team", "Assertion failed, data{} or players{} not " ..
+						"found in team{}")
+			end
+			return team
+		else
+			if name and name:trim() ~= "" then
 				ctf.warning("team", dump(name) .. " does not exist!")
 			end
 			return nil
 		end
-		return ctf.teams[name]
 	end
 end
 

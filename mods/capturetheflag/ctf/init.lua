@@ -23,26 +23,26 @@ minetest.register_privilege("ctf_admin", {
 
 -- Colors
 ctf.flag_colors = {
-	red = "0xFF0000",
-	cyan = "0x00FFFF",
-	blue  = "0x0000FF",
+	red    = "0xFF0000",
+	cyan   = "0x00FFFF",
+	blue   = "0x0000FF",
 	purple = "0x800080",
 	yellow = "0xFFFF00",
-	green = "0x00FF00",
-	pink = "0xFF00FF",
+	green  = "0x00FF00",
+	pink   = "0xFF00FF",
 	silver = "0xC0C0C0",
-	gray = "0x808080",
-	black = "0x000000",
+	gray   = "0x808080",
+	black  = "0x000000",
 	orange = "0xFFA500",
-	gold = "0x808000"
+	gold   = "0x808000"
 }
 
 -- Modules
-dofile(minetest.get_modpath("ctf").."/core.lua")
-dofile(minetest.get_modpath("ctf").."/teams.lua")
-dofile(minetest.get_modpath("ctf").."/diplomacy.lua")
-dofile(minetest.get_modpath("ctf").."/gui.lua")
-dofile(minetest.get_modpath("ctf").."/hud.lua")
+dofile(minetest.get_modpath("ctf") .. "/core.lua")
+dofile(minetest.get_modpath("ctf") .. "/teams.lua")
+dofile(minetest.get_modpath("ctf") .. "/diplomacy.lua")
+dofile(minetest.get_modpath("ctf") .. "/gui.lua")
+dofile(minetest.get_modpath("ctf") .. "/hud.lua")
 
 -- Init
 ctf.init()

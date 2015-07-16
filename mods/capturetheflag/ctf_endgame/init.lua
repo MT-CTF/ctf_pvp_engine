@@ -30,7 +30,7 @@ ctf_flag.register_on_capture(function(attname, flag)
 		minetest.chat_send_all("Team " .. winner .. " won!")
 		minetest.chat_send_all("Resetting the map, this may take a few moments...")
 		minetest.after(0.5, function()
-			minetest.delete_area(vector.new(-16*4, -16*4, -16*4), vector.new(16*4, 16*4, 16*4))
+			--minetest.delete_area(vector.new(-16*4, -16*4, -16*4), vector.new(16*4, 16*4, 16*4))
 
 			minetest.after(1, function()
 				ctf.reset()

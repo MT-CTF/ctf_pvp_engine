@@ -34,11 +34,11 @@ function ctf.gui.show(name, tab, team)
 		return
 	end
 
-	if not team or not ctf.team(team) then
+	if not ctf.team(team) then
 		team = ctf.player(name).team
 	end
 
-	if team and team ~= "" and ctf.team(team) then
+	if ctf.team(team) then
 		ctf.action("gui", name .. " views " .. team .. "'s " .. tab .. " page")
 		ctf.gui.tabs[tab].func(name, team)
 	else
@@ -51,12 +51,12 @@ function ctf.gui.get_tabs(name, team)
 	local result = ""
 	local id = 1
 	local function addtab(name,text)
-		result = result .. "button["..(id*2-1)..",0;2,1;"..name..";"..text.."]"
+		result = result .. "button[" .. (id*2-1) .. ",0;2,1;" .. name .. ";" .. text .. "]"
 		id = id + 1
 	end
 
 	for name, tab in pairs(ctf.gui.tabs) do
-		if ctf.setting("gui.tab."..name) then
+		if ctf.setting("gui.tab." .. name) then
 			addtab(name, tab.title)
 		end
 	end
@@ -67,7 +67,7 @@ end
 -- Team interface
 ctf.gui.register_tab("news", "News", function(name, team)
 	local result = ""
-	local data = ctf.teams[team].log
+	local data = ctf.team(team).log
 
 	if not data then
 		data = {}
@@ -83,16 +83,20 @@ ctf.gui.register_tab("news", "News", function(name, team)
 				amount = amount + 1
 
 				if data[i].mode == "diplo" then
-					result = result .. "image[0.5,".. height ..";10.5,1;diplo_"..data[i].msg..".png]"
+					result = result .. "image[0.5," .. height .. ";10.5,1;diplo_" .. data[i].msg .. ".png]"
 					if data[i].msg == "alliance" then
-						result = result .. "label[1,".. height ..";".. data[i].team .." offers an "..minetest.formspec_escape(data[i].msg).." treaty]"
+						result = result .. "label[1," .. height .. ";" ..
+								data[i].team .. " offers an " ..
+								minetest.formspec_escape(data[i].msg) .. " treaty]"
 					else
-						result = result .. "label[1,".. height ..";".. data[i].team .." offers a "..minetest.formspec_escape(data[i].msg).." treaty]"
+						result = result .. "label[1," .. height .. ";" ..
+								data[i].team .. " offers a " ..
+								minetest.formspec_escape(data[i].msg) .. " treaty]"
 					end
-					result = result .. "button[6,".. height ..";1,1;btn_y"..i..";Yes]"
-					result = result .. "button[7,".. height ..";1,1;btn_n"..i..";No]"
+					result = result .. "button[6," .. height .. ";1,1;btn_y" .. i .. ";Yes]"
+					result = result .. "button[7," .. height .. ";1,1;btn_n" .. i .. ";No]"
 				else
-					result = result .. "label[0.5,".. height ..";RANDOM REQUEST TYPE]"
+					result = result .. "label[0.5," .. height .. ";RANDOM REQUEST TYPE]"
 				end
 			end
 		else
@@ -103,7 +107,8 @@ ctf.gui.register_tab("news", "News", function(name, team)
 				break
 			end
 
-			result = result .. "label[0.5,".. height ..";".. minetest.formspec_escape(data[i].msg) .."]"
+			result = result .. "label[0.5," .. height .. ";" ..
+					minetest.formspec_escape(data[i].msg) .. "]"
 		end
 	end
 
@@ -112,13 +117,13 @@ ctf.gui.register_tab("news", "News", function(name, team)
 	end
 
 	if amount == 0 then
-		result = "label[0.5,1;Welcome to the news panel]"..
+		result = "label[0.5,1;Welcome to the news panel]" ..
 			"label[0.5,1.5;News such as attacks will appear here]"
 	end
 
 	minetest.show_formspec(name, "ctf:news",
-		"size[10,7]"..
-		ctf.gui.get_tabs(name,team)..
+		"size[10,7]" ..
+		ctf.gui.get_tabs(name,team) ..
 		result)
 end)
 
@@ -129,20 +134,20 @@ ctf.gui.register_tab("diplo", "Diplomacy", function(name, team)
 
 	local amount = 0
 
-	for key,value in pairs(ctf.teams) do
+	for key, value in pairs(ctf.teams) do
 		if key ~= team then
 			table.insert(data,{
-					team = key,
+					team  = key,
 					state = ctf.diplo.get(team,key),
-					to = ctf.diplo.check_requests(team,key),
-					from = ctf.diplo.check_requests(key,team)
+					to    = ctf.diplo.check_requests(team,key),
+					from  = ctf.diplo.check_requests(key,team)
 				})
 		end
 	end
 
-	result = result .. "label[1,1;Diplomacy from the perspective of "..team.."]"
+	result = result .. "label[1,1;Diplomacy from the perspective of " .. team .. "]"
 
-	for i=1,#data do
+	for i = 1, #data do
 		amount = i
 		local height = (i*1)+0.5
 
@@ -150,32 +155,42 @@ ctf.gui.register_tab("diplo", "Diplomacy", function(name, team)
 			break
 		end
 
-		result = result .. "image[1,".. height ..";10,1;diplo_"..data[i].state..".png]"
-		result = result .. "button[1.25,".. height ..";2,1;team_".. data[i].team ..";".. data[i].team .."]"
-		result = result .. "label[3.75,".. height ..";".. data[i].state .."]"
+		result = result .. "image[1," .. height .. ";10,1;diplo_" ..
+				data[i].state .. ".png]"
+		result = result .. "button[1.25," .. height .. ";2,1;team_" ..
+				data[i].team .. ";" .. data[i].team .. "]"
+		result = result .. "label[3.75," .. height .. ";" .. data[i].state
+				.. "]"
 
-		if ctf.can_mod(name,team)==true and ctf.player(name).team == team then
+		if ctf.can_mod(name,team) and ctf.player(name).team == team then
 			if not data[i].from and not data[i].to then
 				if data[i].state == "war" then
-					result = result .. "button[7.5,".. height ..";1.5,1;peace_".. data[i].team ..";Peace]"
+					result = result .. "button[7.5," .. height ..
+							";1.5,1;peace_" .. data[i].team .. ";Peace]"
 				elseif data[i].state == "peace" then
-					result = result .. "button[6,".. height ..";1.5,1;war_".. data[i].team ..";War]"
-					result = result .. "button[7.5,".. height ..";1.5,1;alli_".. data[i].team ..";Alliance]"
+					result = result .. "button[6," .. height ..
+							";1.5,1;war_" .. data[i].team .. ";War]"
+					result = result .. "button[7.5," .. height ..
+							";1.5,1;alli_" .. data[i].team .. ";Alliance]"
 				elseif data[i].state == "alliance" then
-					result = result .. "button[6,".. height ..";1.5,1;peace_".. data[i].team ..";Peace]"
+					result = result .. "button[6," .. height ..
+							";1.5,1;peace_" .. data[i].team .. ";Peace]"
 				end
 			elseif data[i].from ~= nil then
-				result = result .. "label[6,".. height ..";request recieved]"
+				result = result .. "label[6," .. height ..
+						";request recieved]"
 			elseif data[i].to ~= nil then
-				result = result .. "label[5.5,".. height ..";request sent]"
-				result = result .. "button[7.5,".. height ..";1.5,1;cancel_".. data[i].team ..";Cancel]"
+				result = result .. "label[5.5," .. height ..
+						";request sent]"
+				result = result .. "button[7.5," .. height ..
+						";1.5,1;cancel_" .. data[i].team .. ";Cancel]"
 			end
 		end
 	end
 
 	minetest.show_formspec(name, "ctf:diplo",
-		"size[10,7]"..
-		ctf.gui.get_tabs(name,team)..
+		"size[10,7]" ..
+		ctf.gui.get_tabs(name, team) ..
 		result
 	)
 end)
@@ -184,21 +199,21 @@ end)
 ctf.gui.register_tab("settings", "Settings", function(name, team)
 	local color = ""
 
-	if ctf.team(team).data and ctf.team(team).data.color then
+	if ctf.team(team).data.color then
 		color = ctf.team(team).data.color
 	end
 
-	local result = "field[3,2;4,1;color;Team Color;"..color.."]"..
+	local result = "field[3,2;4,1;color;Team Color;" .. color .. "]" ..
 		"button[4,6;2,1;save;Save]"
 
 
-	if ctf.can_mod(name,team) == false then
+	if not ctf.can_mod(name,team) then
 		result = "label[0.5,1;You do not own this team!"
 	end
 
 	minetest.show_formspec(name, "ctf:settings",
-		"size[10,7]"..
-		ctf.gui.get_tabs(name,team)..
+		"size[10,7]" ..
+		ctf.gui.get_tabs(name, team) ..
 		result
 	)
 end)
@@ -213,15 +228,23 @@ local function formspec_is_ctf_tab(fsname)
 end
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	local name = player:get_player_name()
 	if not formspec_is_ctf_tab(formname) then
 		return false
 	end
 
+	local name    = player:get_player_name()
+	local tplayer = ctf.player(name)
+	local tname   = tplayer.team
+	local team    = ctf.team(tname)
+
+	if not team then
+		return false
+	end
+
 	-- Do navigation
-	for tname, tab in pairs(ctf.gui.tabs) do
-		if fields[tname] then
-			ctf.gui.show(name, tname)
+	for tabname, tab in pairs(ctf.gui.tabs) do
+		if fields[tabname] then
+			ctf.gui.show(name, tabname)
 			return true
 		end
 	end
@@ -229,125 +252,140 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	-- Todo: move callbacks
 	-- News page
 	if fields.clear then
-		if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
-			ctf.team(ctf.players[name].team).log = {}
-			ctf.needs_save = true
-			ctf.gui.show(name, "news")
-		end
+		team.log = {}
+		ctf.needs_save = true
+		ctf.gui.show(name, "news")
 		return true
 	end
 
 	-- Settings page
-	if fields.save and formname=="ctf:settings" then
-		if ctf and ctf.players and ctf.players[name] and ctf.players[name].team then
-			ctf.gui.show(name, "settings")
-		end
-		if ctf and ctf.team(ctf.players[name].team) and ctf.team(ctf.players[name].team).data then
-			if ctf.flag_colors[fields.color] then
-				ctf.team(ctf.players[name].team).data.color = fields.color
-				ctf.needs_save = true
-			else
-				local colors = ""
-				for color, code in pairs(ctf.flag_colors) do
-					if colors ~= "" then
-						colors = colors .. ", "
-					end
-					colors = colors .. color
+	if fields.save and formname == "ctf:settings" then
+		ctf.gui.show(name, "settings")
+
+		if ctf.flag_colors[fields.color] then
+			team.data.color = fields.color
+			ctf.needs_save = true
+		else
+			local colors = ""
+			for color, code in pairs(ctf.flag_colors) do
+				if colors ~= "" then
+					colors = colors .. ", "
 				end
-				minetest.chat_send_player(name,"Color "..fields.color..
-						" does not exist! Available: " .. colors)
+				colors = colors .. color
 			end
+			minetest.chat_send_player(name, "Color " .. fields.color ..
+					" does not exist! Available: " .. colors)
 		end
+
 		return true
 	end
 end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	local name = player:get_player_name()
-	if formname=="ctf:news" then
+	local name    = player:get_player_name()
+	local tplayer = ctf.player(name)
+	local tname   = tplayer.team
+	local team    = ctf.team(tname)
+
+	if not team then
+		return false
+	end
+
+	if formname == "ctf:news" then
 		for key, field in pairs(fields) do
 			local ok, id = string.match(key, "btn_([yn])([0123456789]+)")
 			if ok and id then
-				if ctf.player(name).team and ctf.team(ctf.player(name).team) then
-					if ok == "y" then
-						ctf.diplo.set(ctf.player(name).team, ctf.team(ctf.player(name).team).log[tonumber(id)].team, ctf.team(ctf.player(name).team).log[tonumber(id)].msg)
-						ctf.post(ctf.player(name).team,{msg="You have accepted the "..ctf.team(ctf.player(name).team).log[tonumber(id)].msg.." request from "..ctf.team(ctf.player(name).team).log[tonumber(id)].team})
-						ctf.post(ctf.team(ctf.player(name).team).log[tonumber(id)].team,{msg=ctf.player(name).team.." has accepted your "..ctf.team(ctf.player(name).team).log[tonumber(id)].msg.." request"})
-						id = id + 1
-					end
+				if ok == "y" then
+					ctf.diplo.set(tname, team.log[tonumber(id)].team, team.log[tonumber(id)].msg)
 
-					table.remove(ctf.team(ctf.player(name).team).log,id)
-					ctf.needs_save = true
-					ctf.gui.show(name, "news")
-					return true
+					-- Post to acceptor's log
+					ctf.post(tname, {
+						msg = "You have accepted the " ..
+								team.log[tonumber(id)].msg .. " request from " ..
+								team.log[tonumber(id)].team })
+
+					-- Post to request's log
+					ctf.post(team.log[tonumber(id)].team, {
+						msg = tname .. " has accepted your " ..
+								team.log[tonumber(id)].msg .. " request" })
+
+					id = id + 1
 				end
+
+				table.remove(team.log, id)
+				ctf.needs_save = true
+				ctf.gui.show(name, "news")
+				return true
 			end
 		end
 	end
 end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	local name = player:get_player_name()
-	if formname=="ctf:diplo" then
+	local name    = player:get_player_name()
+	local tplayer = ctf.player(name)
+	local tname   = tplayer.team
+	local team    = ctf.team(tname)
+
+	if not team then
+		return false
+	end
+
+	if formname == "ctf:diplo" then
 		for key, field in pairs(fields) do
-			local newteam = string.match(key, "team_(.+)")
-			if newteam then
+			local tname2 = string.match(key, "team_(.+)")
+			if tname2 then
 				ctf.gui.show(name, "diplo")
 				return true
 			end
 
-			newteam = string.match(key, "peace_(.+)")
-			if newteam and ctf.player(name) then
-				local team = ctf.player(name).team
-
-				if team then
-					if ctf.diplo.get(team,newteam) == "war" then
-						ctf.post(newteam,{type="request",msg="peace",team=team,mode="diplo"})
-					else
-						ctf.diplo.set(team,newteam,"peace")
-						ctf.post(team,{msg="You have cancelled the alliance treaty with "..newteam})
-						ctf.post(newteam,{msg=team.." has cancelled the alliance treaty"})
-					end
+			tname2 = string.match(key, "peace_(.+)")
+			if tname2 then
+				if ctf.diplo.get(tname, tname2) == "war" then
+					ctf.post(tname2, {
+						type = "request",
+						msg  = "peace",
+						team = tname,
+						mode = "diplo" })
+				else
+					ctf.diplo.set(tname, tname2, "peace")
+					ctf.post(tname, {
+						msg = "You have cancelled the alliance treaty with " .. tname2 })
+					ctf.post(tname2, {
+						msg = tname .. " has cancelled the alliance treaty" })
 				end
 
 				ctf.gui.show(name, "diplo")
 				return true
 			end
 
-			newteam = string.match(key, "war_(.+)")
-			if newteam and ctf.player(name) then
-				local team = ctf.player(name).team
-
-				if team then
-					ctf.diplo.set(team,newteam,"war")
-					ctf.post(team,{msg="You have declared war on "..newteam})
-					ctf.post(newteam,{msg=team.." has declared war on you"})
-				end
+			tname2 = string.match(key, "war_(.+)")
+			if tname2 then
+				ctf.diplo.set(team, tname2,"war")
+				ctf.post(tname, {
+					msg = "You have declared war on " .. tname2 })
+				ctf.post(tname2, {
+					msg = tname .. " has declared war on you" })
 
 				ctf.gui.show(name, "diplo")
 				return true
 			end
 
-			newteam = string.match(key, "alli_(.+)")
-			if newteam and ctf.player(name) then
-				local team = ctf.player(name).team
-
-				if team then
-					ctf.post(newteam,{type="request",msg="alliance",team=team,mode="diplo"})
-				end
+			tname2 = string.match(key, "alli_(.+)")
+			if tname2 then
+				ctf.post(tname2, {
+					type = "request",
+					msg  = "alliance",
+					team = tname,
+					mode = "diplo" })
 
 				ctf.gui.show(name, "diplo")
 				return true
 			end
 
-			newteam = string.match(key, "cancel_(.+)")
-			if newteam and ctf.player(name) then
-				local team = ctf.player(name).team
-
-				if team then
-					ctf.diplo.cancel_requests(team,newteam)
-				end
-
+			tname2 = string.match(key, "cancel_(.+)")
+			if tname2 then
+				ctf.diplo.cancel_requests(tname, tname2)
 				ctf.gui.show(name, "diplo")
 				return true
 			end

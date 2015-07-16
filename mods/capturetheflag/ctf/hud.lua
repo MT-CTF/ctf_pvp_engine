@@ -3,7 +3,7 @@ local function hudkit()
 		players = {},
 
 		add = function(self, player, id, def)
-			local name = player:get_player_name()
+			local name     = player:get_player_name()
 			local elements = self.players[name]
 
 			if not elements then
@@ -20,7 +20,7 @@ local function hudkit()
 				return false
 			end
 
-			local name = player:get_player_name()
+			local name     = player:get_player_name()
 			local elements = self.players[name]
 
 			if not elements or not elements[id] then
@@ -34,7 +34,7 @@ local function hudkit()
 				return false
 			end
 
-			local name = player:get_player_name()
+			local name     = player:get_player_name()
 			local elements = self.players[name]
 
 			if not elements or not elements[id] then
@@ -46,7 +46,7 @@ local function hudkit()
 		end,
 
 		remove = function(self, player, id)
-			local name = player:get_player_name()
+			local name     = player:get_player_name()
 			local elements = self.players[name]
 
 			if not elements or not elements[id] then
@@ -71,15 +71,15 @@ function ctf.hud.update(player)
 		return
 	end
 
-	local name = player:get_player_name()
-	local player_data = ctf.player(name)
+	local name        = player:get_player_name()
+	local tplayer = ctf.player(name)
 
-	if not player_data or not player_data.team or not ctf.team(player_data.team) then
+	if not tplayer or not tplayer.team or not ctf.team(tplayer.team) then
 		return
 	end
 
 	-- Team Identifier
-	local color = ctf.flag_colors[ctf.team(player_data.team).data.color]
+	local color = ctf.flag_colors[ctf.team(tplayer.team).data.color]
 	if not color then
 		color = "0x000000"
 	end
@@ -87,14 +87,14 @@ function ctf.hud.update(player)
 	if not ctf.hud:exists(player, "ctf:hud_team") then
 		return ctf.hud:add(player, "ctf:hud_team", {
 			hud_elem_type = "text",
-			position = {x = 1, y = 0},
-			scale = {x = 100, y = 100},
-			text = player_data.team,
-			number = color,
-			offset = {x=-100, y = 20}
+			position      = {x = 1, y = 0},
+			scale         = {x = 100, y = 100},
+			text          = tplayer.team,
+			number        = color,
+			offset        = {x=-100, y = 20}
 		})
 	else
-		ctf.hud:change(player, "ctf:hud_team", "text", player_data.team)
+		ctf.hud:change(player, "ctf:hud_team", "text",   tplayer.team)
 		ctf.hud:change(player, "ctf:hud_team", "number", color)
 	end
 end
@@ -102,17 +102,16 @@ end
 local count = 0
 function ctf.hud.updateAll()
 	count = 0
-
 	if not ctf.setting("hud") then
 		return
 	end
 
 	local players = minetest.get_connected_players()
-
 	for i = 1, #players do
 		ctf.hud.update(players[i])
 	end
 end
+
 minetest.register_globalstep(function(delta)
 	count = count + delta
 
