@@ -1,11 +1,44 @@
 ctf.register_on_init(function()
-	ctf.log("flash", "Initialising...")
-	ctf._set("remove_player_on_leave",     true)
-	ctf._set("new_game.teams",             "")
-	ctf._set("new_game.clear_inv",         false)
-	-- ^ name, color, x, y, z; name, color, x, y, z
-	-- ^ eg: red, red, 15, 7, 39; blue, blue, -9, 9, -43
+	ctf._set("endgame.destroy_team",       false)
+	ctf._set("endgame.break_alliances",    true)
+	ctf._set("endgame.reset_on_winner",    false)
+	ctf._set("newgame.teams",             "")
+	ctf._set("newgame.clear_inv",         false)
+end)
 
+ctf_flag.register_on_capture(function(attname, flag)
+	if not ctf.setting("endgame.destroy_team") then
+		return
+	end
+
+	local fl_team = ctf.team(flag.team)
+	if fl_team and #fl_team.flags == 0 then
+		ctf.action("endgame", flag.team .. " was defeated.")
+		ctf.remove_team(flag.team)
+		minetest.chat_send_all(flag.team .. " has been defeated!")
+	end
+
+	if ctf.setting("endgame.reset_on_winner") then
+		local winner = nil
+		for name, team in pairs(ctf.teams) do
+			if winner then
+				return
+			end
+			winner = name
+		end
+
+		-- Only one team left!
+		ctf.action("endgame", winner .. " won!")
+		minetest.chat_send_all("Team " .. winner .. " won!")
+		minetest.chat_send_all("Resetting the map, this may take a few moments...")
+		minetest.after(0.5, function()
+			--minetest.delete_area(vector.new(-16*4, -16*4, -16*4), vector.new(16*4, 16*4, 16*4))
+
+			minetest.after(1, function()
+				ctf.reset()
+			end)
+		end)
+	end
 end)
 
 local function safe_place(pos, node)
@@ -25,36 +58,8 @@ for i, flag in pairs(claimed) do
 	flag.claimed = nil
 end
 
-minetest.register_on_joinplayer(function(player)
-	if ctf.team(ctf.player(player:get_player_name()).team) then
-		return
-	end
-
-	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
-	if alloc_mode == 0 then
-		return
-	end
-	local name = player:get_player_name()
-	local team = ctf.autoalloc(name, alloc_mode)
-	if team then
-		ctf.log("autoalloc", name .. " was allocated to " .. team)
-		ctf.join(name, team)
-
-		local spawn = ctf.get_spawn(team)
-		if spawn then
-			player:moveto(spawn, false)
-		end
-	end
-end)
-
-minetest.register_on_leaveplayer(function(player)
-	if ctf.setting("remove_player_on_leave") then
-		ctf.remove_player(player:get_player_name())
-	end
-end)
-
-ctf.register_on_new_game(function()
-	local teams = ctf.setting("new_game.teams")
+ctf.register_on_newgame(function()
+	local teams = ctf.setting("newgame.teams")
 	if teams:trim() == "" then
 		return
 	end
@@ -113,7 +118,7 @@ ctf.register_on_new_game(function()
 			end
 		end
 
-		if ctf.setting("new_game.clear_inv") then
+		if ctf.setting("newgame.clear_inv") then
 			local inv = player:get_inventory()
 			inv:set_list("main", {})
 			inv:set_list("craft", {})

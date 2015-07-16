@@ -330,24 +330,6 @@ function ctf.autoalloc(name, alloc_mode)
 	end
 end
 
-minetest.register_on_newplayer(function(player)
-	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
-	if alloc_mode == 0 then
-		return
-	end
-	local name = player:get_player_name()
-	local team = ctf.autoalloc(name, alloc_mode)
-	if team then
-		ctf.log("autoalloc", name .. " was allocated to " .. team)
-		ctf.join(name, team)
-
-		local spawn = ctf.get_spawn(team)
-		if spawn then
-			player:moveto(spawn, false)
-		end
-	end
-end)
-
 -- updates the spawn position for a team
 function ctf.get_spawn(team)
 	if ctf.team(team) and ctf.team(team).spawn then
@@ -374,4 +356,69 @@ minetest.register_on_respawnplayer(function(player)
 	end
 
 	return false
+end)
+
+function ctf.get_territory_owner(pos)
+	local largest = nil
+	local largest_weight = 0
+	for i = 1, #ctf.registered_on_territory_query do
+		local team, weight = ctf.registered_on_territory_query[i](pos)
+		if team and weight then
+			if weight == -1 then
+				return team
+			end
+			if weight > largest_weight then
+				largest = team
+				largest_weight = weight
+			end
+		end
+	end
+	return largest
+end
+
+minetest.register_on_newplayer(function(player)
+	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
+	if alloc_mode == 0 then
+		return
+	end
+	local name = player:get_player_name()
+	local team = ctf.autoalloc(name, alloc_mode)
+	if team then
+		ctf.log("autoalloc", name .. " was allocated to " .. team)
+		ctf.join(name, team)
+
+		local spawn = ctf.get_spawn(team)
+		if spawn then
+			player:moveto(spawn, false)
+		end
+	end
+end)
+
+
+minetest.register_on_joinplayer(function(player)
+	if not ctf.setting("autoalloc_on_joinplayer") then
+		return
+	end
+
+	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
+	if alloc_mode == 0 then
+		return
+	end
+	local name = player:get_player_name()
+	local team = ctf.autoalloc(name, alloc_mode)
+	if team then
+		ctf.log("autoalloc", name .. " was allocated to " .. team)
+		ctf.join(name, team)
+
+		local spawn = ctf.get_spawn(team)
+		if spawn then
+			player:moveto(spawn, false)
+		end
+	end
+end)
+
+minetest.register_on_leaveplayer(function(player)
+	if ctf.setting("remove_player_on_leave") then
+		ctf.remove_player(player:get_player_name())
+	end
 end)

@@ -144,6 +144,9 @@ function ctf.init()
 	ctf._set("maximum_in_team",            -1)
 	ctf._set("default_diplo_state",        "war")
 	ctf._set("hud",                        true)
+	ctf._set("remove_player_on_leave",     false)
+	ctf._set("autoalloc_on_joinplayer",     true)
+
 
 	for i = 1, #ctf.registered_on_init do
 		ctf.registered_on_init[i]()
@@ -265,22 +268,4 @@ function ctf.save()
 	else
 		ctf.error("io", "CTF file failed to save!")
 	end
-end
-
-function ctf.get_territory_owner(pos)
-	local largest = nil
-	local largest_weight = 0
-	for i = 1, #ctf.registered_on_territory_query do
-		local team, weight = ctf.registered_on_territory_query[i](pos)
-		if team and weight then
-			if weight == -1 then
-				return team
-			end
-			if weight > largest_weight then
-				largest = team
-				largest_weight = weight
-			end
-		end
-	end
-	return largest
 end
