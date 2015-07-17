@@ -223,7 +223,6 @@ function ctf_flag.delete(team, pos)
 end
 
 function ctf_flag.assert_flags()
-	ctf.log("flag", "Checking flags...")
 	for tname, team in pairs(ctf.teams) do
 		ctf_flag.assert_flags_team(tname)
 	end
@@ -235,14 +234,12 @@ function ctf_flag.assert_flags_team(tname)
 		return false
 	end
 
-	ctf.log("flag", " - of "..tname)
-
 	for i=1, #team.flags do
 		local flag = team.flags[i]
 		minetest.get_voxel_manip(flag, { x = flag.x + 1, y = flag.y + 1, z = flag.z + 1})
 		local nodename = minetest.get_node(flag).name
 		if nodename ~= "ctf_flag:flag" then
-			ctf.log("flag", "   - found " .. nodename .. ", correcting...")
+			ctf.log("flag", tname .. " has wrong node at flag position, " .. nodename .. ", correcting...")
 			minetest.set_node(flag, { name = "ctf_flag:flag"})
 		end
 	end
