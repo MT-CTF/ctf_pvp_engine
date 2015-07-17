@@ -18,6 +18,10 @@ function ctf.gui.register_tab(name, title, func)
 		title = title,
 		func  = func
 	}
+
+	if ctf._defsettings and ctf._defsettings["gui.tab." .. name] == nil then
+		ctf._set("gui.tab." .. name, true)
+	end
 end
 
 function ctf.gui.show(name, tab, team)
