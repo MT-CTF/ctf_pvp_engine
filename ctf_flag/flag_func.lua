@@ -186,20 +186,18 @@ ctf_flag = {
 			-- add flag
 			ctf_flag.add(team, pos)
 
-			if ctf.teams[team].spawn and minetest.get_node(ctf.teams[team].spawn).name == "ctf_flag:flag" then
-				if not ctf.setting("flag.allow_multiple") then
-					-- send message
-					minetest.chat_send_all(team.."'s flag has been moved")
-					minetest.set_node(ctf.team(team).spawn,{name="air"})
-					minetest.set_node({
-						x=ctf.team(team).spawn.x,
-						y=ctf.team(team).spawn.y+1,
-						z=ctf.team(team).spawn.z
-					},{name="air"})
-					ctf.team(team).spawn = pos
-				end
-			else
-				ctf.get_spawn(team)
+			if ctf.teams[team].spawn and not ctf.setting("flag.allow_multiple") and
+					minetest.get_node(ctf.teams[team].spawn).name ==
+					"ctf_flag:flag"  then
+				-- send message
+				minetest.chat_send_all(team.."'s flag has been moved")
+				minetest.set_node(ctf.team(team).spawn,{name="air"})
+				minetest.set_node({
+					x=ctf.team(team).spawn.x,
+					y=ctf.team(team).spawn.y+1,
+					z=ctf.team(team).spawn.z
+				},{name="air"})
+				ctf.team(team).spawn = pos
 			end
 
 			ctf.needs_save = true

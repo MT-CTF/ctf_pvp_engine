@@ -339,23 +339,25 @@ function ctf.get_spawn(team)
 	end
 end
 
-minetest.register_on_respawnplayer(function(player)
-	if not player then
-		return false
-	end
-
-	local name = player:get_player_name()
-	local team = ctf.player(name).team
-
-	if ctf.team(team) then
-		local spawn = ctf.get_spawn(team)
+function ctf.move_to_spawn(name)
+	local player = minetest.get_player_by_name(name)
+	local tplayer = ctf.player(name)
+	if ctf.team(tplayer.team) then
+		local spawn = ctf.get_spawn(tplayer.team)
 		if spawn then
 			player:moveto(spawn, false)
 			return true
 		end
 	end
-
 	return false
+end
+
+minetest.register_on_respawnplayer(function(player)
+	if not player then
+		return false
+	end
+
+	return ctf.move_to_spawn(player:get_player_name())
 end)
 
 function ctf.get_territory_owner(pos)
@@ -386,11 +388,7 @@ minetest.register_on_newplayer(function(player)
 	if team then
 		ctf.log("autoalloc", name .. " was allocated to " .. team)
 		ctf.join(name, team)
-
-		local spawn = ctf.get_spawn(team)
-		if spawn then
-			player:moveto(spawn, false)
-		end
+		ctf.move_to_spawn(player:get_player_name())
 	end
 end)
 
@@ -400,20 +398,20 @@ minetest.register_on_joinplayer(function(player)
 		return
 	end
 
+	local name = player:get_player_name()
+	if ctf.team(ctf.player(name).team) then
+		return
+	end
+
 	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
 	if alloc_mode == 0 then
 		return
 	end
-	local name = player:get_player_name()
 	local team = ctf.autoalloc(name, alloc_mode)
 	if team then
 		ctf.log("autoalloc", name .. " was allocated to " .. team)
 		ctf.join(name, team)
-
-		local spawn = ctf.get_spawn(team)
-		if spawn then
-			player:moveto(spawn, false)
-		end
+		ctf.move_to_spawn(player:get_player_name())
 	end
 end)
 
