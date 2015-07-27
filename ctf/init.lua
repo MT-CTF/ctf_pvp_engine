@@ -23,9 +23,9 @@ minetest.register_privilege("ctf_admin", {
 
 -- Colors
 ctf.flag_colors = {
-	red    = "0xFF0000",
+	red    = "0xFF4444",
 	cyan   = "0x00FFFF",
-	blue   = "0x0000FF",
+	blue   = "0x4466FF",
 	purple = "0x800080",
 	yellow = "0xFFFF00",
 	green  = "0x00FF00",
