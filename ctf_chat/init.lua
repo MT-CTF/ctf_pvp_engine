@@ -232,7 +232,7 @@ minetest.register_chatcommand("all", {
 			return
 		end
 
-		if ctf.player(name) and ctf.player(name).team then
+		if ctf.player(name).team then
 			minetest.chat_send_all(ctf.player(name).team .. " <" ..
 					name .. "> " .. param)
 		else
@@ -268,17 +268,26 @@ minetest.register_chatcommand("t", {
 -- Chat plus stuff
 if chatplus then
 	chatplus.register_handler(function(from, to, msg)
-		if not ctf.setting("chat.team_channel") or
-				ctf.setting("chat.default") ~= "team" then
+		if not ctf.setting("chat.team_channel") then
 			-- Send to global
 			return nil
+		end
+		
+		if ctf.setting("chat.default") ~= "team" then
+			if ctf.player(from).team then
+				minetest.chat_send_player(to, ctf.player(from).team ..
+					"<" .. from .. "> " .. msg)
+				return false
+			else
+				return nil
+			end
 		end
 
 		-- Send to team
 		local fromp = ctf.player(from)
 		local top = ctf.player(to)
 
-		if not fromp then
+		if not fromp.team then
 			if not ctf.setting("chat.global_channel") then
 				-- Send to global
 				return nil
