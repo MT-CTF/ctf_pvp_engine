@@ -423,13 +423,15 @@ end)
 
 -- Disable friendly fire.
 minetest.register_on_punchplayer(function(player, hitter)
-	local to = ctf.player(player:get_player_name())
-	local from = ctf.player(hitter:get_player_name())
+	if player and hitter then
+		local to = ctf.player(player:get_player_name())
+		local from = ctf.player(hitter:get_player_name())
 
-	if to.team == from.team and to.team ~= "" and to.team ~= nil then
-		minetest.chat_send_player(from:get_player_name(), to:get_player_name() .. " is on your team!")
-		if not ctf.setting("friendly_fire") then
-			return true
+		if to.team == from.team and to.team ~= "" and to.team ~= nil then
+			minetest.chat_send_player(hitter:get_player_name(), player:get_player_name() .. " is on your team!")
+			if not ctf.setting("friendly_fire") then
+				return true
+			end
 		end
 	end
 end)
