@@ -1,66 +1,8 @@
-local function hudkit()
-	return {
-		players = {},
-
-		add = function(self, player, id, def)
-			local name     = player:get_player_name()
-			local elements = self.players[name]
-
-			if not elements then
-				self.players[name] = {}
-				elements = self.players[name]
-			end
-
-			elements[id] = player:hud_add(def)
-			return true
-		end,
-
-		exists = function(self, player, id)
-			if not player then
-				return false
-			end
-
-			local name     = player:get_player_name()
-			local elements = self.players[name]
-
-			if not elements or not elements[id] then
-				return false
-			end
-			return true
-		end,
-
-		change = function(self, player, id, stat, value)
-			if not player then
-				return false
-			end
-
-			local name     = player:get_player_name()
-			local elements = self.players[name]
-
-			if not elements or not elements[id] then
-				return false
-			end
-
-			player:hud_change(elements[id], stat, value)
-			return true
-		end,
-
-		remove = function(self, player, id)
-			local name     = player:get_player_name()
-			local elements = self.players[name]
-
-			if not elements or not elements[id] then
-				return false
-			end
-
-			player:hud_remove(elements[id])
-			elements[id] = nil
-			return true
-		end
-	}
-end
-
 ctf.hud = hudkit()
+ctf.hud.parts = {}
+function ctf.hud.register_part(func)
+	table.insert(ctf.hud.parts, func)
+end
 
 minetest.register_on_leaveplayer(function(player)
 	ctf.hud.players[player:get_player_name()] = nil
@@ -79,29 +21,27 @@ function ctf.hud.update(player)
 	end
 
 	-- Team Identifier
-	local color = ctf.flag_colors[ctf.team(tplayer.team).data.color]
-	if not color then
-		color = "0x000000"
+	for i = 1, #ctf.hud.parts do
+		ctf.hud.parts[i](player, name, tplayer)
 	end
-	player:set_nametag_attributes({ color = "0xFF" .. string.sub(color, 3) })
+end
+
+ctf.hud.register_part(function(player, name, tplayer)
 	if not ctf.hud:exists(player, "ctf:hud_team") then
-		return ctf.hud:add(player, "ctf:hud_team", {
+		ctf.hud:add(player, "ctf:hud_team", {
 			hud_elem_type = "text",
 			position      = {x = 1, y = 0},
 			scale         = {x = 100, y = 100},
 			text          = tplayer.team,
-			number        = color,
+			number        = "0x000000",
 			offset        = {x=-100, y = 20}
 		})
 	else
 		ctf.hud:change(player, "ctf:hud_team", "text",   tplayer.team)
-		ctf.hud:change(player, "ctf:hud_team", "number", color)
 	end
-end
+end)
 
-local count = 0
 function ctf.hud.updateAll()
-	count = 0
 	if not ctf.setting("hud") then
 		return
 	end
@@ -112,10 +52,8 @@ function ctf.hud.updateAll()
 	end
 end
 
-minetest.register_globalstep(function(delta)
-	count = count + delta
-
-	if count > 10 then
-		ctf.hud.updateAll()
-	end
-end)
+local function tick()
+	ctf.hud.updateAll()
+	minetest.after(10, tick)
+end
+minetest.after(1, tick)
