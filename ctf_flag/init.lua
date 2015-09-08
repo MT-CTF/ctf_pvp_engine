@@ -4,10 +4,11 @@ ctf.register_on_init(function()
 	ctf._set("flag.allow_multiple",        true)
 	ctf._set("flag.capture_take",          false)
 	ctf._set("flag.names",                 true)
+	ctf._set("flag.waypoints",             true)
 	ctf._set("flag.protect_distance",      25)
+	ctf._set("flag.capture_mode",          "take")
 	ctf._set("gui.team.teleport_to_flag",  true)
 	ctf._set("gui.team.teleport_to_spawn", false)
-	ctf._set("flag.capture_mode",          "take")
 end)
 ctf.register_on_new_team(function(team)
 	team.flags = {}
@@ -49,6 +50,34 @@ function ctf.get_spawn(team)
 		return nil
 	end
 end
+
+-- TODO: delete flags if they are removed (ctf.next, or captured)
+ctf.hud.register_part(function(player, name, tplayer)
+	if ctf.setting("flag.waypoints") then
+		for tname, team in pairs(ctf.teams) do
+			for _, flag in pairs(team.flags) do
+				local hud = "ctf:hud_" .. flag.x .. "_" .. flag.y .. "_" .. flag.z
+				local flag_name = flag.name or tname .. "'s base"
+				local color = ctf.flag_colors[team.data.color]
+				if not color then
+					color = "0x000000"
+				end
+				if not ctf.hud:exists(player, hud) then
+					ctf.hud:add(player, hud, {
+						hud_elem_type = "waypoint",
+						name = flag_name,
+						number = color,
+						world_pos = {
+							x = flag.x,
+							y = flag.y,
+							z = flag.z
+						}
+					})
+				end
+			end
+		end
+	end
+end)
 
 dofile(minetest.get_modpath("ctf_flag") .. "/gui.lua")
 dofile(minetest.get_modpath("ctf_flag") .. "/flag_func.lua")
