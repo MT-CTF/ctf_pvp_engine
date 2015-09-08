@@ -47,6 +47,7 @@ ctf.hud.register_part(function(player, name, tplayer)
 			alignment     = {x = -1, y = 0}
 		})
 	else
+		ctf.hud:change(player, "ctf:hud_team", "text", tplayer.team)
 		ctf.hud:change(player, "ctf:hud_team", "number", color)
 	end
 end)
