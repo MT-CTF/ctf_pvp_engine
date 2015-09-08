@@ -79,6 +79,35 @@ ctf.hud.register_part(function(player, name, tplayer)
 	end
 end)
 
+ctf.hud.register_part(function(player, name, tplayer)
+	local alert = nil
+	local team = ctf.team(tplayer.team)
+	for _, flag in pairs(team.flags) do
+		if flag.claimed then
+			alert = "Kill " .. flag.claimed.player .. ", they have your flag!"
+			break
+		end
+	end
+
+	if alert then
+		if ctf.hud:exists(player, "ctf:hud_team_alert") then
+			ctf.hud:change(player, "ctf:hud_team_alert", "text", alert)
+		else
+			ctf.hud:add(player, "ctf:hud_team_alert", {
+				hud_elem_type = "text",
+				position      = {x = 1, y = 0},
+				scale         = {x = 100, y = 100},
+				text          = alert,
+				number        = "0xFF0000",
+				offset        = {x = -10, y = 50},
+				alignment     = {x = -1, y = 0}
+			})
+		end
+	else
+		ctf.hud:remove(player, "ctf:hud_team_alert")
+	end
+end)
+
 dofile(minetest.get_modpath("ctf_flag") .. "/gui.lua")
 dofile(minetest.get_modpath("ctf_flag") .. "/flag_func.lua")
 
@@ -126,6 +155,8 @@ function ctf_flag.player_drop_flag(name)
 				flag_name = flag.name .. " "
 			end
 			flag_name = flag.team .. "'s " .. flag_name .. "flag"
+
+			ctf.hud.updateAll()
 
 			ctf.action("flag", name .. " dropped " .. flag_name)
 			minetest.chat_send_all(flag_name.." has returned.")

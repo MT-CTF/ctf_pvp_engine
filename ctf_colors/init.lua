@@ -43,7 +43,8 @@ ctf.hud.register_part(function(player, name, tplayer)
 			scale         = {x = 100, y = 100},
 			text          = tplayer.team,
 			number        = color,
-			offset        = {x=-100, y = 20}
+			offset        = {x = -20, y = 20},
+			alignment     = {x = -1, y = 0}
 		})
 	else
 		ctf.hud:change(player, "ctf:hud_team", "number", color)

@@ -31,6 +31,8 @@ local function do_capture(attname, flag, returned)
 			player = attname
 		}
 
+		ctf.hud.updateAll()
+
 		ctf_flag.update(flag)
 
 		for i = 1, #ctf_flag.registered_on_pick_up do

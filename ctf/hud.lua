@@ -26,21 +26,6 @@ function ctf.hud.update(player)
 	end
 end
 
-ctf.hud.register_part(function(player, name, tplayer)
-	if not ctf.hud:exists(player, "ctf:hud_team") then
-		ctf.hud:add(player, "ctf:hud_team", {
-			hud_elem_type = "text",
-			position      = {x = 1, y = 0},
-			scale         = {x = 100, y = 100},
-			text          = tplayer.team,
-			number        = "0x000000",
-			offset        = {x=-100, y = 20}
-		})
-	else
-		ctf.hud:change(player, "ctf:hud_team", "text",   tplayer.team)
-	end
-end)
-
 function ctf.hud.updateAll()
 	if not ctf.setting("hud") then
 		return
