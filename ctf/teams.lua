@@ -91,7 +91,6 @@ function ctf.new_player(name)
 		ctf.error("team", "Can't create a blank player")
 		ctf.log("team", debug.traceback())
 	end
-	ctf.log("team", "Creating player " .. name)
 	ctf.players[name] = {
 		name = name
 	}
@@ -241,8 +240,6 @@ end
 
 -- Automatic Allocation
 function ctf.autoalloc(name, alloc_mode)
-	ctf.log("autoalloc", "Getting autoallocation for " .. name)
-
 	if alloc_mode == 0 then
 		return
 	end

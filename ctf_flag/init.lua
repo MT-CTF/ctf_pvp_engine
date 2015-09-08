@@ -70,7 +70,6 @@ function ctf_flag.register_on_pick_up(func)
 end
 
 function ctf_flag.collect_claimed()
-	ctf.log("flag", "Collecting claimed locations")
 	local claimed = {}
 	for _, team in pairs(ctf.teams) do
 		for i = 1, #team.flags do
