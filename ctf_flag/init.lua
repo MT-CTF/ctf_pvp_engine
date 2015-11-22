@@ -310,9 +310,32 @@ function ctf_flag.assert_flags_team(tname)
 		if nodename ~= "ctf_flag:flag" then
 			ctf.log("flag", tname .. " has wrong node at flag position, " .. nodename .. ", correcting...")
 			minetest.set_node(flag, { name = "ctf_flag:flag"})
+
+			local function base_at(flag, dx, dz)
+				minetest.set_node({
+					x = flag.x + dx,
+					y = flag.y - 1,
+					z = flag.z + dz,
+				}, { name = "ctf_flag:ind_base"})
+			end
+			base_at(flag, -1, -1)
+			base_at(flag, -1,  0)
+			base_at(flag, -1,  1)
+			base_at(flag,  0, -1)
+			base_at(flag,  0,  0)
+			base_at(flag,  0,  1)
+			base_at(flag,  1, -1)
+			base_at(flag,  1,  0)
+			base_at(flag,  1,  1)
 		end
 	end
 end
+
+minetest.register_node("ctf_flag:ind_base", {
+	description = "Cheater!",
+	groups = {immortal = 1},
+	tiles = {"default_stone.png"}
+})
 
 -- The flag
 minetest.register_node("ctf_flag:flag", {
