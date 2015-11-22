@@ -266,13 +266,13 @@ minetest.register_chatcommand("t", {
 })
 
 -- Chat plus stuff
-if chatplus then
+if minetest.global_exists("chatplus") then
 	chatplus.register_handler(function(from, to, msg)
 		if not ctf.setting("chat.team_channel") then
 			-- Send to global
 			return nil
 		end
-		
+
 		if ctf.setting("chat.default") ~= "team" then
 			if ctf.player(from).team then
 				minetest.chat_send_player(to, ctf.player(from).team ..

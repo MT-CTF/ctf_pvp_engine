@@ -412,12 +412,6 @@ minetest.register_on_joinplayer(function(player)
 	end
 end)
 
-minetest.register_on_leaveplayer(function(player)
-	if ctf.setting("remove_player_on_leave") then
-		ctf.remove_player(player:get_player_name())
-	end
-end)
-
 -- Disable friendly fire.
 minetest.register_on_punchplayer(function(player, hitter)
 	if player and hitter then

@@ -144,7 +144,6 @@ function ctf.init()
 	ctf._set("maximum_in_team",            -1)
 	ctf._set("default_diplo_state",        "war")
 	ctf._set("hud",                        true)
-	ctf._set("remove_player_on_leave",     false)
 	ctf._set("autoalloc_on_joinplayer",    true)
 	ctf._set("friendly_fire",              true)
 
