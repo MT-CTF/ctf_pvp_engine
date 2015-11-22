@@ -13,7 +13,7 @@ function ctf.hud.update(player)
 		return
 	end
 
-	local name        = player:get_player_name()
+	local name    = player:get_player_name()
 	local tplayer = ctf.player(name)
 
 	if not tplayer or not tplayer.team or not ctf.team(tplayer.team) then

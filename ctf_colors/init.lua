@@ -41,13 +41,13 @@ ctf.hud.register_part(function(player, name, tplayer)
 			hud_elem_type = "text",
 			position      = {x = 1, y = 0},
 			scale         = {x = 100, y = 100},
-			text          = tplayer.team,
+			text          = "Team " .. tplayer.team,
 			number        = color,
 			offset        = {x = -20, y = 20},
 			alignment     = {x = -1, y = 0}
 		})
 	else
-		ctf.hud:change(player, "ctf:hud_team", "text", tplayer.team)
+		ctf.hud:change(player, "ctf:hud_team", "text", "Team " .. tplayer.team)
 		ctf.hud:change(player, "ctf:hud_team", "number", color)
 	end
 end)
