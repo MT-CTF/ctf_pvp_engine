@@ -1,7 +1,8 @@
 minetest.register_node("ctf_flag:ind_base", {
 	description = "Cheater!",
 	groups = {immortal = 1},
-	tiles = {"default_stone.png"}
+	tiles = {"default_stone.png"},
+	is_ground_content = false
 })
 
 -- The flag
