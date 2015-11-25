@@ -176,6 +176,7 @@ minetest.register_chatcommand("ctf_ls", {
 		minetest.chat_send_player(name, "Settings:")
 		for set, def in orderedPairs(ctf._defsettings) do
 			minetest.chat_send_player(name, " - " .. set .. ": " .. dump(ctf.setting(set)))
+			print("\"" .. set .. "\"   " .. dump(ctf.setting(set)))
 		end
 	end
 })
