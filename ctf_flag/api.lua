@@ -168,6 +168,36 @@ function ctf_flag.delete(team, pos)
 	end
 end
 
+function ctf_flag.assert_flag(flag)
+	minetest.get_voxel_manip(flag, { x = flag.x + 1, y = flag.y + 1, z = flag.z + 1})
+	local nodename = minetest.get_node(flag).name
+	if nodename ~= "ctf_flag:flag" then
+		ctf.log("flag", flag.team .. " has wrong node at flag position, " .. nodename .. ", correcting...")
+		minetest.set_node(flag, { name = "ctf_flag:flag"})
+
+		local function base_at(flag, dx, dz)
+			minetest.set_node({
+				x = flag.x + dx,
+				y = flag.y - 1,
+				z = flag.z + dz,
+			}, { name = "ctf_flag:ind_base"})
+		end
+		base_at(flag, -1, -1)
+		base_at(flag, -1,  0)
+		base_at(flag, -1,  1)
+		base_at(flag,  0, -1)
+		base_at(flag,  0,  0)
+		base_at(flag,  0,  1)
+		base_at(flag,  1, -1)
+		base_at(flag,  1,  0)
+		base_at(flag,  1,  1)
+
+		if minetest.get_node(flag).name ~= "ctf_flag:flag" then
+			ctf_flag.update(flag)
+		end
+	end
+end
+
 function ctf_flag.assert_flags()
 	for tname, team in pairs(ctf.teams) do
 		ctf_flag.assert_flags_team(tname)
@@ -181,29 +211,6 @@ function ctf_flag.assert_flags_team(tname)
 	end
 
 	for i=1, #team.flags do
-		local flag = team.flags[i]
-		minetest.get_voxel_manip(flag, { x = flag.x + 1, y = flag.y + 1, z = flag.z + 1})
-		local nodename = minetest.get_node(flag).name
-		if nodename ~= "ctf_flag:flag" then
-			ctf.log("flag", tname .. " has wrong node at flag position, " .. nodename .. ", correcting...")
-			minetest.set_node(flag, { name = "ctf_flag:flag"})
-
-			local function base_at(flag, dx, dz)
-				minetest.set_node({
-					x = flag.x + dx,
-					y = flag.y - 1,
-					z = flag.z + dz,
-				}, { name = "ctf_flag:ind_base"})
-			end
-			base_at(flag, -1, -1)
-			base_at(flag, -1,  0)
-			base_at(flag, -1,  1)
-			base_at(flag,  0, -1)
-			base_at(flag,  0,  0)
-			base_at(flag,  0,  1)
-			base_at(flag,  1, -1)
-			base_at(flag,  1,  0)
-			base_at(flag,  1,  1)
-		end
+		ctf_flag.assert_flag(team.flags[i])
 	end
 end
