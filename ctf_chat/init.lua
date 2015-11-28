@@ -251,13 +251,13 @@ minetest.register_chatcommand("t", {
 			return
 		end
 
-		if ctf.player(name).team then
-			local team = ctf.team(ctf.player(name).team)
-			if team then
-				for username, to in pairs(team.players) do
-					minetest.chat_send_player(username,
-							"<" .. name .. "> ** " .. param .. " **")
-				end
+		local tname = ctf.player(name).team
+		local team = ctf.team(tname)
+		if team then
+			minetest.log("action", tname .. "<" .. name .. "> ** ".. param .. " **")
+			for username, to in pairs(team.players) do
+				minetest.chat_send_player(username,
+						tname .. "<" .. name .. "> ** " .. param .. " **")
 			end
 		else
 			minetest.chat_send_player(name,

@@ -1,5 +1,8 @@
 -- Get or add a team
 function ctf.team(name)
+	if name == nil then
+		return nil
+	end
 	if type(name) == "table" then
 		if not name.add_team then
 			ctf.error("team", "Invalid table given to ctf.team")
