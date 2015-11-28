@@ -45,7 +45,7 @@ local function do_capture(attname, flag, returned)
 			ctf_flag.registered_on_pick_up[i](attname, flag)
 		end
 	else
-		for i = 1, #ctf_flag.registered_on_prepick_up do
+		for i = 1, #ctf_flag.registered_on_precapture do
 			if not ctf_flag.registered_on_precapture[i](attname, flag) then
 				return
 			end
