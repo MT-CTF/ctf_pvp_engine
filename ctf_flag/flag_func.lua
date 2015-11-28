@@ -10,6 +10,12 @@ local function do_capture(attname, flag, returned)
 
 
 	if ctf.setting("flag.capture_take") and not returned then
+		for i = 1, #ctf_flag.registered_on_prepick_up do
+			if not ctf_flag.registered_on_prepick_up[i](attname, flag) then
+				return
+			end
+		end
+
 		minetest.chat_send_all(flag_name.." has been picked up by "..
 				attname.." (team "..attacker.team..")")
 
@@ -39,6 +45,12 @@ local function do_capture(attname, flag, returned)
 			ctf_flag.registered_on_pick_up[i](attname, flag)
 		end
 	else
+		for i = 1, #ctf_flag.registered_on_prepick_up do
+			if not ctf_flag.registered_on_precapture[i](attname, flag) then
+				return
+			end
+		end
+
 		minetest.chat_send_all(flag_name.." has been captured "..
 				" by "..attname.." (team "..attacker.team..")")
 
