@@ -255,6 +255,9 @@ minetest.register_chatcommand("t", {
 		local team = ctf.team(tname)
 		if team then
 			minetest.log("action", tname .. "<" .. name .. "> ** ".. param .. " **")
+			if minetest.global_exists("chatplus") then
+				chatplus.log(tname .. "<" .. name .. "> ** ".. param .. " **")
+			end
 			for username, to in pairs(team.players) do
 				minetest.chat_send_player(username,
 						tname .. "<" .. name .. "> ** " .. param .. " **")
