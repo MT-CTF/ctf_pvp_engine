@@ -8,6 +8,12 @@ minetest.register_on_leaveplayer(function(player)
 	ctf.hud.players[player:get_player_name()] = nil
 end)
 
+ctf.register_on_join_team(function(name, tname)
+	if ctf.setting("hud") then
+		ctf.hud.update(minetest.get_player_by_name(name))
+	end
+end)
+
 function ctf.hud.update(player)
 	if not player then
 		return

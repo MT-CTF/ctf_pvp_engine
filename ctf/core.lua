@@ -244,7 +244,6 @@ minetest.after(10, ctf.check_save)
 
 function ctf.save()
 	local file = io.open(minetest.get_worldpath().."/ctf.txt", "w")
-	ctf.needs_save = false
 	if file then
 		local out = {
 			teams = ctf.teams,
@@ -263,6 +262,7 @@ function ctf.save()
 
 		file:write(minetest.serialize(out))
 		file:close()
+    	ctf.needs_save = false
 	else
 		ctf.error("io", "CTF file failed to save!")
 	end
