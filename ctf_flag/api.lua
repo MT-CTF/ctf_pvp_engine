@@ -190,27 +190,7 @@ function ctf_flag.assert_flag(flag)
 	if nodename ~= "ctf_flag:flag" then
 		ctf.log("flag", flag.team .. " has wrong node at flag position, " .. nodename .. ", correcting...")
 		minetest.set_node(flag, { name = "ctf_flag:flag"})
-
-		local function base_at(flag, dx, dz)
-			minetest.set_node({
-				x = flag.x + dx,
-				y = flag.y - 1,
-				z = flag.z + dz,
-			}, { name = "ctf_flag:ind_base"})
-		end
-		base_at(flag, -1, -1)
-		base_at(flag, -1,  0)
-		base_at(flag, -1,  1)
-		base_at(flag,  0, -1)
-		base_at(flag,  0,  0)
-		base_at(flag,  0,  1)
-		base_at(flag,  1, -1)
-		base_at(flag,  1,  0)
-		base_at(flag,  1,  1)
-
-		if minetest.get_node(flag).name ~= "ctf_flag:flag" then
-			ctf_flag.update(flag)
-		end
+		ctf_flag.update(flag)
 	end
 end
 
