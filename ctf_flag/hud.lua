@@ -35,9 +35,11 @@ ctf.hud.register_part(function(player, name, tplayer)
 		if flag.claimed.player == name then
 			alert = "You've got the flag! Run back and punch your flag!"
 			color = "0xFF0000"
+			break
 		elseif flag.team == tplayer.team then
 			alert = "Kill " .. flag.claimed.player .. ", they have your flag!"
 			color = "0xFF0000"
+			break
 		else
 			alert = "Protect " .. flag.claimed.player .. ", he's got the enemy flag!"
 			color = "0xFF0000"
