@@ -24,7 +24,6 @@ end)
 
 function ctf_flag.get_nearest(pos)
 	local closest = nil
-	local closest_team = nil
 	local closest_distSQ = 1000000
 	local pd = ctf.setting("flag.protect_distance")
 	local pdSQ = pd * pd
@@ -34,16 +33,20 @@ function ctf_flag.get_nearest(pos)
 			local distSQ = vector.distanceSQ(pos, team.flags[i])
 			if distSQ < pdSQ and distSQ < closest_distSQ then
 				closest = team.flags[i]
-				closest_team = tname
 				closest_distSQ = distSQ
 			end
 		end
 	end
 
-	return closest_team, closest_distSQ
+	return closest, closest_distSQ
 end
 
-ctf.register_on_territory_query(ctf_flag.get_nearest)
+function ctf_flag.get_nearest_team_dist(pos)
+	local flag, distSQ = ctf_flag.get_nearest(pos)
+	return flag.team, distSQ
+end
+
+ctf.register_on_territory_query(ctf_flag.get_nearest_team_dist)
 
 function ctf.get_spawn(team)
 	if not ctf.team(team) then
@@ -72,12 +75,10 @@ function minetest.is_protected(pos, name)
 		return old_is_protected(pos, name)
 	end
 
-	local tname, distsq = ctf_flag.get_nearest(pos)
-	if distsq < rs then
+	local flag, distSQ = ctf_flag.get_nearest(pos)
+	if flag and pos.y >= flag.y and distSQ < rs then
 		minetest.chat_send_player(name,
-			"Too close to the flag to build! You need to be at least " .. r .. " nodes away.")
-		minetest.chat_send_player(name,
-			"This is to stop new or respawning players from being trapped.")
+			"Too close to the flag to build! Leave at least " .. r .. " blocks around the flag.")
 		return true
 	else
 		return old_is_protected(pos, name)
