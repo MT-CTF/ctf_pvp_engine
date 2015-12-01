@@ -14,6 +14,9 @@ Copyright (c) 2013 - 2015
 **Code:** LGPL 2.1 or later.  
 **Textures:** CC-BY-SA 3.0
 
+ctf_flag/sounds/trumpet* by tobyk, license: CC-BY 3.0
+from: http://freesound.org/people/tobyk/sounds/26198/
+
 Modules
 =======
 

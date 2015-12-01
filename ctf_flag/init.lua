@@ -83,3 +83,22 @@ function minetest.is_protected(pos, name)
 		return old_is_protected(pos, name)
 	end
 end
+
+-- Play sound
+ctf_flag.register_on_pick_up(function(attname, flag)
+	local vteam = ctf.team(flag.team)
+	for name, player in pairs(vteam.players) do
+		minetest.sound_play({name="trumpet_lose"}, 	{
+			to_player = name,
+			gain = 1.0, -- default
+		})
+	end
+
+	local ateam = ctf.team(ctf.player(attname).team)
+	for name, player in pairs(ateam.players) do
+		minetest.sound_play({name="trumpet_win"}, 	{
+		    to_player = name,
+		    gain = 1.0, -- default
+		})
+	end
+end)
