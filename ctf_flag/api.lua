@@ -14,6 +14,14 @@ function ctf_flag.register_on_pick_up(func)
 	table.insert(ctf_flag.registered_on_pick_up, func)
 end
 
+ctf_flag.registered_on_drop = {}
+function ctf_flag.register_on_drop(func)
+	if ctf._mt_loaded then
+		error("You can't register callbacks at game time!")
+	end
+	table.insert(ctf_flag.registered_on_drop, func)
+end
+
 ctf_flag.registered_on_precapture = {}
 function ctf_flag.register_on_precapture(func)
 	if ctf._mt_loaded then
@@ -63,6 +71,10 @@ function ctf_flag.player_drop_flag(name)
 
 			ctf.action("flag", name .. " dropped " .. flag_name)
 			minetest.chat_send_all(flag_name.." has returned.")
+
+			for i = 1, #ctf_flag.registered_on_drop do
+				ctf_flag.registered_on_drop[i](name, flag)
+			end
 		end
 	end
 end

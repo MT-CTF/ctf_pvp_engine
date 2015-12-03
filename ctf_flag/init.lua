@@ -8,8 +8,11 @@ ctf.register_on_init(function()
 	ctf._set("flag.protect_distance",      25)
 	ctf._set("flag.nobuild_radius",        3)
 	ctf._set("flag.capture_mode",          "take")
+	ctf._set("flag.drop_time",             7*60)
+	ctf._set("flag.drop_warn_time",        60)
 	ctf._set("gui.team.teleport_to_flag",  true)
 	ctf._set("gui.team.teleport_to_spawn", false)
+
 end)
 
 dofile(minetest.get_modpath("ctf_flag") .. "/hud.lua")
@@ -103,3 +106,34 @@ ctf_flag.register_on_pick_up(function(attname, flag)
 		})
 	end
 end)
+
+-- Drop after time
+local pickup_times = {}
+ctf_flag.register_on_pick_up(function(attname, flag)
+	pickup_times[attname] = minetest.get_gametime()
+end)
+ctf_flag.register_on_drop(function(attname, flag)
+	pickup_times[attname] = nil
+end)
+ctf_flag.register_on_capture(function(attname, flag)
+	pickup_times[attname] = nil
+end)
+ctf.register_on_new_game(function()
+	pickup_times = {}
+end)
+local function update_flag_drops()
+	local time = minetest.get_gametime()
+	local drop_time = ctf.setting("flag.drop_time")
+	for name, start in pairs(pickup_times) do
+		local remaining = drop_time - time + start
+		if remaining < 0 then
+			ctf_flag.player_drop_flag(name)
+			minetest.chat_send_player(name, "You took too long to capture the flag, so it returned!")
+		elseif remaining < ctf.setting("flag.drop_warn_time") then
+			minetest.chat_send_player(name, "You have " .. remaining ..
+				" seconds to capture the flag before it returns.")
+		end
+	end
+	minetest.after(5, update_flag_drops)
+end
+minetest.after(5, update_flag_drops)
