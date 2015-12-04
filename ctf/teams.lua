@@ -423,7 +423,15 @@ minetest.register_on_joinplayer(function(player)
 end)
 
 -- Disable friendly fire.
-minetest.register_on_punchplayer(function(player, hitter)
+ctf.registered_on_killedplayer = {}
+function ctf.register_on_killedplayer(func)
+	if ctf._mt_loaded then
+		error("You can't register callbacks at game time!")
+	end
+	table.insert(ctf.registered_on_killedplayer, func)
+end
+minetest.register_on_punchplayer(function(player, hitter,
+		time_from_last_punch, tool_capabilities, dir, damage)
 	if player and hitter then
 		local to = ctf.player(player:get_player_name())
 		local from = ctf.player(hitter:get_player_name())
@@ -433,6 +441,13 @@ minetest.register_on_punchplayer(function(player, hitter)
 			if not ctf.setting("friendly_fire") then
 				return true
 			end
+		end
+
+		if player:get_hp() - damage <= 0 then
+			for i = 1, #ctf.registered_on_killedplayer do
+				ctf.registered_on_killedplayer[i](player:get_player_name(), hitter:get_player_name())
+			end
+			return false
 		end
 	end
 end)
