@@ -12,8 +12,11 @@ ctf.register_on_init(function()
 	ctf._set("flag.drop_warn_time",        60)
 	ctf._set("gui.team.teleport_to_flag",  true)
 	ctf._set("gui.team.teleport_to_spawn", false)
-
 end)
+
+minetest.register_privilege("ctf_place_flag", {
+	description = "can place flag"
+})
 
 dofile(minetest.get_modpath("ctf_flag") .. "/hud.lua")
 dofile(minetest.get_modpath("ctf_flag") .. "/gui.lua")

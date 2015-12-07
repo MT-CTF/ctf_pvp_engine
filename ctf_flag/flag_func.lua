@@ -181,60 +181,72 @@ ctf_flag = {
 		meta:set_string("infotext", "Unowned flag")
 	end,
 	after_place_node = function(pos, placer)
-		local name = name
-
+		local name = placer:get_player_name()
 		if not pos or not name then
+			minetest.set_node(pos, {name="air"})
 			return
 		end
 
 		local meta = minetest.get_meta(pos)
-
 		if not meta then
+			minetest.set_node(pos, {name="air"})
 			return
 		end
 
-		if ctf.players and ctf.players[name] and ctf.players[name].team then
-			local team = ctf.players[name].team
-			meta:set_string("infotext", team.."'s flag")
+		local tplayer = ctf.player_or_nil(name)
+		if tplayer and ctf.team(tplayer.team) then
+			if not minetest.check_player_privs(name, {ctf_place_flag=true}) then
+				minetest.chat_send_player(name, "You're not allowed to place flags! Reported to admin for investigation.")
+				minetest.set_node(pos, {name="air"})
+				if minetest.global_exists("chatplus") then
+					chatplus.send_mail("*SERVER*", minetest.setting_get("name"),
+						"player " .. name .. " attempted to place flag!")
+				end
+				return
+			end
+
+			local tname = tplayer.team
+			local team = ctf.team(tplayer.team)
+			meta:set_string("infotext", tname.."'s flag")
 
 			-- add flag
-			ctf_flag.add(team, pos)
+			ctf_flag.add(tname, pos)
 
-			if ctf.teams[team].spawn and not ctf.setting("flag.allow_multiple") and
-					minetest.get_node(ctf.teams[team].spawn).name ==
-					"ctf_flag:flag"  then
+			-- TODO: fix this hackiness
+			if team.spawn and not ctf.setting("flag.allow_multiple") and
+					minetest.get_node(team.spawn).name == "ctf_flag:flag"  then
 				-- send message
-				minetest.chat_send_all(team.."'s flag has been moved")
-				minetest.set_node(ctf.team(team).spawn,{name="air"})
+				minetest.chat_send_all(tname .. "'s flag has been moved")
+				minetest.set_node(team.spawn, {name="air"})
 				minetest.set_node({
-					x=ctf.team(team).spawn.x,
-					y=ctf.team(team).spawn.y+1,
-					z=ctf.team(team).spawn.z
-				},{name="air"})
-				ctf.team(team).spawn = pos
+					x = team.spawn.x,
+					y = team.spawn.y+1,
+					z = team.spawn.z
+				}, {name="air"})
+				team.spawn = pos
 			end
 
 			ctf.needs_save = true
 
 			local pos2 = {
 				x = pos.x,
-				y = pos.y+1,
+				y = pos.y + 1,
 				z = pos.z
 			}
 
-			if not ctf.team(team).data.color then
-				ctf.team(team).data.color = "red"
+			if not team.data.color then
+				team.data.color = "red"
 				ctf.needs_save = true
 			end
 
-			minetest.set_node(pos2, {name="ctf_flag:flag_top_"..ctf.team(team).data.color})
+			minetest.set_node(pos2, {name="ctf_flag:flag_top_"..team.data.color})
 
 			local meta2 = minetest.get_meta(pos2)
 
-			meta2:set_string("infotext", team.."'s flag")
+			meta2:set_string("infotext", tname.."'s flag")
 		else
 			minetest.chat_send_player(name, "You are not part of a team!")
-			minetest.set_node(pos,{name="air"})
+			minetest.set_node(pos, {name="air"})
 		end
 	end
 }
