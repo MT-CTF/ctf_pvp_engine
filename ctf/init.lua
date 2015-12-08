@@ -13,7 +13,7 @@ function minetest.chat_send_all(msg)
 end
 
 -- Privs
-minetest.register_privilege("team", {
+minetest.register_privilege("ctf_team_mgr", {
 	description = "Team manager",
 })
 

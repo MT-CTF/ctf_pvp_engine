@@ -216,7 +216,7 @@ function ctf.can_mod(player,team)
 	local privs = minetest.get_player_privs(player)
 
 	if privs then
-		if privs.team == true then
+		if privs.ctf_admin == true then
 		 	return true
 		end
 	end
