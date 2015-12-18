@@ -285,6 +285,11 @@ minetest.register_chatcommand("t", {
 
 -- Chat plus stuff
 if minetest.global_exists("chatplus") then
+	function chatplus.log_message(from, msg)
+		local tname = ctf.player(from).team
+		chatplus.log(tname .. "<" .. from .. "> " .. msg)
+	end
+
 	chatplus.register_handler(function(from, to, msg)
 		if not ctf.setting("chat.team_channel") then
 			-- Send to global
