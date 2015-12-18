@@ -286,7 +286,7 @@ minetest.register_chatcommand("t", {
 -- Chat plus stuff
 if minetest.global_exists("chatplus") then
 	function chatplus.log_message(from, msg)
-		local tname = ctf.player(from).team
+		local tname = ctf.player(from).team or ""
 		chatplus.log(tname .. "<" .. from .. "> " .. msg)
 	end
 
