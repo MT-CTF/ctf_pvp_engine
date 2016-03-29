@@ -90,13 +90,14 @@ function ctf.count_players_in_team(team)
 end
 
 function ctf.new_player(name)
-	if not name then
+	if name then
+		ctf.players[name] = {
+			name = name
+		}
+	else
 		ctf.error("team", "Can't create a blank player")
 		ctf.log("team", debug.traceback())
 	end
-	ctf.players[name] = {
-		name = name
-	}
 end
 
 -- get a player

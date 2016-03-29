@@ -27,10 +27,11 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
 	-- Settings page
 	if fields.save then
-		ctf.gui.show(name, "settings")
-		
+		local name = player:get_player_name()
 		local pdata = ctf.player(name)
 		local team = ctf.team(pdata.team)
+
+		ctf.gui.show(name, "settings")
 		if team and ctf.can_mod(name, pdata.team) then
 			if ctf.flag_colors[fields.color] then
 				team.data.color = fields.color
