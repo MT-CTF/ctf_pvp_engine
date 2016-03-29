@@ -28,20 +28,28 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	-- Settings page
 	if fields.save then
 		ctf.gui.show(name, "settings")
-
-		if ctf.flag_colors[fields.color] then
-			team.data.color = fields.color
-			ctf.needs_save = true
-		else
-			local colors = ""
-			for color, code in pairs(ctf.flag_colors) do
-				if colors ~= "" then
-					colors = colors .. ", "
+		
+		local pdata = ctf.player(name)
+		local team = ctf.team(pdata.team)
+		if team and ctf.can_mod(name, pdata.team) then
+			if ctf.flag_colors[fields.color] then
+				team.data.color = fields.color
+				ctf.needs_save = true
+			else
+				local colors = ""
+				for color, code in pairs(ctf.flag_colors) do
+					if colors ~= "" then
+						colors = colors .. ", "
+					end
+					colors = colors .. color
 				end
-				colors = colors .. color
+				minetest.chat_send_player(name, "Color " .. fields.color ..
+						" does not exist! Available: " .. colors)
 			end
-			minetest.chat_send_player(name, "Color " .. fields.color ..
-					" does not exist! Available: " .. colors)
+		elseif team then
+			minetest.chat_send_player(name, "You don't have the rights to change settings.")
+		else
+			minetest.chat_send_player(name, "You don't appear to be in a team")
 		end
 
 		return true
