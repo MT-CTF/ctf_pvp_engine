@@ -218,6 +218,10 @@ function ctf_flag.assert_flags_team(tname)
 		return false
 	end
 
+	if not team.flags then
+		team.flags = {}
+	end
+
 	for i=1, #team.flags do
 		ctf_flag.assert_flag(team.flags[i])
 	end

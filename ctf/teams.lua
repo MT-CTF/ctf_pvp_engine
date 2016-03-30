@@ -9,21 +9,7 @@ function ctf.team(name)
 			return
 		end
 
-		ctf.log("team", "Defining team "..name.name)
-
-		ctf.teams[name.name] = {
-			data = name,
-			spawn = nil,
-			players = {}
-		}
-
-		for i = 1, #ctf.registered_on_new_team do
-			ctf.registered_on_new_team[i](ctf.teams[name.name])
-		end
-
-		ctf.needs_save = true
-
-		return ctf.teams[name.name]
+		return ctf.create_team(name.name, name)
 	else
 		local team = ctf.teams[name]
 		if team then
@@ -39,6 +25,24 @@ function ctf.team(name)
 			return nil
 		end
 	end
+end
+
+function ctf.create_team(name, data)
+	ctf.log("team", "Creating team " .. name)
+
+	ctf.teams[name] = {
+		data = data,
+		spawn = nil,
+		players = {}
+	}
+
+	for i = 1, #ctf.registered_on_new_team do
+		ctf.registered_on_new_team[i](ctf.teams[name])
+	end
+
+	ctf.needs_save = true
+
+	return ctf.teams[name]
 end
 
 function ctf.remove_team(name)
