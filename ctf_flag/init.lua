@@ -49,7 +49,9 @@ end
 
 function ctf_flag.get_nearest_team_dist(pos)
 	local flag, distSQ = ctf_flag.get_nearest(pos)
-	return flag.team, distSQ
+	if flag then
+		return flag.team, distSQ
+	end
 end
 
 ctf.register_on_territory_query(ctf_flag.get_nearest_team_dist)
