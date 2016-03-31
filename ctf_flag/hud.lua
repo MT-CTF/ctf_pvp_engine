@@ -28,21 +28,26 @@ end)
 
 ctf.hud.register_part(function(player, name, tplayer)
 	-- Check all flags
-	local alert = "Punch the enemy flag! Protect your flag!"
+	local alert = nil
 	local color = "0xFFFFFF"
-	local claimed = ctf_flag.collect_claimed()
-	for _, flag in pairs(claimed) do
-		if flag.claimed.player == name then
-			alert = "You've got the flag! Run back and punch your flag!"
-			color = "0xFF0000"
-			break
-		elseif flag.team == tplayer.team then
-			alert = "Kill " .. flag.claimed.player .. ", they have your flag!"
-			color = "0xFF0000"
-			break
-		else
-			alert = "Protect " .. flag.claimed.player .. ", he's got the enemy flag!"
-			color = "0xFF0000"
+	if ctf.setting("flag.alerts") then
+		if ctf.setting("flag.alerts.neutral_alert") then
+			alert = "Punch the enemy flag! Protect your flag!"
+		end
+		local claimed = ctf_flag.collect_claimed()
+		for _, flag in pairs(claimed) do
+			if flag.claimed.player == name then
+				alert = "You've got the flag! Run back and punch your flag!"
+				color = "0xFF0000"
+				break
+			elseif flag.team == tplayer.team then
+				alert = "Kill " .. flag.claimed.player .. ", they have your flag!"
+				color = "0xFF0000"
+				break
+			else
+				alert = "Protect " .. flag.claimed.player .. ", he's got the enemy flag!"
+				color = "0xFF0000"
+			end
 		end
 	end
 
