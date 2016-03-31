@@ -87,7 +87,7 @@ ctf.gui.register_tab("news", "News", function(name, tname)
 				amount = amount + 1
 
 				if team[i].mode == "diplo" then
-					result = result .. "image[0.5," .. height .. ";10.5,1;diplo_" .. team[i].msg .. ".png]"
+					result = result .. "background[0.5," .. height .. ";8.3,1;diplo_" .. team[i].msg .. ".png]"
 					if team[i].msg == "alliance" then
 						result = result .. "label[1," .. height .. ";" ..
 								team[i].team .. " offers an " ..
@@ -159,7 +159,7 @@ ctf.gui.register_tab("diplo", "Diplomacy", function(name, tname)
 			break
 		end
 
-		result = result .. "image[1," .. height .. ";10,1;diplo_" ..
+		result = result .. "background[1," .. height .. ";8.2,1;diplo_" ..
 				data[i].state .. ".png]"
 		result = result .. "button[1.25," .. height .. ";2,1;team_" ..
 				data[i].team .. ";" .. data[i].team .. "]"
