@@ -286,18 +286,18 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	local tname   = tplayer.team
 	local team    = ctf.team(tname)
 
-	if not team then
+	if not team or formname ~= "ctf:diplo" then
 		return false
 	end
 
-	if formname == "ctf:diplo" then
-		for key, field in pairs(fields) do
-			local tname2 = string.match(key, "team_(.+)")
-			if tname2 and ctf.team(tname2) then
-				ctf.gui.show(name, "diplo", tname2)
-				return true
-			end
+	for key, field in pairs(fields) do
+		local tname2 = string.match(key, "team_(.+)")
+		if tname2 and ctf.team(tname2) then
+			ctf.gui.show(name, "diplo", tname2)
+			return true
+		end
 
+		if ctf.can_mod(name, tname) then
 			tname2 = string.match(key, "peace_(.+)")
 			if tname2 then
 				if ctf.diplo.get(tname, tname2) == "war" then
@@ -348,6 +348,6 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				ctf.gui.show(name, "diplo")
 				return true
 			end
-		end
-	end
+		end -- end if can mod
+	end -- end for each field
 end)
