@@ -293,8 +293,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	if formname == "ctf:diplo" then
 		for key, field in pairs(fields) do
 			local tname2 = string.match(key, "team_(.+)")
-			if tname2 then
-				ctf.gui.show(name, "diplo")
+			if tname2 and ctf.team(tname2) then
+				ctf.gui.show(name, "diplo", tname2)
 				return true
 			end
 
