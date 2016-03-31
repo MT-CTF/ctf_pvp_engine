@@ -153,8 +153,6 @@ function ctf.init()
 	end
 
 	ctf.load()
-
-	ctf.log("init", "Done!")
 end
 
 function ctf.reset()
