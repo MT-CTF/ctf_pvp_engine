@@ -29,14 +29,14 @@ end
 minetest.register_chatcommand("team", {
 	description = "Open the team console, or run team command (see /team help)",
 	func = function(name, param)
-		local test   = string.match(param,"^player ([%a%d_-]+)")
-		local create = string.match(param,"^add ([%a%d_-]+)")
-		local remove = string.match(param,"^remove ([%a%d_-]+)")
-		local j_name, j_tname = string.match(param,"^join ([%a%d_-]+) ([%a%d_]+)")
-		local l_name = string.match(param,"^removeplr ([%a%d_-]+)")
+		local test   = string.match(param, "^player ([%a%d_-]+)")
+		local create = string.match(param, "^add ([%a%d_-]+)")
+		local remove = string.match(param, "^remove ([%a%d_-]+)")
+		local j_name, j_tname = string.match(param, "^join ([%a%d_-]+) ([%a%d_]+)")
+		local l_name = string.match(param, "^removeplr ([%a%d_-]+)")
 		if create then
 			local privs = minetest.get_player_privs(name)
-			if privs and privs.ctf_admin == true then
+			if privs and privs.ctf_admin then
 				if (
 					string.match(create, "([%a%b_]-)")
 					and create ~= ""
@@ -52,7 +52,7 @@ minetest.register_chatcommand("team", {
 			end
 		elseif remove then
 			local privs = minetest.get_player_privs(name)
-			if privs and privs.ctf_admin == true then
+			if privs and privs.ctf_admin then
 				if ctf.remove_team(remove) then
 					return true, "Removed team '" .. remove .. "'"
 				else
@@ -66,9 +66,9 @@ minetest.register_chatcommand("team", {
 		elseif ctf.team(param) then
 			minetest.chat_send_player(name, "Team "..param..":")
 			local count = 0
-			for _,value in pairs(ctf.team(param).players) do
+			for _, value in pairs(ctf.team(param).players) do
 				count = count + 1
-				if value.auth == true then
+				if value.auth then
 					minetest.chat_send_player(name, count .. ">> " .. value.name
 							.. " (team owner)")
 				else
@@ -92,7 +92,7 @@ minetest.register_chatcommand("team", {
 			end
 		elseif j_name and j_tname then
 			local privs = minetest.get_player_privs(name)
-			if privs and privs.ctf_team_mgr == true then
+			if privs and privs.ctf_team_mgr then
 				if ctf.join(j_name, j_tname, true, name) then
 					return true, "Successfully added " .. j_name .. " to " .. j_tname
 				else
@@ -103,7 +103,7 @@ minetest.register_chatcommand("team", {
 			end
 		elseif l_name then
 			local privs = minetest.get_player_privs(name)
-			if privs and privs.ctf_team_mgr == true then
+			if privs and privs.ctf_team_mgr then
 				if ctf.remove_player(l_name) then
 					return true, "Removed player " .. l_name
 				else
@@ -115,21 +115,27 @@ minetest.register_chatcommand("team", {
 		elseif param=="help" then
 			team_console_help(name)
 		else
-			if param~="" and param~= nil then
+			if param ~= "" and param ~= nil then
 				minetest.chat_send_player(name, "'"..param.."' is an invalid parameter to /team")
 				team_console_help(name)
 			end
-			if (
-				ctf and
-				ctf.players and
-				ctf.players[name] and
-				ctf.players[name].team and
-				ctf.setting("gui")
-			) then
-				ctf.gui.show(name)
+			if ctf.setting("gui") then
+				if (ctf and
+						ctf.players and
+						ctf.players[name] and
+						ctf.players[name].team) then
+					print("showing")
+					ctf.gui.show(name)
+					return true, "Showing the team window"
+				else
+					return false, "You're not part of a team!"
+				end
+			else
+				return false, "GUI is disabled!"
 			end
 		end
-	end,
+		return false, "Nothing could be done"
+	end
 })
 
 minetest.register_chatcommand("join", {
