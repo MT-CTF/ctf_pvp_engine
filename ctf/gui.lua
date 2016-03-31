@@ -24,7 +24,7 @@ function ctf.gui.register_tab(name, title, func)
 	end
 end
 
-function ctf.gui.show(name, tab, team)
+function ctf.gui.show(name, tab, tname)
 	if not tab then
 		tab = ctf.setting("gui.team.initial") or "news"
 	end
@@ -38,20 +38,20 @@ function ctf.gui.show(name, tab, team)
 		return
 	end
 
-	if not ctf.team(team) then
-		team = ctf.player(name).team
+	if not ctf.team(tname) then
+		tname = ctf.player(name).team
 	end
 
-	if ctf.team(team) then
-		ctf.action("gui", name .. " views " .. team .. "'s " .. tab .. " page")
-		ctf.gui.tabs[tab].func(name, team)
+	if ctf.team(tname) then
+		ctf.action("gui", name .. " views " .. tname .. "'s " .. tab .. " page")
+		ctf.gui.tabs[tab].func(name, tname)
 	else
 		ctf.log("gui", "Invalid team given to ctf.gui.show")
 	end
 end
 
 -- Get tab buttons
-function ctf.gui.get_tabs(name, team)
+function ctf.gui.get_tabs(name, tname)
 	local result = ""
 	local id = 1
 	local function addtab(name,text)
@@ -69,33 +69,33 @@ function ctf.gui.get_tabs(name, team)
 end
 
 -- Team interface
-ctf.gui.register_tab("news", "News", function(name, team)
+ctf.gui.register_tab("news", "News", function(name, tname)
 	local result = ""
-	local data = ctf.team(team).log
+	local team = ctf.team(tname).log
 
-	if not data then
-		data = {}
+	if not team then
+		team = {}
 	end
 
 	local amount = 0
 
-	for i = 1, #data do
-		if data[i].type == "request" then
-			if ctf.can_mod(name, team) then
+	for i = 1, #team do
+		if team[i].type == "request" then
+			if ctf.can_mod(name, tname) then
 				amount = amount + 2
 				local height = (amount*0.5) + 0.5
 				amount = amount + 1
 
-				if data[i].mode == "diplo" then
-					result = result .. "image[0.5," .. height .. ";10.5,1;diplo_" .. data[i].msg .. ".png]"
-					if data[i].msg == "alliance" then
+				if team[i].mode == "diplo" then
+					result = result .. "image[0.5," .. height .. ";10.5,1;diplo_" .. team[i].msg .. ".png]"
+					if team[i].msg == "alliance" then
 						result = result .. "label[1," .. height .. ";" ..
-								data[i].team .. " offers an " ..
-								minetest.formspec_escape(data[i].msg) .. " treaty]"
+								team[i].team .. " offers an " ..
+								minetest.formspec_escape(team[i].msg) .. " treaty]"
 					else
 						result = result .. "label[1," .. height .. ";" ..
-								data[i].team .. " offers a " ..
-								minetest.formspec_escape(data[i].msg) .. " treaty]"
+								team[i].team .. " offers a " ..
+								minetest.formspec_escape(team[i].msg) .. " treaty]"
 					end
 					result = result .. "button[6," .. height .. ";1,1;btn_y" .. i .. ";Yes]"
 					result = result .. "button[7," .. height .. ";1,1;btn_n" .. i .. ";No]"
@@ -112,11 +112,11 @@ ctf.gui.register_tab("news", "News", function(name, team)
 			end
 
 			result = result .. "label[0.5," .. height .. ";" ..
-					minetest.formspec_escape(data[i].msg) .. "]"
+					minetest.formspec_escape(team[i].msg) .. "]"
 		end
 	end
 
-	if ctf.can_mod(name, team) then
+	if ctf.can_mod(name, tname) then
 		result = result .. "button[4,6;2,1;clear;Clear all]"
 	end
 
@@ -127,29 +127,29 @@ ctf.gui.register_tab("news", "News", function(name, team)
 
 	minetest.show_formspec(name, "ctf:news",
 		"size[10,7]" ..
-		ctf.gui.get_tabs(name,team) ..
+		ctf.gui.get_tabs(name, tname) ..
 		result)
 end)
 
 -- Team interface
-ctf.gui.register_tab("diplo", "Diplomacy", function(name, team)
+ctf.gui.register_tab("diplo", "Diplomacy", function(name, tname)
 	local result = ""
 	local data = {}
 
 	local amount = 0
 
 	for key, value in pairs(ctf.teams) do
-		if key ~= team then
+		if key ~= tname then
 			table.insert(data,{
 					team  = key,
-					state = ctf.diplo.get(team,key),
-					to    = ctf.diplo.check_requests(team,key),
-					from  = ctf.diplo.check_requests(key,team)
+					state = ctf.diplo.get(tname, key),
+					to    = ctf.diplo.check_requests(tname, key),
+					from  = ctf.diplo.check_requests(key, tname)
 				})
 		end
 	end
 
-	result = result .. "label[1,1;Diplomacy from the perspective of " .. team .. "]"
+	result = result .. "label[1,1;Diplomacy from the perspective of " .. tname .. "]"
 
 	for i = 1, #data do
 		amount = i
@@ -166,7 +166,7 @@ ctf.gui.register_tab("diplo", "Diplomacy", function(name, team)
 		result = result .. "label[3.75," .. height .. ";" .. data[i].state
 				.. "]"
 
-		if ctf.can_mod(name,team) and ctf.player(name).team == team then
+		if ctf.can_mod(name, tname) and ctf.player(name).team == tname then
 			if not data[i].from and not data[i].to then
 				if data[i].state == "war" then
 					result = result .. "button[7.5," .. height ..
@@ -194,7 +194,7 @@ ctf.gui.register_tab("diplo", "Diplomacy", function(name, team)
 
 	minetest.show_formspec(name, "ctf:diplo",
 		"size[10,7]" ..
-		ctf.gui.get_tabs(name, team) ..
+		ctf.gui.get_tabs(name, tname) ..
 		result
 	)
 end)
