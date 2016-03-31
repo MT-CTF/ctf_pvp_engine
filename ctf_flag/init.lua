@@ -79,7 +79,7 @@ local old_is_protected = minetest.is_protected
 local r = ctf.setting("flag.nobuild_radius")
 local rs = r * r
 function minetest.is_protected(pos, name)
-	if rs == 0 then
+	if r <= 0 or rs == 0 then
 		return old_is_protected(pos, name)
 	end
 
