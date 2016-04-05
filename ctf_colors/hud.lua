@@ -1,5 +1,9 @@
 function ctf_colors.get_color(name, tplayer)
-	local tcolor_text = ctf.team(tplayer.team).data.color
+	local team = ctf.team(tplayer.team)
+	local tcolor_text = nil
+	if team then
+		tcolor_text = team.data.color
+	end
 	local tcolor_hex = ctf.flag_colors[tcolor_text]
 	if not tcolor_hex then
 		tcolor_hex = "0x000000"

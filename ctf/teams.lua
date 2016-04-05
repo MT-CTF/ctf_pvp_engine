@@ -449,8 +449,19 @@ minetest.register_on_punchplayer(function(player, hitter,
 		end
 
 		if player:get_hp() - damage <= 0 then
+			local wielded = hitter:get_wielded_item()
+			local wname = wielded:get_name()
+			print(wname)
+			local type = "sword"
+			if wname:sub(1, 8) == "shooter:" then
+				if wname == "shooter:grenade" then
+					type = "grenade"
+				else
+					type = "bullet"
+				end
+			end
 			for i = 1, #ctf.registered_on_killedplayer do
-				ctf.registered_on_killedplayer[i](player:get_player_name(), hitter:get_player_name())
+				ctf.registered_on_killedplayer[i](player:get_player_name(), hitter:get_player_name(), type)
 			end
 			return false
 		end
