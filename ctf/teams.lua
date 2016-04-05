@@ -472,6 +472,9 @@ minetest.register_on_punchplayer(function(player, hitter,
 					type = "bullet"
 				end
 			end
+			if tool_capabilities.damage_groups.grenade then
+				type = "grenade"
+			end
 			for i = 1, #ctf.registered_on_killedplayer do
 				ctf.registered_on_killedplayer[i](player:get_player_name(), hitter:get_player_name(), type)
 			end
