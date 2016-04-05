@@ -1,4 +1,6 @@
-ctf.flag_colors = {
+-- Supported colors
+ctf_colors = {}
+ctf_colors.colors = {
 	red    = "0xFF4444",
 	cyan   = "0x00FFFF",
 	blue   = "0x4466FF",
@@ -12,11 +14,13 @@ ctf.flag_colors = {
 	orange = "0xFFA500",
 	gold   = "0x808000"
 }
+ctf.flag_colors = ctf_colors.colors
 
 ctf.register_on_init(function()
 	ctf.log("colors", "Initialising...")
 	ctf._set("colors.skins",               false)
 	ctf._set("colors.nametag",             true)
+	ctf._set("colors.nametag.tcolor",      false)
 end)
 
 dofile(minetest.get_modpath("ctf_colors") .. "/hud.lua")

@@ -114,6 +114,24 @@ ctf_flag.register_on_pick_up(function(attname, flag)
 	end
 end)
 
+-- Change nametag color
+local oldntc = ctf_colors.get_nametag_color
+function ctf_colors.get_nametag_color(name, tplayer, tcolor_text, tcolor_hex)
+	if ctf_flag.get_claimed_by_player(name) then
+		return "0xFFFF0000"
+	else
+		return oldntc(name, tplayer, tcolor_text, tcolor_hex)
+	end
+end
+
+ctf_flag.register_on_pick_up(function(attname, flag)
+	ctf_colors.update(nil, attname, ctf.player(attname))
+end)
+
+ctf_flag.register_on_drop(function(attname, flag)
+	ctf_colors.update(nil, attname, ctf.player(attname))
+end)
+
 -- Drop after time
 local pickup_times = {}
 ctf_flag.register_on_pick_up(function(attname, flag)

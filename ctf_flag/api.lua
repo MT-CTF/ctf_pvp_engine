@@ -50,6 +50,15 @@ function ctf_flag.collect_claimed()
 	return claimed
 end
 
+function ctf_flag.get_claimed_by_player(name)
+	local claimed = ctf_flag.collect_claimed()
+	for _, flag in pairs(claimed) do
+		if flag.claimed.player == name then
+			return name
+		end
+	end
+end
+
 function ctf_flag.player_drop_flag(name)
 	if not name then
 		return
