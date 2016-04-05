@@ -11,7 +11,10 @@ function hudkit()
 				elements = self.players[name]
 			end
 
-			elements[id] = player:hud_add(def)
+			elements[id] = {
+				id = player:hud_add(def),
+				def = def
+			}
 			return true
 		end,
 
@@ -37,11 +40,14 @@ function hudkit()
 			local name     = player:get_player_name()
 			local elements = self.players[name]
 
-			if not elements or not elements[id] then
+			if not elements or not elements[id] or not elements[id].id then
 				return false
 			end
 
-			player:hud_change(elements[id], stat, value)
+			if elements[id].def[stat] ~= value then
+				elements[id].def[stat] = value
+				player:hud_change(elements[id].id, stat, value)
+			end
 			return true
 		end,
 
@@ -49,11 +55,11 @@ function hudkit()
 			local name     = player:get_player_name()
 			local elements = self.players[name]
 
-			if not elements or not elements[id] then
+			if not elements or not elements[id] or not elements[id].id then
 				return false
 			end
 
-			player:hud_remove(elements[id])
+			player:hud_remove(elements[id].id)
 			elements[id] = nil
 			return true
 		end
