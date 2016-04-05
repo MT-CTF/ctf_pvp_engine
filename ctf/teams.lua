@@ -435,11 +435,22 @@ function ctf.register_on_killedplayer(func)
 	end
 	table.insert(ctf.registered_on_killedplayer, func)
 end
+local dead_players = {}
+minetest.register_on_respawnplayer(function(player)
+	dead_players[player:get_player_name()] = nil
+end)
+minetest.register_on_joinplayer(function(player)
+	dead_players[player:get_player_name()] = nil
+end)
 minetest.register_on_punchplayer(function(player, hitter,
 		time_from_last_punch, tool_capabilities, dir, damage)
 	if player and hitter then
 		local to = ctf.player(player:get_player_name())
 		local from = ctf.player(hitter:get_player_name())
+
+		if dead_players[player:get_player_name()] then
+			return
+		end
 
 		if to.team == from.team and to.team ~= "" and to.team ~= nil then
 			minetest.chat_send_player(hitter:get_player_name(), player:get_player_name() .. " is on your team!")
@@ -449,6 +460,7 @@ minetest.register_on_punchplayer(function(player, hitter,
 		end
 
 		if player:get_hp() - damage <= 0 then
+			dead_players[player:get_player_name()] = true
 			local wielded = hitter:get_wielded_item()
 			local wname = wielded:get_name()
 			print(wname)
