@@ -452,7 +452,7 @@ minetest.register_on_punchplayer(function(player, hitter,
 			return
 		end
 
-		if to.team == from.team and to.team ~= "" and to.team ~= nil then
+		if to.team == from.team and to.team ~= "" and to.team ~= nil and to.name ~= from.name then
 			minetest.chat_send_player(hitter:get_player_name(), player:get_player_name() .. " is on your team!")
 			if not ctf.setting("friendly_fire") then
 				return true
