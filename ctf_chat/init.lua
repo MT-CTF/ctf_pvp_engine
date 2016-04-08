@@ -282,6 +282,9 @@ minetest.register_chatcommand("t", {
 				minetest.chat_send_player(username,
 						tname .. "<" .. name .. "> ** " .. param .. " **")
 			end
+			if minetest.global_exists("irc") and irc.feature_mod_channel then
+				irc:say(irc.config.channel, tname .. "<" .. name .. "> ** " .. param .. " **", true)
+			end
 		else
 			minetest.chat_send_player(name,
 					"You're not in a team, so you have no team to talk to.")
