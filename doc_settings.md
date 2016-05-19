@@ -40,14 +40,13 @@
 | flag.alerts                | true          | prompts like "X has captured your flag"                          |
 | flag.alerts.neutral_alert  | true          | show prompt in neutral state, ie: "attack and defend!"           |
 | flag.allow_multiple        | true          | teams can have multiple flags                                    |
-| flag.capture_mode          | true          | whether a player needs to return flag to base to capture         |
-| flag.capture_take          | false         |
-| flag.drop_time             | 420           |
-| flag.drop_warn_time        | 60            |
-| flag.nobuild_radius        | 3             |
-| flag.names                 | true          |
-| flag.protect_distance      | 25            |
-| flag.waypoints             | true          |
+| flag.capture_take          | false         | whether a player needs to return flag to base to capture         |
+| flag.drop_time             | 420           | time in seconds before a player drops the flag they're holding   |
+| flag.drop_warn_time        | 60            | warning time before drop                                         |
+| flag.nobuild_radius        | 3             | area around flag where you can't build                           |
+| flag.names                 | true          | enable naming flags                                              |
+| flag.protect_distance      | 25            | area protection distance                                         |
+| flag.waypoints             | true          | enable waypoints to flags                                        |
 | gui.tab.flags              | true          | Show flags tab                                                   |
 | gui.team.teleport_to_flag  | true          | Enable teleport to flag button in flags tab                      |
 | gui.team.teleport_to_spawn | false         | Enable teleport to spawn button in flags tab                     |
