@@ -320,7 +320,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
 			tname2 = string.match(key, "war_(.+)")
 			if tname2 then
-				ctf.diplo.set(team, tname2,"war")
+				ctf.diplo.set(tname, tname2, "war")
 				ctf.post(tname, {
 					msg = "You have declared war on " .. tname2 })
 				ctf.post(tname2, {
