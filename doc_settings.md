@@ -47,6 +47,7 @@
 | flag.names                 | true          | enable naming flags                                              |
 | flag.protect_distance      | 25            | area protection distance                                         |
 | flag.waypoints             | true          | enable waypoints to flags                                        |
+| flag.crafting              | false         | enable the crafting of flags                                     |      |
 | gui.tab.flags              | true          | Show flags tab                                                   |
 | gui.team.teleport_to_flag  | true          | Enable teleport to flag button in flags tab                      |
 | gui.team.teleport_to_spawn | false         | Enable teleport to spawn button in flags tab                     |
