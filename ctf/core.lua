@@ -119,7 +119,7 @@ function ctf.action(area, msg)
 	if area and area ~= "" then
 		minetest.log("action", "[CaptureTheFlag] (" .. area .. ") " .. msg)
 	else
-		nubetest.log("action", "[CaptureTheFlag] " .. msg)
+		minetest.log("action", "[CaptureTheFlag] " .. msg)
 	end
 end
 function ctf.warning(area, msg)
