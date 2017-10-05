@@ -276,11 +276,13 @@ minetest.register_chatcommand("t", {
 		if team then
 			minetest.log("action", tname .. "<" .. name .. "> ** ".. param .. " **")
 			if minetest.global_exists("chatplus") then
-				chatplus.log(tname .. "<" .. name .. "> ** ".. param .. " **")
+				chatplus.log("<" .. name .. "> ** ".. param .. " **")
 			end
+
+			local color, colorHex = ctf_colors.get_color(name, ctf.player(name))
 			for username, to in pairs(team.players) do
 				minetest.chat_send_player(username,
-						tname .. "<" .. name .. "> ** " .. param .. " **")
+						minetest.colorize("#" .. colorHex:sub(3, 8), "<" .. name .. "> ** " .. param .. " **"))
 			end
 			if minetest.global_exists("irc") and irc.feature_mod_channel then
 				irc:say(irc.config.channel, tname .. "<" .. name .. "> ** " .. param .. " **", true)
@@ -299,6 +301,11 @@ if minetest.global_exists("chatplus") then
 		chatplus.log(tname .. "<" .. from .. "> " .. msg)
 	end
 
+	function chatplus.send_message_to_sender(from, msg)
+		local color, colorHex = ctf_colors.get_color(from, ctf.player(from))
+		minetest.chat_send_player(from, minetest.colorize("#" .. colorHex:sub(3, 8), "<" .. from .. "> ") .. msg)
+	end
+
 	chatplus.register_handler(function(from, to, msg)
 		if not ctf.setting("chat.team_channel") then
 			-- Send to global
@@ -306,9 +313,11 @@ if minetest.global_exists("chatplus") then
 		end
 
 		if ctf.setting("chat.default") ~= "team" then
-			if ctf.player(from).team then
-				minetest.chat_send_player(to, ctf.player(from).team ..
-					"<" .. from .. "> " .. msg)
+			local team_name = ctf.player(from).team
+			if team_name then
+				local color, colorHex = ctf_colors.get_color(from, ctf.player(from))
+				minetest.chat_send_player(to,
+					minetest.colorize("#" .. colorHex:sub(3, 8), "<" .. from .. "> ") .. msg)
 				return false
 			else
 				return nil
