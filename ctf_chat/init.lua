@@ -7,6 +7,10 @@ ctf.register_on_init(function()
 	ctf._set("chat.default",               "global")
 end)
 
+function minetest.is_player_name_valid(name)
+	return name:match("^[%a%d_-]+$")
+end
+
 local function team_console_help(name)
 	minetest.chat_send_player(name, "Try:")
 	minetest.chat_send_player(name, "/team - show team panel")
@@ -33,6 +37,7 @@ minetest.register_chatcommand("team", {
 		local create = string.match(param, "^add ([%a%d_-]+)")
 		local remove = string.match(param, "^remove ([%a%d_-]+)")
 		local j_name, j_tname = string.match(param, "^join ([%a%d_-]+) ([%a%d_]+)")
+		local b_tname, b_pattern = string.match(param, "^bjoin ([%a%d_-]+) ([%a%d_-%*%! ]+)")
 		local l_name = string.match(param, "^removeplr ([%a%d_-]+)")
 		if create then
 			local privs = minetest.get_player_privs(name)
@@ -100,6 +105,34 @@ minetest.register_chatcommand("team", {
 				end
 			else
 				return true, "You are not a ctf_team_mgr!"
+			end
+		elseif b_pattern and b_tname then
+			local privs = minetest.get_player_privs(name)
+			if privs and privs.ctf_team_mgr then
+				local tokens = string.split(b_pattern, " ")
+				local players = {}
+
+				for _, token in pairs(tokens) do
+					print(token)
+					if token == "*" then
+						for _, player in pairs(minetest.get_connected_players()) do
+							players[player:get_player_name()] = true
+						end
+					elseif token:sub(1, 1) == "!" then
+						players[token:sub(2, #token)] = nil
+					elseif minetest.is_player_name_valid(token) then
+						players[token] = true
+					else
+						return false, "Invalid token: " .. token .. "\nExpecting *, playername, or !playername."
+					end
+				end
+
+				for pname, _ in pairs(players) do
+					ctf.join(pname, b_tname, true, name)
+				end
+				return true, "Success!"
+			else
+				return false, "You are not a ctf_team_mgr!"
 			end
 		elseif l_name then
 			local privs = minetest.get_player_privs(name)
