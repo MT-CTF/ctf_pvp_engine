@@ -196,7 +196,7 @@ function ctf.join(name, team, force, by)
 
 	player.team = team
 	team_data.players[player.name] = player
-	
+
 	ctf.needs_save = true
 
 	minetest.log("action", name .. " joined team " .. team)
@@ -219,7 +219,7 @@ function ctf.clean_player_lists()
 			ctf.log("utils", " - Skipping player "..str.name)
 		end
 	end
-	
+
 	ctf.needs_save = true
 end
 
@@ -281,7 +281,8 @@ function ctf.autoalloc(name, alloc_mode)
 		local index = {}
 
 		for key, team in pairs(ctf.teams) do
-			if max_players == -1 or ctf.count_players_in_team(key) < max_players then
+			if team.data.allow_joins ~= false and (max_players == -1 or
+					ctf.count_players_in_team(key) < max_players) then
 				table.insert(index, key)
 			end
 		end
@@ -298,7 +299,8 @@ function ctf.autoalloc(name, alloc_mode)
 		local two_count = -1
 		for key, team in pairs(ctf.teams) do
 			local count = ctf.count_players_in_team(key)
-			if (max_players == -1 or count < max_players) then
+			if team.data.allow_joins ~= false and
+					(max_players == -1 or count < max_players) then
 				if count > one_count then
 					two = one
 					two_count = one_count
@@ -333,7 +335,8 @@ function ctf.autoalloc(name, alloc_mode)
 		local smallest_count = 1000
 		for key, team in pairs(ctf.teams) do
 			local count = ctf.count_players_in_team(key)
-			if not smallest or count < smallest_count then
+			if team.data.allow_joins ~= false and
+					(not smallest or count < smallest_count) then
 				smallest = key
 				smallest_count = count
 			end

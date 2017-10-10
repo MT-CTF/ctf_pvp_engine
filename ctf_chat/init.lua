@@ -25,6 +25,9 @@ local function team_console_help(name)
 		minetest.chat_send_player(name, "/team remove <team> - add a team called name (ctf_admin only)")
 	end
 	if privs and privs.ctf_team_mgr == true then
+		minetest.chat_send_player(name, "/team lock <team> - closes a team to new players (ctf_team_mgr only)")
+		minetest.chat_send_player(name, "/team unlock <team> - opens a team to new players (ctf_team_mgr only)")
+		minetest.chat_send_player(name, "/team bjoin <team> <commands> - Command is * for all players, playername for one, !playername to remove (ctf_team_mgr only)")
 		minetest.chat_send_player(name, "/team join <name> <team> - add 'player' to team 'team' (ctf_team_mgr only)")
 		minetest.chat_send_player(name, "/team removeply <name> - add 'player' to team 'team' (ctf_team_mgr only)")
 	end
@@ -36,6 +39,8 @@ minetest.register_chatcommand("team", {
 		local test   = string.match(param, "^player ([%a%d_-]+)")
 		local create = string.match(param, "^add ([%a%d_-]+)")
 		local remove = string.match(param, "^remove ([%a%d_-]+)")
+		local lock = string.match(param, "^lock ([%a%d_-]+)")
+		local lock = string.match(param, "^unlock ([%a%d_-]+)")
 		local j_name, j_tname = string.match(param, "^join ([%a%d_-]+) ([%a%d_]+)")
 		local b_tname, b_pattern = string.match(param, "^bjoin ([%a%d_-]+) ([%a%d_-%*%! ]+)")
 		local l_name = string.match(param, "^removeplr ([%a%d_-]+)")
@@ -65,6 +70,32 @@ minetest.register_chatcommand("team", {
 				end
 			else
 				return false, "You are not a ctf_admin!"
+			end
+		elseif lock then
+			local privs = minetest.get_player_privs(name)
+			if privs and privs.ctf_team_mgr then
+				local team = ctf.team(lock)
+				if team then
+					team.data.allow_joins = false
+					return true, "Locked team to new members"
+				else
+					return false, "Unable to find that team!"
+				end
+			else
+				return false, "You are not a ctf_team_mgr!"
+			end
+		elseif unlock then
+			local privs = minetest.get_player_privs(name)
+			if privs and privs.ctf_team_mgr then
+				local team = ctf.team(unlock)
+				if team then
+					team.data.allow_joins = true
+					return true, "Unlocked team to new members"
+				else
+					return false, "Unable to find that team!"
+				end
+			else
+				return false, "You are not a ctf_team_mgr!"
 			end
 		elseif param == "all" then
 			ctf.list_teams(name)
