@@ -57,13 +57,19 @@ ctf.hud.register_part(function(player, name, tplayer)
 			ctf.hud:change(player, "ctf:hud_team_alert", "text", alert)
 			ctf.hud:change(player, "ctf:hud_team_alert", "number", color)
 		else
+			local y
+			if ctf.setting("hud.teamname") then
+				y = 50
+			else
+				y = 20
+			end
 			ctf.hud:add(player, "ctf:hud_team_alert", {
 				hud_elem_type = "text",
 				position      = {x = 1, y = 0},
 				scale         = {x = 100, y = 100},
 				text          = alert,
 				number        = color,
-				offset        = {x = -10, y = 50},
+				offset        = {x = -10, y = y},
 				alignment     = {x = -1, y = 0}
 			})
 		end

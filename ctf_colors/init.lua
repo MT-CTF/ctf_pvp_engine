@@ -21,6 +21,8 @@ ctf.register_on_init(function()
 	ctf._set("colors.skins",               false)
 	ctf._set("colors.nametag",             true)
 	ctf._set("colors.nametag.tcolor",      false)
+	ctf._set("colors.hudtint",             true)
+	ctf._set("hud.teamname",               false)
 end)
 
 dofile(minetest.get_modpath("ctf_colors") .. "/hud.lua")
