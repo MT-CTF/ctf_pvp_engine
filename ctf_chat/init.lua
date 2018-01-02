@@ -369,7 +369,9 @@ if minetest.global_exists("irc") then
 			color = ""
 			clear = ""
 		end
-		return ("%s%s%s <%s> %s"):format(color, tname, clear, name, message)
+		local abrace = color .. "<" .. clear
+		local bbrace = color .. ">" .. clear
+		return ("%s%s%s %s"):format(abrace, name, bbrace, message)
 	end
 end
 
