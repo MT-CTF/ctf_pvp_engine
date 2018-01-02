@@ -55,16 +55,16 @@ end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
 	-- Todo: fix security issue here
-	local name = player:get_player_name()
-	if formname == "ctf:flags" then
-		for key, field in pairs(fields) do
-			local x,y,z = string.match(key, "goto_([%d-]+)_([%d-]+)_([%d-]+)")
-			if x and y and z then
-				player:setpos({ x=tonumber(x), y=tonumber(y), z=tonumber(z) })
-				return true
-			end
-		end
-	end
+	-- local name = player:get_player_name()
+	-- if formname == "ctf:flags" then
+	-- 	for key, field in pairs(fields) do
+	-- 		local x,y,z = string.match(key, "goto_([%d-]+)_([%d-]+)_([%d-]+)")
+	-- 		if x and y and z then
+	-- 			player:setpos({ x=tonumber(x), y=tonumber(y), z=tonumber(z) })
+	-- 			return true
+	-- 		end
+	-- 	end
+	-- end
 end)
 
 -- Flag interface
