@@ -14,6 +14,10 @@ ctf_colors.colors = {
 	orange = "0xFFA500",
 	gold   = "0x808000"
 }
+ctf_colors.irc_colors = {
+	red    = "4",
+	blue   = "2",
+}
 ctf.flag_colors = ctf_colors.colors
 
 ctf.register_on_init(function()

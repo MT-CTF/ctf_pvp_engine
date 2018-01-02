@@ -12,6 +12,15 @@ function ctf_colors.get_color(name, tplayer)
 	return tcolor_text, tcolor_hex
 end
 
+function ctf_colors.get_irc_color(name, tplayer)
+	local team = ctf.team(tplayer.team)
+	local tcolor_text = nil
+	if team then
+		tcolor_text = team.data.color
+	end
+	return ctf_colors.irc_colors[tcolor_text]
+end
+
 function ctf_colors.get_nametag_color(name, tplayer, tcolor_text, tcolor_hex)
 	if ctf.setting("colors.nametag.tcolor") then
 		return "0xFF" .. string.sub(tcolor_hex, 3)

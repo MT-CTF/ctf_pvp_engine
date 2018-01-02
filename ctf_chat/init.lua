@@ -370,6 +370,22 @@ if minetest.global_exists("chatplus") then
 		minetest.chat_send_player(from, minetest.colorize("#" .. colorHex:sub(3, 8), "<" .. from .. "> ") .. msg)
 	end
 
+	if minetest.global_exists("irc") then
+		function irc.playerMessage(name, message)
+			local color = ctf_colors.get_irc_color(name, ctf.player(name))
+			local clear = "\x0F"
+			print("color is " .. color)
+			if color then
+				color = "\x03" .. color
+			else
+				color = ""
+				clear = ""
+			end
+			print("message: " .. ("%s<%s>%s %s"):format(color, name, clear, message))
+			return ("%s<%s>%s %s"):format(color, name, clear, message)
+		end
+	end
+
 	chatplus.register_handler(function(from, to, msg)
 		if not ctf.setting("chat.team_channel") then
 			-- Send to global
