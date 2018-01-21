@@ -36,11 +36,6 @@ function ctf_colors.update(player, name, tplayer)
 
 	local tcolor_text, tcolor_hex = ctf_colors.get_color(name, tplayer)
 
-	if ctf.setting("colors.nametag") then
-		player:set_nametag_attributes({
-			color = ctf_colors.get_nametag_color(name, tplayer, tcolor_text, tcolor_hex) })
-	end
-
 	if ctf.setting("colors.hudtint") then
 		if tcolor_text == "red" or tcolor_text == "blue" then
 			print("tinting hud! " .. tcolor_hex)
@@ -82,21 +77,4 @@ function ctf_colors.update(player, name, tplayer)
 	end
 end
 
-
 ctf.hud.register_part(ctf_colors.update)
-
---[[if minetest.global_exists("armor") and armor.get_player_skin then
-	print("3d_armor detected!")
-	local old = armor.get_player_skin
-	function armor.get_player_skin(self, name)
-		local player = ctf.player(name)
-		local team = ctf.team(player.team)
-		if team and team.data.color and ctf.flag_colors[team.data.color] then
-			print("Return ctf_colors_skin_" .. team.data.color .. ".png")
-			return "ctf_colors_skin_" .. team.data.color .. ".png"
-		end
-		print("ctf_colors -!- Reverting to default armor skin")
-
-		return old(self, name)
-	end
-end]]

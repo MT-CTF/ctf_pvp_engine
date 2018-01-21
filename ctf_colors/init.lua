@@ -23,8 +23,6 @@ ctf.flag_colors = ctf_colors.colors
 ctf.register_on_init(function()
 	ctf.log("colors", "Initialising...")
 	ctf._set("colors.skins",               false)
-	ctf._set("colors.nametag",             true)
-	ctf._set("colors.nametag.tcolor",      false)
 	ctf._set("colors.hudtint",             true)
 	ctf._set("hud.teamname",               false)
 end)
