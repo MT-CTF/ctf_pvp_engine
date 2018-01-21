@@ -3,13 +3,20 @@ ctf.hud.register_part(function(player, name, tplayer)
 	if ctf.setting("flag.waypoints") then
 		for tname, team in pairs(ctf.teams) do
 			for _, flag in pairs(team.flags) do
-				local hud = "ctf:hud_" .. flag.x .. "_" .. flag.y .. "_" .. flag.z
+				local hud = "ctf:hud_" .. tname
 				local flag_name = flag.name or tname .. "'s base"
 				local color = ctf.flag_colors[team.data.color]
 				if not color then
 					color = "0x000000"
 				end
-				if not ctf.hud:exists(player, hud) then
+
+				if ctf.hud:exists(player, hud) then
+					ctf.hud:change(player, hud, "world_pos", {
+						x = flag.x,
+						y = flag.y,
+						z = flag.z
+					})
+				else
 					ctf.hud:add(player, hud, {
 						hud_elem_type = "waypoint",
 						name = flag_name,
