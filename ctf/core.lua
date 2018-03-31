@@ -158,6 +158,7 @@ end
 function ctf.reset()
 	ctf.log("io", "Deleting CTF save data...")
 	os.remove(minetest.get_worldpath().."/ctf.txt")
+	ctf.player_last_team = {}
 	ctf.init()
 end
 

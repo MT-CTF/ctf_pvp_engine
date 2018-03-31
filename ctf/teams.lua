@@ -142,6 +142,8 @@ function ctf.register_on_join_team(func)
 	table.insert(ctf.registered_on_join_team, func)
 end
 
+ctf.player_last_team = {}
+
 -- Player joins team
 -- Called by /join, /team join or auto allocate.
 function ctf.join(name, team, force, by)
@@ -196,6 +198,7 @@ function ctf.join(name, team, force, by)
 
 	player.team = team
 	team_data.players[player.name] = player
+	ctf.player_last_team[name] = team
 
 	ctf.needs_save = true
 
@@ -265,6 +268,11 @@ function ctf.autoalloc(name, alloc_mode)
 	if alloc_mode == 0 then
 		return
 	end
+	local last_team = ctf.player_last_team[name]
+	if last_team then
+		return last_team
+	end
+
 	local max_players = ctf.setting("maximum_in_team")
 
 	local mtot = false -- more than one team
