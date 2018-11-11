@@ -152,6 +152,11 @@ function ctf_flag.update(pos)
 	end
 end
 
+function ctf_flag.flag_tick(pos)
+	ctf_flag.update(pos)
+	minetest.get_node_timer(pos):start(5)
+end
+
 -- get a flag from a team
 function ctf_flag.get(pos)
 	if not pos then
