@@ -146,6 +146,7 @@ function ctf.init()
 	ctf._set("hud",                        true)
 	ctf._set("autoalloc_on_joinplayer",    true)
 	ctf._set("friendly_fire",              true)
+	ctf._set("spawn_offset",               "0,0,0")
 
 
 	for i = 1, #ctf.registered_on_init do

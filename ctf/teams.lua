@@ -362,8 +362,12 @@ end
 
 -- updates the spawn position for a team
 function ctf.get_spawn(team)
-	if ctf.team(team) and ctf.team(team).spawn then
-		return ctf.team(team).spawn
+	if ctf.team(team) then
+		local spawn = ctf.team(team).spawn
+		if not spawn then
+			return nil
+		end
+		return vector.add(spawn, minetest.string_to_pos(ctf.setting("spawn_offset")))
 	else
 		return nil
 	end
