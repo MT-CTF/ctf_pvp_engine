@@ -1,4 +1,4 @@
-function ctf_colors.get_color(name, tplayer)
+function ctf_colors.get_color(tplayer)
 	local team = ctf.team(tplayer.team)
 	local tcolor_text = nil
 	if team then
@@ -12,7 +12,7 @@ function ctf_colors.get_color(name, tplayer)
 	return tcolor_text, tcolor_hex
 end
 
-function ctf_colors.get_irc_color(name, tplayer)
+function ctf_colors.get_irc_color(tplayer)
 	local team = ctf.team(tplayer.team)
 	local tcolor_text = nil
 	if team then
@@ -34,7 +34,7 @@ function ctf_colors.update(player, name, tplayer)
 		player = minetest.get_player_by_name(name)
 	end
 
-	local tcolor_text, tcolor_hex = ctf_colors.get_color(name, tplayer)
+	local tcolor_text, tcolor_hex = ctf_colors.get_color(tplayer)
 
 	if ctf.setting("colors.hudtint") then
 		if tcolor_text == "red" or tcolor_text == "blue" then
