@@ -171,18 +171,18 @@ function ctf._set(setting, default)
 	end
 	ctf._defsettings[setting] = default
 
-	if minetest.setting_get("ctf."..setting) then
-		ctf.log("settings", "- " .. setting .. ": " .. minetest.setting_get("ctf."..setting))
-	elseif minetest.setting_get("ctf_"..setting) then
-		ctf.log("settings", "- " .. setting .. ": " .. minetest.setting_get("ctf_"..setting))
+	if minetest.settings:get("ctf."..setting) then
+		ctf.log("settings", "- " .. setting .. ": " .. minetest.settings:get("ctf."..setting))
+	elseif minetest.settings:get("ctf_"..setting) then
+		ctf.log("settings", "- " .. setting .. ": " .. minetest.settings:get("ctf_"..setting))
 		ctf.warning("settings", "deprecated setting ctf_"..setting..
 				" used, use ctf."..setting.." instead.")
 	end
 end
 
 function ctf.setting(name)
-	local set = minetest.setting_get("ctf."..name) or
-			minetest.setting_get("ctf_"..name)
+	local set = minetest.settings:get("ctf."..name) or
+			minetest.settings:get("ctf_"..name)
 	local dset = ctf._defsettings[name]
 	if dset == nil then
 		ctf.error("setting", "No such setting - " .. name)

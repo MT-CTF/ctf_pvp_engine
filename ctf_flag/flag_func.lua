@@ -200,7 +200,7 @@ ctf_flag = {
 				minetest.chat_send_player(name, "You're not allowed to place flags! Reported to admin for investigation.")
 				minetest.set_node(pos, {name="air"})
 				if minetest.global_exists("chatplus") then
-					chatplus.send_mail("*SERVER*", minetest.setting_get("name"),
+					chatplus.send_mail("*SERVER*", minetest.settings:get("name"),
 						"player " .. name .. " attempted to place flag!")
 				end
 				return
