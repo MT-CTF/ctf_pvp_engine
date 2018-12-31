@@ -467,38 +467,28 @@ end)
 minetest.register_on_punchplayer(function(player, hitter,
 		time_from_last_punch, tool_capabilities, dir, damage)
 	if player and hitter then
-		local to = ctf.player(player:get_player_name())
-		local from = ctf.player(hitter:get_player_name())
+		local pname = player:get_player_name()
+		local hname = hitter:get_player_name()
 
-		if dead_players[player:get_player_name()] then
+		local to = ctf.player(pname)
+		local from = ctf.player(hname)
+
+		if dead_players[pname] then
 			return
 		end
 
 		if to.team == from.team and to.team ~= "" and to.team ~= nil and to.name ~= from.name then
-			minetest.chat_send_player(hitter:get_player_name(), player:get_player_name() .. " is on your team!")
+			minetest.chat_send_player(hname, pname .. " is on your team!")
 			if not ctf.setting("friendly_fire") then
 				return true
 			end
 		end
 
 		if player:get_hp() - damage <= 0 then
-			dead_players[player:get_player_name()] = true
+			dead_players[pname] = true
 			local wielded = hitter:get_wielded_item()
-			local wname = wielded:get_name()
-			print(wname)
-			local type = "sword"
-			if wname:sub(1, 8) == "shooter:" then
-				if wname == "shooter:grenade" then
-					type = "grenade"
-				else
-					type = "bullet"
-				end
-			end
-			if tool_capabilities.damage_groups.grenade then
-				type = "grenade"
-			end
 			for i = 1, #ctf.registered_on_killedplayer do
-				ctf.registered_on_killedplayer[i](player:get_player_name(), hitter:get_player_name(), type)
+				ctf.registered_on_killedplayer[i](pname, hname, wielded)
 			end
 			return false
 		end
