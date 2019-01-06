@@ -427,4 +427,39 @@ if minetest.global_exists("chatplus") then
 		end
 		return false
 	end)
+
+else
+	local function handler(name, message)
+		local team_name = ctf.player(name).team
+		if team_name then
+			for i=1, #minetest.registered_on_chat_messages do
+				local func = minetest.registered_on_chat_messages[i]
+				if func ~= handler then
+					if func(name, message) then
+						return true
+					end
+				end
+			end
+
+			local color, colorHex = ctf_colors.get_color(ctf.player(name))
+			local scolor = "#" .. colorHex:sub(3, 8)
+			minetest.chat_send_all(minetest.colorize(scolor, "<" .. name .. "> ") .. message)
+			return true
+		else
+			return nil
+		end
+	end
+	table.insert(minetest.registered_on_chat_messages, 1, handler)
+
+	minetest.registered_chatcommands["me"].func = function(name, param)
+		local team_name = ctf.player(name).team
+		if team_name then
+			local color, colorHex = ctf_colors.get_color(ctf.player(name))
+			name = minetest.colorize("#" .. colorHex:sub(3, 8), "* " .. name)
+		else
+			name = "* ".. name
+		end
+
+		minetest.chat_send_all(name .. " " .. param)
+	end
 end
