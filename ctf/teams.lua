@@ -118,6 +118,16 @@ function ctf.player_or_nil(name)
 	return ctf.players[name]
 end
 
+function ctf.chat_send_team(team, msg)
+	if type(team) == "string" then
+		team = ctf.team(team)
+	end
+
+	for pname, _ in pairs(team.players) do
+		minetest.chat_send_player(pname, msg)
+	end
+end
+
 function ctf.remove_player(name)
 	ctf.log("team", "Removing player ".. dump(name))
 	local player = ctf.players[name]
