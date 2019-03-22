@@ -29,6 +29,18 @@ function ctf_colors.get_nametag_color(name, tplayer, tcolor_text, tcolor_hex)
 	end
 end
 
+function ctf_colors.set_skin(player, color)
+	if minetest.global_exists("armor") then
+		-- TODO: how should support for skin mods be done?
+		armor.textures[name].skin = "ctf_colors_skin_" .. color .. ".png"
+		armor:update_player_visuals(player)
+	else
+		player:set_properties({
+			textures = {"ctf_colors_skin_" .. color .. ".png"}
+		})
+	end
+end
+
 function ctf_colors.update(player, name, tplayer)
 	if not player then
 		player = minetest.get_player_by_name(name)
@@ -48,15 +60,7 @@ function ctf_colors.update(player, name, tplayer)
 	end
 
 	if ctf.setting("colors.skins") and tcolor_text and tcolor_hex then
-		if minetest.global_exists("armor") then
-			-- TODO: how should support for skin mods be done?
-			armor.textures[name].skin = "ctf_colors_skin_" .. tcolor_text .. ".png"
-			armor:update_player_visuals(player)
-		else
-			player:set_properties({
-				textures = {"ctf_colors_skin_" .. tcolor_text .. ".png"}
-			})
-		end
+		ctf_colors.set_skin(player, tcolor_text)
 	end
 
 	if ctf.setting("hud.teamname") then
