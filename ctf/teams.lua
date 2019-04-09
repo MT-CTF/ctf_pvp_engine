@@ -275,6 +275,7 @@ end
 
 -- Automatic Allocation
 function ctf.autoalloc(name, alloc_mode)
+	alloc_mode = alloc_mode or ctf.setting("allocate_mode")
 	if alloc_mode == 0 then
 		return
 	end
@@ -365,9 +366,19 @@ function ctf.autoalloc(name, alloc_mode)
 		else
 			return smallest
 		end
+	elseif alloc_mode == 4 then
+		return ctf.custom_alloc(name)
 	else
-		ctf.error("autoalloc", "Unknown allocation mode: "..ctf.setting("allocate_mode"))
+		ctf.error("autoalloc",
+				"Unknown allocation mode: " .. alloc_mode)
 	end
+end
+
+-- Custom team allocation function. Throws error
+-- if unimplemented, and autoalloc mode 4 is selected
+function ctf.custom_alloc()
+	error("Allocation mode set to custom while " ..
+			"ctf.custom_alloc hasn't been overridden!")
 end
 
 -- updates the spawn position for a team
@@ -423,12 +434,8 @@ function ctf.get_territory_owner(pos)
 end
 
 minetest.register_on_newplayer(function(player)
-	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
-	if alloc_mode == 0 then
-		return
-	end
 	local name = player:get_player_name()
-	local team = ctf.autoalloc(name, alloc_mode)
+	local team = ctf.autoalloc(name)
 	if team then
 		ctf.log("autoalloc", name .. " was allocated to " .. team)
 		ctf.join(name, team)
@@ -447,11 +454,7 @@ minetest.register_on_joinplayer(function(player)
 		return
 	end
 
-	local alloc_mode = tonumber(ctf.setting("allocate_mode"))
-	if alloc_mode == 0 then
-		return
-	end
-	local team = ctf.autoalloc(name, alloc_mode)
+	local team = ctf.autoalloc(name)
 	if team then
 		ctf.log("autoalloc", name .. " was allocated to " .. team)
 		ctf.join(name, team)
