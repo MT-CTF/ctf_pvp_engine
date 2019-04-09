@@ -9,7 +9,13 @@ function ctf_colors.get_color(tplayer)
 		tcolor_hex = "0x000000"
 	end
 
-	return tcolor_text, tcolor_hex
+	local tcolor_css = "#" .. tcolor_hex:sub(3, 8)
+
+	return {
+		text = tcolor_text,
+		hex = tcolor_hex,
+		css = tcolor_css
+	}
 end
 
 function ctf_colors.get_irc_color(tplayer)
@@ -46,21 +52,19 @@ function ctf_colors.update(player, name, tplayer)
 		player = minetest.get_player_by_name(name)
 	end
 
-	local tcolor_text, tcolor_hex = ctf_colors.get_color(tplayer)
+	local tcolor = ctf_colors.get_color(tplayer)
 
 	if ctf.setting("colors.hudtint") then
-		if tcolor_text == "red" or tcolor_text == "blue" then
-			print("tinting hud! " .. tcolor_hex)
-			local tint_color = "#" .. string.sub(tcolor_hex, 3)
-			player:hud_set_hotbar_image("ctf_colors_hotbar_" .. tcolor_text .. ".png")
-			player:hud_set_hotbar_selected_image("ctf_colors_hotbar_selected_" .. tcolor_text .. ".png")
+		if tcolor.text == "red" or tcolor.text == "blue" then
+			player:hud_set_hotbar_image("ctf_colors_hotbar_" .. tcolor.text .. ".png")
+			player:hud_set_hotbar_selected_image("ctf_colors_hotbar_selected_" .. tcolor.text .. ".png")
 		else
-			ctf.error("ctfcolors", "Hint color not supported for " .. tcolor_text)
+			ctf.error("ctf_colors", "Hint color not supported for " .. tcolor.text)
 		end
 	end
 
-	if ctf.setting("colors.skins") and tcolor_text and tcolor_hex then
-		ctf_colors.set_skin(player, tcolor_text)
+	if ctf.setting("colors.skins") and tcolor.text then
+		ctf_colors.set_skin(player, tcolor.text)
 	end
 
 	if ctf.setting("hud.teamname") then
@@ -70,13 +74,13 @@ function ctf_colors.update(player, name, tplayer)
 				position      = {x = 1, y = 0},
 				scale         = {x = 100, y = 100},
 				text          = "Team " .. tplayer.team,
-				number        = tcolor_hex,
+				number        = tcolor.hex,
 				offset        = {x = -20, y = 20},
 				alignment     = {x = -1, y = 0}
 			})
 		else
 			ctf.hud:change(player, "ctf:hud_team", "text", "Team " .. tplayer.team)
-			ctf.hud:change(player, "ctf:hud_team", "number", tcolor_hex)
+			ctf.hud:change(player, "ctf:hud_team", "number", tcolor.hex)
 		end
 	end
 end
