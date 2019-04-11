@@ -490,14 +490,20 @@ minetest.register_on_punchplayer(function(player, hitter,
 			return
 		end
 
-		if to.team == from.team and to.team ~= "" and to.team ~= nil and to.name ~= from.name then
+		if to.team == from.team and to.team ~= "" and
+				to.team ~= nil and to.name ~= from.name then
 			minetest.chat_send_player(hname, pname .. " is on your team!")
 			if not ctf.setting("friendly_fire") then
 				return true
 			end
 		end
 
-		if player:get_hp() - damage <= 0 then
+		local hp = player:get_hp()
+		if hp == 0 then
+			return false
+		end
+
+		if hp - damage <= 0 then
 			dead_players[pname] = true
 			local wielded = hitter:get_wielded_item()
 			for i = 1, #ctf.registered_on_killedplayer do
