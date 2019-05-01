@@ -375,94 +375,36 @@ if minetest.global_exists("irc") then
 	end
 end
 
--- Chat plus stuff
-if minetest.global_exists("chatplus") then
-	function chatplus.log_message(from, msg)
-		local tname = ctf.player(from).team or ""
-		chatplus.log(tname .. "<" .. from .. "> " .. msg)
-	end
-
-	function chatplus.send_message_to_sender(from, msg)
-		local tcolor = ctf_colors.get_color(ctf.player(from))
-		minetest.chat_send_player(from, minetest.colorize(tcolor.css, "<" .. from .. "> ") .. msg)
-	end
-
-	chatplus.register_handler(function(from, to, msg)
-		if not ctf.setting("chat.team_channel") then
-			-- Send to global
-			return
-		end
-
-		if ctf.setting("chat.default") ~= "team" then
-			local team_name = ctf.player(from).team
-			if team_name then
-				local tcolor = ctf_colors.get_color(ctf.player(from))
-				minetest.chat_send_player(to,
-					minetest.colorize(tcolor.css, "<" .. from .. "> ") .. msg)
-				return false
-			else
-				return
-			end
-		end
-
-		-- Send to team
-		local fromp = ctf.player(from)
-		local top = ctf.player(to)
-
-		if not fromp.team then
-			if not ctf.setting("chat.global_channel") then
-				-- Send to global
-				return nil
-			else
-				-- Global channel is disabled
-				minetest.chat_send_player(from,
-						"You are not yet part of a team! Join one so you can chat to people.",
-						false)
-				return false
-			end
-		end
-
-		if top.team == fromp.team then
-			minetest.chat_send_player(to, "<" .. from .. "> ** " .. msg .. " **")
-		end
-		return false
-	end)
-
-else
-	local function handler(name, message)
-		local team_name = ctf.player(name).team
-		if team_name then
-			for i=1, #minetest.registered_on_chat_messages do
-				local func = minetest.registered_on_chat_messages[i]
-				if func ~= handler then
-					if func(name, message) then
-						return true
-					end
-				end
-			end
-
-			if not minetest.check_player_privs(name, {shout = true}) then
-				minetest.chat_send_player("-!- You don't have permission to shout.")
+local function handler(name, message)
+	if ctf.player(name).team then
+		for i = 2, #minetest.registered_on_chat_messages do
+			local func = minetest.registered_on_chat_messages[i]
+			if func(name, message) then
 				return true
 			end
-			local tcolor = ctf_colors.get_color(ctf.player(name))
-			minetest.chat_send_all(minetest.colorize(tcolor.css, "<" .. name .. "> ") .. message)
+		end
+
+		if not minetest.check_player_privs(name, {shout = true}) then
+			minetest.chat_send_player("-!- You don't have permission to shout.")
 			return true
-		else
-			return nil
 		end
+		local tcolor = ctf_colors.get_color(ctf.player(name))
+		minetest.chat_send_all(minetest.colorize(tcolor.css,
+				"<" .. name .. "> ") .. message)
+		return true
+	else
+		return nil
 	end
-	table.insert(minetest.registered_on_chat_messages, 1, handler)
+end
+table.insert(minetest.registered_on_chat_messages, 1, handler)
 
-	minetest.registered_chatcommands["me"].func = function(name, param)
-		local team_name = ctf.player(name).team
-		if team_name then
-			local tcolor = ctf_colors.get_color(ctf.player(name))
-			name = minetest.colorize(tcolor.css, "* " .. name)
-		else
-			name = "* ".. name
-		end
-
-		minetest.chat_send_all(name .. " " .. param)
+minetest.registered_chatcommands["me"].func = function(name, param)
+	if ctf.player(name).team then
+		local tcolor = ctf_colors.get_color(ctf.player(name))
+		name = minetest.colorize(tcolor.css, "* " .. name)
+	else
+		name = "* ".. name
 	end
+
+	minetest.chat_send_all(name .. " " .. param)
 end
