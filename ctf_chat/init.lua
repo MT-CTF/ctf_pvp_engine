@@ -33,6 +33,24 @@ local function team_console_help(name)
 	end
 end
 
+-- Implement coloured PMs by overriding /msg
+minetest.override_chatcommand("msg", {
+	func = function(name, param)
+		local sendto, message = param:match("^(%S+)%s(.+)$")
+		if not sendto then
+			return false, "Invalid usage, see /help msg."
+		end
+		if not minetest.get_player_by_name(sendto) then
+			return false, "The player " .. sendto .. " is not online."
+		end
+		minetest.log("action", "PM from " .. name .. " to " .. sendto ..
+				": " .. message)
+		minetest.chat_send_player(sendto, minetest.colorize("#8060D0",
+				"PM from " .. name .. ": " .. message))
+		return true, "Message sent."
+	end
+})
+
 minetest.register_chatcommand("team", {
 	description = "Open the team console, or run team command (see /team help)",
 	func = function(name, param)
