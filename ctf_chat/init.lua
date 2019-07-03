@@ -375,11 +375,12 @@ if minetest.global_exists("irc") then
 	end
 end
 
-local function handler(name, message)
+local handler
+handler = function(name, message)
 	if ctf.player(name).team then
-		for i = 2, #minetest.registered_on_chat_messages do
+		for i = 1, #minetest.registered_on_chat_messages do
 			local func = minetest.registered_on_chat_messages[i]
-			if func(name, message) then
+			if func ~= handler and func(name, message) then
 				return true
 			end
 		end
