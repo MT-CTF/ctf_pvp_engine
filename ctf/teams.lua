@@ -400,7 +400,7 @@ function ctf.move_to_spawn(name)
 	if ctf.team(tplayer.team) then
 		local spawn = ctf.get_spawn(tplayer.team)
 		if spawn then
-			player:moveto(spawn, false)
+			player:move_to(spawn, false)
 			return true
 		end
 	end
