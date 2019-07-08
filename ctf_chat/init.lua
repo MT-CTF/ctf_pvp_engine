@@ -45,7 +45,7 @@ minetest.override_chatcommand("msg", {
 		end
 		minetest.log("action", "PM from " .. name .. " to " .. sendto ..
 				": " .. message)
-		minetest.chat_send_player(sendto, minetest.colorize("#8060D0",
+		minetest.chat_send_player(sendto, minetest.colorize("##993399",
 				"PM from " .. name .. ": " .. message))
 		return true, "Message sent."
 	end
