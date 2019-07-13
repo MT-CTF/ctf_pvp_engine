@@ -386,7 +386,7 @@ handler = function(name, message)
 		end
 
 		if not minetest.check_player_privs(name, {shout = true}) then
-			minetest.chat_send_player("-!- You don't have permission to shout.")
+			minetest.chat_send_player(name, "-!- You don't have permission to shout.")
 			return true
 		end
 		local tcolor = ctf_colors.get_color(ctf.player(name))
